@@ -10,6 +10,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 function Detail() {
   const { id } = useParams();
+  console.log(id);
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
   function formatMoney(amount) {
     // Nếu số tiền nhỏ hơn 1 triệu

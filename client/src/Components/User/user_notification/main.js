@@ -62,7 +62,7 @@ function Main() {
           Nội dung : Bài đăng đã không được duyệt vì vi phạm nội dung bài đăng !
         </p>
         <Link
-          to="/detail/1"
+          to="/detail/6"
           style={{ fontSize: "20px", fontWeight: "800" }}
           className="update-button"
         >

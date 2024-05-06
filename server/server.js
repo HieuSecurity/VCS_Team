@@ -10,9 +10,9 @@ app.use(express.json());
 
 const connection = mysql.createConnection({
   host: "localhost",
-  user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  user: "goodog", // Thay username bằng tên người dùng của bạn
+  password: "Ptit2021", // Thay password bằng mật khẩu của bạn
+  database: "CNPM", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 // Route để xác thực người dùng
@@ -33,20 +33,11 @@ app.post("/api/login", (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
+    // Truy vấn thành công, trả về thông tin người dùng
     const user = results[0];
-    
-    // Kiểm tra trạng thái tài khoản
-    if (user.state === "0") {
-      return res.status(403).json({ message: "Account is blocked123123. Please contact to admin!!!" });
-    }
-
-    // Truy vấn thành công và tài khoản không bị khóa, trả về thông tin người dùng
     res.status(200).json({ message: "Login successful", user });
   });
 });
-
-
-
 app.post("/api/create-post", (req, res) => {
   const { description, price, area, location } = req.body;
 
@@ -83,43 +74,47 @@ app.get("/api/posts", (req, res) => {
     res.status(200).json(results);
   });
 });
-
 app.post("/api/signup", async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { username, email, phone, password } = req.body;
 
   try {
-    // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu hay không
+    // Check if the email already exists in the database
     const existingUser = await connection.query(
       "SELECT * FROM account WHERE email = ?",
       [email]
     );
-    if (existingUser.length != 0) {
-      // Nếu email đã tồn tại, trả về lỗi 409 (Conflict)
-      return res.status(409).json({ message: "Email already exists" });
+
+    if (existingUser.length > 0) {
+      // Email already exists, return 409 Conflict status
+      return res
+        .status(409)
+        .json({ message: "Email address is already in use" });
     }
 
-    // Nếu email không tồn tại, tiến hành tạo tài khoản mới.
-    // Insert new user into the database
+    // Email does not exist, proceed with user registration
     await connection.query(
-      "INSERT INTO account (email, state, password, role) VALUES (?, ?, ?, ?)",
-      [email, 1, password, 2]
+      "INSERT INTO account (username, email, phone, password, role) VALUES (?, ?, ?, ?, ?)",
+      [username, email, phone, password, 0]
     );
 
-    // Insert user information into the userinfo table
-    await connection.query(
-      "INSERT INTO userinfo (name, phone, email) VALUES (?, ?, ?)",
-      [username, phone, email]
-    );
-
+    // User created successfully, return 201 Created status
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ message: "Internal server error" });
+    if (error.code === "ER_DUP_ENTRY") {
+      // Handle duplicate entry error
+      res.status(409).json({ message: "Email address is already in use" });
+    } else {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
 });
-
-
-
 
 app.get("/api/detail/:id", (req, res) => {
   const postId = req.params.id;
@@ -138,35 +133,14 @@ app.get("/api/detail/:id", (req, res) => {
     }
 
     // Lấy thông tin chi tiết từ bảng newsdetail
-    const selectDetailQuery =
-      "SELECT timestart, timeend FROM newsdetail WHERE newsid = ?";
-    connection.query(
-      selectDetailQuery,
-      [postId],
-      (detailError, detailResults) => {
-        if (detailError) {
-          console.error(
-            "Error executing SELECT query for newsdetail",
-            detailError
-          );
-          return res.status(500).json({ message: "Internal server error" });
-        }
 
-        // Kiểm tra nếu không có thông tin chi tiết nào
-        if (detailResults.length === 0) {
-          return res.status(404).json({ message: "Detail not found" });
-        }
+    // Kết hợp thông tin từ cả hai truy vấn
+    const responseData = {
+      ...newsResults[0],
+    };
 
-        // Kết hợp thông tin từ cả hai truy vấn
-        const responseData = {
-          ...newsResults[0],
-          ...detailResults[0],
-        };
-
-        // Trả về kết quả dưới dạng JSON
-        res.status(200).json(responseData);
-      }
-    );
+    // Trả về kết quả dưới dạng JSON
+    res.status(200).json(responseData);
   });
 });
 app.get("/api/images/:id", (req, res) => {

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./post.css"; // Import CSS file for styling
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 const PostTable = () => {
   const [posts, setPosts] = useState([]);
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -43,7 +44,7 @@ const PostTable = () => {
               <td className="">
                 <Link
                   className="detail-link update-button"
-                  to={`/detail/admin/1`}
+                  to={`/detail/admin/${post.newsid}`}
                 >
                   Chi tiết
                 </Link>
