@@ -66,28 +66,32 @@ function Image_des() {
   };
   return (
     <div className="container_form" style={{ height: "100%" }}>
-      <span
-        className="total_result"
-        style={{ fontSize: "25px", fontWeight: 700 }}
-      >
-        Tổng 124.152 kết quả
-      </span>
-      <div className="sort">
-        <p>Sắp xếp: </p>
+      <div className="sort" style={{ fontSize: "25x" }}>
+        <p style={{ fontSize: "22px", padding: "10px" }}>Sắp xếp : </p>
         {/* Thêm className active cho nút mặc định */}
         <span
           className={sortBy === "default" ? "active" : ""}
           onClick={() => handleSortByChange("default")}
+          style={{ fontSize: "20px", fontWeight: "bold" }}
         >
           Mặc định
         </span>
         <span
           className={sortBy === "newest" ? "active" : ""}
           onClick={() => handleSortByChange("newest")}
+          style={{ fontSize: "22px", fontWeight: "bold" }}
         >
           Mới nhất
         </span>
       </div>
+      <span
+        className="total_result"
+        style={{ fontSize: "30px", fontWeight: 700, marginLeft: "18px" }}
+      >
+        Tổng kết quả tìm kiếm :{" "}
+        <h5 style={{ color: "red", fontSize: "35px" }}>10</h5>
+      </span>
+
       {data.map((item) => (
         <Link
           key={item.newsid}
