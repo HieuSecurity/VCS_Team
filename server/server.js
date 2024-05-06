@@ -85,27 +85,20 @@ app.get("/api/posts", (req, res) => {
 });
 
 app.post("/api/signup", async (req, res) => {
-  // Check for validation errors
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   const { username, email, phone, password } = req.body;
 
   try {
-    // Check if user already exists
+    // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu hay không
     const existingUser = await connection.query(
       "SELECT * FROM account WHERE email = ?",
       [email]
     );
-    if (existingUser.length > 0) {
-      return res.status(400).json({ message: "User already exists" });
+    if (existingUser.length != 0) {
+      // Nếu email đã tồn tại, trả về lỗi 409 (Conflict)
+      return res.status(409).json({ message: "Email already exists" });
     }
 
-    // Hash the password (You should use a proper hashing library like bcrypt)
-    // For example: const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Nếu email không tồn tại, tiến hành tạo tài khoản mới
     // Insert new user into the database
     await connection.query(
       "INSERT INTO account (email, state, password, role) VALUES (?, ?, ?, ?)",
@@ -124,6 +117,7 @@ app.post("/api/signup", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 
