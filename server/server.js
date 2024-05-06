@@ -98,7 +98,7 @@ app.post("/api/signup", async (req, res) => {
       return res.status(409).json({ message: "Email already exists" });
     }
 
-    // Nếu email không tồn tại, tiến hành tạo tài khoản mới
+    // Nếu email không tồn tại, tiến hành tạo tài khoản mới.
     // Insert new user into the database
     await connection.query(
       "INSERT INTO account (email, state, password, role) VALUES (?, ?, ?, ?)",
