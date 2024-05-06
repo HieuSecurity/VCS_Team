@@ -53,10 +53,7 @@ function PostForm() {
   };
 
   const handleImageChange = (e) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      image: e.target.files[0],
-    }));
+    setFormData(e.target.files[0]);
   };
 
   return (
@@ -110,7 +107,6 @@ function PostForm() {
             <input
               type="file"
               name="image"
-              accept="image/*"
               onChange={handleImageChange}
               required
             />

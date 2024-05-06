@@ -97,7 +97,14 @@ function Image_des() {
             state: { selectedItem: item }, // Truyền dữ liệu của thẻ qua trang chi tiết
           }}
         >
-          <div class="container-posts" style={{ border: "1px solid red" }}>
+          <div
+            class="container-posts"
+            style={{
+              border: "5px solid #ccc",
+              margin: "30px 0",
+              boder: "none",
+            }}
+          >
             <div
               class="left-part"
               style={{
@@ -172,18 +179,25 @@ function Image_des() {
                     alignContent: "center",
                     alignItems: "center",
                     display: "flex",
+                    marginLeft: "50px",
                   }}
                 >
                   <img
                     src="https://tse4.mm.bing.net/th?id=OIP.XtlXmrujgxcWTyVw8iThMgHaE7&pid=Api&P=0&h=220"
                     style={{
                       borderRadius: "50%",
-                      width: "100px",
-                      marginRight: "10px",
+                      width: "150px",
+                      marginRight: "30px",
                     }}
                   />
-                  <span style={{ fontSize: "20px", fontWeight: "700" }}>
-                    Nguyễn Minh Hiếu
+                  <span
+                    style={{
+                      fontSize: "25px",
+                      fontWeight: "900",
+                      color: "#f83859",
+                    }}
+                  >
+                    {item.name}
                   </span>
                 </div>
               </div>

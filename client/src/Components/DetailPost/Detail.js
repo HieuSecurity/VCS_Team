@@ -10,8 +10,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 function Detail() {
   const { id } = useParams();
-  console.log(id);
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
+  console.log(detailData);
   function formatMoney(amount) {
     // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
@@ -235,7 +235,7 @@ function Detail() {
                 }}
               >
                 <li style={{ textAlign: "left" }}>Liên lệ : </li>
-                <p>{detailData.userName}</p>
+                <p>{detailData.name}</p>
               </div>
               <div
                 style={{
@@ -270,7 +270,7 @@ function Detail() {
                   icon={faPhone}
                   style={{ marginRight: "10px" }}
                 />
-                {detailData.phoneNumber}
+                {detailData.phone}
               </button>
               <button>
                 <FontAwesomeIcon

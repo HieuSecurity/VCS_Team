@@ -62,8 +62,24 @@ app.post("/api/create-post", (req, res) => {
   );
 });
 app.get("/api/posts", (req, res) => {
-  // Thực hiện truy vấn SELECT để lấy tất cả bài đăng
-  const selectQuery = "SELECT * FROM newslist";
+  // Thực hiện truy vấn SELECT để lấy tất cả bài đăng kèm thông tin người dùng từ bảng userinfo
+  const selectQuery = `
+    SELECT 
+      newslist.newsid,
+      newslist.userid,
+      newslist.description,
+      newslist.price,
+      newslist.area,
+      newslist.location,
+      userinfo.name,
+      userinfo.phone,
+      userinfo.avatar
+    FROM 
+      newslist
+    LEFT JOIN 
+      userinfo ON newslist.userid = userinfo.userid
+  `;
+
   connection.query(selectQuery, (error, results) => {
     if (error) {
       console.error("Error executing SELECT query", error);
@@ -119,44 +135,46 @@ app.post("/api/signup", async (req, res) => {
 app.get("/api/detail/:id", (req, res) => {
   const postId = req.params.id;
 
-  // Thực hiện truy vấn SELECT để lấy chi tiết của bài đăng với id tương ứng từ bảng newslist
-  const selectQuery = "SELECT * FROM newslist WHERE newsid = ?";
-  connection.query(selectQuery, [postId], (error, newsResults) => {
+  // Thực hiện truy vấn SELECT để lấy chi tiết của bài đăng với id tương ứng từ cả ba bảng newslist, newsdetail, và userinfo
+  const selectQuery = `
+    SELECT 
+      newslist.userid,
+      newslist.newsid,
+      newslist.description,
+      newslist.price,
+      newslist.area,
+      newslist.location,
+      newsdetail.timestart,
+      newsdetail.timeend,
+      userinfo.phone,
+      userinfo.name,
+      userinfo.avatar
+    FROM 
+      newslist
+    LEFT JOIN 
+      newsdetail ON newslist.newsid = newsdetail.newsid
+    LEFT JOIN 
+      userinfo ON newslist.userid = userinfo.userid
+    WHERE 
+      newslist.newsid = ?
+  `;
+
+  connection.query(selectQuery, [postId], (error, results) => {
     if (error) {
       console.error("Error executing SELECT query", error);
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // Kiểm tra nếu không có bài đăng nào có id tương ứng
-    if (newsResults.length === 0) {
+    if (results.length === 0) {
       return res.status(404).json({ message: "Post not found" });
     }
 
-    // Lấy thông tin chi tiết từ bảng newsdetail
+    const responseData = results[0];
 
-    // Kết hợp thông tin từ cả hai truy vấn
-    const responseData = {
-      ...newsResults[0],
-    };
-
-    // Trả về kết quả dưới dạng JSON
     res.status(200).json(responseData);
   });
 });
-app.get("/api/images/:id", (req, res) => {
-  const { id } = req.params;
 
-  // Tìm kiếm hình ảnh trong cơ sở dữ liệu
-  const image = co.find((img) => img.id === id);
-
-  if (!image) {
-    return res.status(404).json({ error: "Image not found" });
-  }
-
-  // Trả về dữ liệu hình ảnh
-  res.set("Content-Type", "image/jpeg");
-  res.send(image.data); // Giả sử dữ liệu hình ảnh đã được lưu dưới dạng mảng byte
-});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
