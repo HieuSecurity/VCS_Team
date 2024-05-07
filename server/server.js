@@ -2,11 +2,15 @@ const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql");
 const { check, validationResult } = require("express-validator");
+const multer = require("multer");
+const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const images = [];
 app.use(cors());
 app.use(express.json());
+app.use;
+express.static("public");
+app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -16,6 +20,42 @@ const connection = mysql.createConnection({
 });
 
 // Route để xác thực người dùng
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.resolve(__dirname, "./uploads"));
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().getTime() + path.extname(file.originalname));
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    cb(null, true);
+  } else {
+    cb(new Error("Unsupported file"), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 1024 * 1024 * 10 }, // 10 MB limit
+  fileFilter: fileFilter,
+});
+
+// API to upload an image
+app.post("/upload", upload.single("image"), (req, res) => {
+  res.json({ message: "Image uploaded successfully" });
+});
+
+// API to get an image
+app.get("/image/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const imagePath = path.resolve(__dirname, "./uploads", filename);
+  res.sendFile(imagePath);
+});
+
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -38,15 +78,18 @@ app.post("/api/login", (req, res) => {
     res.status(200).json({ message: "Login successful", user });
   });
 });
-app.post("/api/create-post", (req, res) => {
+app.post("/api/create-post", upload.single("image"), (req, res) => {
   const { description, price, area, location } = req.body;
+
+  // Assuming 'image' field is optional, check if req.file exists
+  const imageUrl = req.file ? req.file.filename : null;
 
   // Thực hiện truy vấn INSERT vào cơ sở dữ liệu
   const insertQuery =
-    "INSERT INTO newslist (description, price, area, location) VALUES (?, ?, ?, ?)";
+    "INSERT INTO newslist (description, price, area, location, image) VALUES (?, ?, ?, ?, ?)";
   connection.query(
     insertQuery,
-    [description, price, area, location],
+    [description, price, area, location, imageUrl],
     (error, insertResults) => {
       if (error) {
         console.error("Error executing INSERT query", error);
@@ -64,32 +107,109 @@ app.post("/api/create-post", (req, res) => {
 app.get("/api/posts", (req, res) => {
   // Thực hiện truy vấn SELECT để lấy tất cả bài đăng kèm thông tin người dùng từ bảng userinfo
   const selectQuery = `
-    SELECT 
-      newslist.newsid,
+   SELECT 
       newslist.userid,
+      newslist.newsid,
       newslist.description,
       newslist.price,
       newslist.area,
       newslist.location,
-      userinfo.name,
+      newslist.image,
+      newsdetail.timestart,
+      newsdetail.timeend,
       userinfo.phone,
+      userinfo.name,
       userinfo.avatar
     FROM 
       newslist
     LEFT JOIN 
+      newsdetail ON newslist.newsid = newsdetail.newsid
+    LEFT JOIN 
       userinfo ON newslist.userid = userinfo.userid
+      
   `;
 
-  connection.query(selectQuery, (error, results) => {
+  // Thực hiện truy vấn COUNT để tính tổng số bài đăng
+  const countQuery = `SELECT COUNT(*) AS total FROM newslist`;
+
+  // Thực hiện truy vấn để lấy số lượng kết quả
+  connection.query(countQuery, (error, countResult) => {
     if (error) {
-      console.error("Error executing SELECT query", error);
+      console.error("Error counting:", error);
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // Trả về kết quả dưới dạng JSON nếu không có lỗi
-    res.status(200).json(results);
+    const total = countResult[0].total; // Lấy tổng số kết quả từ kết quả truy vấn COUNT
+
+    // Thực hiện truy vấn SELECT để lấy danh sách bài đăng
+    connection.query(selectQuery, (error, results) => {
+      if (error) {
+        console.error("Error executing SELECT query", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      // Trả về dữ liệu và số lượng bài đăng
+      res.status(200).json({ results, total });
+    });
   });
 });
+
+// API /api/latest-posts
+app.get("/api/latest-posts", (req, res) => {
+  // Thực hiện truy vấn SELECT để lấy danh sách 5 bài đăng mới nhất kèm thông tin người dùng từ bảng userinfo
+  const selectQuery = `
+    SELECT 
+      newslist.userid,
+      newslist.newsid,
+      newslist.description,
+      newslist.price,
+      newslist.area,
+      newslist.location,
+      newslist.image,
+      newsdetail.timestart,
+      newsdetail.timeend,
+      userinfo.phone,
+      userinfo.name,
+      userinfo.avatar
+    FROM 
+      newslist
+    LEFT JOIN 
+      newsdetail ON newslist.newsid = newsdetail.newsid
+    LEFT JOIN 
+      userinfo ON newslist.userid = userinfo.userid
+    ORDER BY 
+      newsdetail.timestart DESC
+    LIMIT 5`; // Giới hạn số lượng kết quả trả về thành 5 bài đăng mới nhất
+
+  // Thực hiện truy vấn COUNT để đếm tổng số bài đăng mới nhất với cùng điều kiện WHERE
+  const countQuery = `
+    SELECT COUNT(*) AS total 
+    FROM newslist 
+    LEFT JOIN newsdetail ON newslist.newsid = newsdetail.newsid
+    WHERE newsdetail.timestart IS NOT NULL`;
+
+  // Thực hiện truy vấn để lấy số lượng kết quả
+  connection.query(countQuery, (error, countResult) => {
+    if (error) {
+      console.error("Error counting:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    const total = countResult[0].total; // Lấy tổng số kết quả từ kết quả truy vấn COUNT
+
+    // Thực hiện truy vấn SELECT để lấy danh sách 5 bài đăng mới nhất
+    connection.query(selectQuery, (error, results) => {
+      if (error) {
+        console.error("Error executing SELECT query", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      // Trả về dữ liệu và số lượng kết quả
+      res.status(200).json({ results, total });
+    });
+  });
+});
+
 app.post("/api/signup", async (req, res) => {
   // Check for validation errors
   const errors = validationResult(req);
@@ -144,6 +264,7 @@ app.get("/api/detail/:id", (req, res) => {
       newslist.price,
       newslist.area,
       newslist.location,
+      newslist.image,
       newsdetail.timestart,
       newsdetail.timeend,
       userinfo.phone,
@@ -174,7 +295,41 @@ app.get("/api/detail/:id", (req, res) => {
     res.status(200).json(responseData);
   });
 });
+app.get("/api/search", (req, res) => {
+  const { district } = req.query; // Get district from query parameters
 
+  // Query to search for posts by district
+  const searchQuery = `
+    SELECT * FROM newslist
+    WHERE location = ?
+  `;
+
+  // Query to count the total number of posts by district
+  const countQuery = `
+    SELECT COUNT(*) AS total FROM newslist
+    WHERE location = ?
+  `;
+
+  // Execute the search query
+  connection.query(searchQuery, [district], (error, results) => {
+    if (error) {
+      console.error("Error searching:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    // Execute the count query to get the total number of posts
+    connection.query(countQuery, [district], (error, countResult) => {
+      if (error) {
+        console.error("Error counting:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      const total = countResult[0].total; // Get the total count from the result
+
+      res.status(200).json({ results, total }); // Send results and total count as JSON response
+    });
+  });
+});
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

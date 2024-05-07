@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 function Detail() {
   const { id } = useParams();
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
-  console.log(detailData);
   function formatMoney(amount) {
     // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
@@ -32,7 +31,11 @@ function Detail() {
     // Hàm gọi API khi component được render và id thay đổi
     fetchData();
   }, [id]);
-
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    // Use slice to extract the first 10 characters which represent the date
+    return date.toISOString().slice(0, 10);
+  };
   const fetchData = async () => {
     try {
       // Gọi API để lấy dữ liệu chi tiết
@@ -67,7 +70,7 @@ function Detail() {
           >
             <img
               style={{ width: "100%", height: "380px" }}
-              src="https://tse1.mm.bing.net/th?id=OIP.UEMBtc9YaGs3UGnaGAlhPwAAAA&pid=Api&P=0&h=220"
+              src={`http://localhost:3000/uploads/${detailData.image}`}
             />
             <div
               style={{
@@ -194,7 +197,7 @@ function Detail() {
                 }}
               >
                 <li>Ngày đăng :</li>
-                <p>{detailData.timestart}</p>
+                <p>{formatDate(detailData.timestart)}</p>
               </div>
               <div
                 style={{
@@ -208,7 +211,7 @@ function Detail() {
                 }}
               >
                 <li>Ngày hết hạn : </li>
-                <p>{detailData.timeend}</p>
+                <p>{formatDate(detailData.timeend)}</p>
               </div>
             </div>
             <div>
@@ -252,11 +255,11 @@ function Detail() {
               </div>
             </div>
           </div>
-          <div class="right-part right-part-detail">
+          <div class="right-part right-part-detail ">
             <div className="des">
               <img
                 style={{ with: "80px", height: "80px", marginTop: "50px" }}
-                src="https://phongtro123.com/images/default-user.png"
+                src={`http://localhost:3000/uploads/${detailData.avatar}`}
               />
               <p
                 style={{

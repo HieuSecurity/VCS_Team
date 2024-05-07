@@ -4,9 +4,12 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+
 function Image_des() {
-  const [data, setData] = useState([]);
-  const [sortBy, setSortBy] = useState("default"); // Trạng thái của loại sắp xếp
+  const [data, setData] = useState({ results: [], total: 0 });
+  const [sortBy, setSortBy] = useState("default");
+  const [totalResults, setTotalResults] = useState(0);
+  // Trạng thái của loại sắp xếp
   console.log(data);
 
   useEffect(() => {
@@ -15,12 +18,27 @@ function Image_des() {
   }, []);
 
   // Hàm để gọi API
+  const handleSortByChange = (type) => {
+    setSortBy(type);
+    if (type === "default") {
+      // Call API for fetching all posts when "Tất cả" button is clicked
+      fetchData();
+    } else if (type === "newest") {
+      // Call API for fetching latest posts when "Mới nhất" button is clicked
+      fetchLatestPosts();
+    }
+  };
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    // Use slice to extract the first 10 characters which represent the date
+    return date.toISOString().slice(0, 10);
+  };
   const fetchData = () => {
     axios
       .get("http://localhost:3000/api/posts")
       .then((response) => {
         // Lưu trữ dữ liệu vào state
-        setData(response.data);
+        setData({ results: response.data.results, total: response.data.total });
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -45,9 +63,18 @@ function Image_des() {
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  const handleSortByChange = (type) => {
-    setSortBy(type);
+
+  const fetchLatestPosts = () => {
+    axios
+      .get("http://localhost:3000/api/latest-posts")
+      .then((response) => {
+        setData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching latest posts:", error);
+      });
   };
+
   const formatMoney = (amount) => {
     // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
@@ -72,9 +99,9 @@ function Image_des() {
         <span
           className={sortBy === "default" ? "active" : ""}
           onClick={() => handleSortByChange("default")}
-          style={{ fontSize: "20px", fontWeight: "bold" }}
+          style={{ fontSize: "22px", fontWeight: "bold" }}
         >
-          Mặc định
+          Tất cả
         </span>
         <span
           className={sortBy === "newest" ? "active" : ""}
@@ -88,11 +115,22 @@ function Image_des() {
         className="total_result"
         style={{ fontSize: "30px", fontWeight: 700, marginLeft: "18px" }}
       >
-        Tổng kết quả tìm kiếm :{" "}
-        <h5 style={{ color: "red", fontSize: "35px" }}>10</h5>
+        Tổng kết quả:
+        <h5
+          style={{
+            color: "red",
+            fontSize: "35px",
+            marginLeft: "5px",
+            textAlign: "center",
+            alignItems: "center",
+          }}
+        >
+          {" "}
+          {data.total}
+        </h5>
       </span>
 
-      {data.map((item) => (
+      {data.results.map((item) => (
         <Link
           key={item.newsid}
           style={{ textDecoration: "none", color: "black" }}
@@ -119,11 +157,12 @@ function Image_des() {
               }}
             >
               <img
-                src="https://tse4.mm.bing.net/th?id=OIP.XtlXmrujgxcWTyVw8iThMgHaE7&pid=Api&P=0&h=220"
+                src={`http://localhost:3000/uploads/${item.image}`}
                 style={{
                   width: "100%",
                   justifyContent: "center",
                   alignItems: "center",
+                  height: "380px",
                 }}
               />
             </div>
@@ -191,7 +230,7 @@ function Image_des() {
                     style={{
                       borderRadius: "50%",
                       width: "150px",
-                      marginRight: "30px",
+                      marginRight: "10px",
                     }}
                   />
                   <span
@@ -202,6 +241,16 @@ function Image_des() {
                     }}
                   >
                     {item.name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "25px",
+                      fontWeight: "900",
+                      color: "rgb(22, 199, 132)",
+                      marginLeft: "50px",
+                    }}
+                  >
+                    {formatDate(item.timestart)}
                   </span>
                 </div>
               </div>
