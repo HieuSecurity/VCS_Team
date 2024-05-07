@@ -4,19 +4,25 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
+import Search from "../../Search/search";
 
 function Image_des() {
   const [data, setData] = useState({ results: [], total: 0 });
   const [sortBy, setSortBy] = useState("default");
   const [totalResults, setTotalResults] = useState(0);
+  const [selectedDistrict, setSelectedDistrict] = useState(""); // Thêm state để lưu trữ giá trị Quận được chọn
+
   // Trạng thái của loại sắp xếp
+  console.log(selectedDistrict);
   console.log(data);
 
   useEffect(() => {
     // Hàm gọi API khi component được render
     fetchData();
   }, []);
-
+  // useEffect(() => {
+  //   fetchData(selectedDistrict); // Khởi tạo dữ liệu với giá trị Quận mặc định
+  // }, [selectedDistrict]); // Sử dụng selectedDistrict trong dependency array để fetchData được gọi lại khi giá trị thay đổi
   // Hàm để gọi API
   const handleSortByChange = (type) => {
     setSortBy(type);
@@ -68,7 +74,7 @@ function Image_des() {
     axios
       .get("http://localhost:3000/api/latest-posts")
       .then((response) => {
-        setData(response.data);
+        setData({ results: response.data.results, total: response.data.total });
       })
       .catch((error) => {
         console.error("Error fetching latest posts:", error);
@@ -91,8 +97,26 @@ function Image_des() {
       return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Định dạng lại số tiền với dấu phẩy ngăn cách hàng nghìn
     }
   };
+  const handleSearch = (selectedDistrict) => {
+    setSelectedDistrict(selectedDistrict);
+    if (selectedDistrict) {
+      axios
+        .get(
+          `http://localhost:3000/api/search-by-location?district=${selectedDistrict}`
+        )
+        .then((response) => {
+          setData(response.data);
+          setSortBy("default");
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    } else {
+    }
+  };
   return (
     <div className="container_form" style={{ height: "100%" }}>
+      <Search onSearch={handleSearch} />
       <div className="sort" style={{ fontSize: "25x" }}>
         <p style={{ fontSize: "22px", padding: "10px" }}>Sắp xếp : </p>
         {/* Thêm className active cho nút mặc định */}

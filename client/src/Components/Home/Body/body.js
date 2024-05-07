@@ -4,7 +4,6 @@ import "./body.css";
 function Body() {
   return (
     <div className="Body">
-      <Search />
       <Posts />
     </div>
   );

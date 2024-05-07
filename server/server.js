@@ -153,6 +153,48 @@ app.get("/api/posts", (req, res) => {
     });
   });
 });
+app.get("/api/search-by-location", (req, res) => {
+  const selectedDistrict = req.query.district;
+
+  // Thực hiện truy vấn SELECT từ cơ sở dữ liệu với điều kiện là selectedDistrict
+  const selectQuery = `
+    SELECT 
+      newslist.userid,
+      newslist.newsid,
+      newslist.description,
+      newslist.price,
+      newslist.area,
+      newslist.location,
+      newslist.image,
+      newsdetail.timestart,
+      newsdetail.timeend,
+      userinfo.phone,
+      userinfo.name,
+      userinfo.avatar
+    FROM 
+      newslist
+    LEFT JOIN 
+      newsdetail ON newslist.newsid = newsdetail.newsid
+    LEFT JOIN 
+      userinfo ON newslist.userid = userinfo.userid
+    WHERE
+      newslist.location LIKE '%${selectedDistrict}%'
+  `;
+
+  // Thực hiện truy vấn SELECT để lấy dữ liệu dựa trên giá trị Quận
+  connection.query(selectQuery, (error, results) => {
+    if (error) {
+      console.error("Error executing SELECT query", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    // Lấy số lượng kết quả
+    const totalResults = results.length;
+
+    // Trả về dữ liệu và số lượng kết quả
+    res.status(200).json({ results, total: totalResults });
+  });
+});
 
 // API /api/latest-posts
 app.get("/api/latest-posts", (req, res) => {
