@@ -34,6 +34,15 @@ function Search({ onSearch }) {
         <option value="Quận 7">Quận 7</option>
         <option value="Quận 8">Quận 8</option>
         <option value="Quận 9">Quận 9</option>
+        <option value="Quận 10">Quận 10</option>
+        <option value="Quận 11">Quận 11</option>
+        <option value="Quận 12">Quận 12</option>
+        <option value="Gò Vấp">Gò Vấp</option>
+        <option value="Phú Nhuận">Phú Nhuận</option>
+        <option value="Tân Bình">Tân Bình</option>
+        <option value="Tân Phú">Tân Phú</option>
+        <option value="Bình Tân">Bình Tân</option>
+        <option value="Bình Thạnh">Bình Thạnh</option>
         {/* Add more options as needed */}
       </select>
       <button className="search-button" onClick={handleSearchButtonClick}>

@@ -259,7 +259,7 @@ function Detail() {
             <div className="des">
               <img
                 style={{ with: "80px", height: "80px", marginTop: "50px" }}
-                src={`http://localhost:3000/uploads/${detailData.avatar}`}
+                src="https://tse4.mm.bing.net/th?id=OIP.XtlXmrujgxcWTyVw8iThMgHaE7&pid=Api&P=0&h=220"
               />
               <p
                 style={{
