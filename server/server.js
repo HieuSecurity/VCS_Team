@@ -254,7 +254,7 @@ app.get("/api/latest-posts", (req, res) => {
 
 app.post("/api/signup", async (req, res) => {
   const { username, email, phone, password } = req.body;
-
+  console.log(email);
   try {
     // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu hay không
     const existingUser = await connection.query(
@@ -263,6 +263,7 @@ app.post("/api/signup", async (req, res) => {
     );
     if (existingUser.length != 0) {
       // Nếu email đã tồn tại, trả về lỗi 409 (Conflict)
+      console.log(`Statis : 409`);
       return res.status(409).json({ message: "Email already exists" });
     }
 
@@ -278,7 +279,7 @@ app.post("/api/signup", async (req, res) => {
       "INSERT INTO userinfo (name, phone, email) VALUES (?, ?, ?)",
       [username, phone, email]
     );
-
+    console.log("Status : 201");
     res.status(201).json({ message: "User created successfully" });
   } catch (error) {
     console.error("Error creating user:", error);

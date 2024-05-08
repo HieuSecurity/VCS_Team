@@ -38,7 +38,7 @@ const Main = () => {
       if (response.status === 200) {
         const { role } = response.data.user;
         console.log(role === 1);
-        if (role === 1) {
+        if (role == 1) {
           history("/admin");
         } else {
           history("/user");

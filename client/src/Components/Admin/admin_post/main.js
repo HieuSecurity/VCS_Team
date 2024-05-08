@@ -3,14 +3,17 @@ import axios from "axios";
 import "./post.css"; // Import CSS file for styling
 import { Link, useParams } from "react-router-dom";
 const PostTable = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState({ results: [], total: 0 });
   const { id } = useParams();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const response = await axios.get("http://localhost:3000/api/posts");
-        setPosts(response.data);
+        setPosts({
+          results: response.data.results,
+          total: response.data.total,
+        });
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -34,7 +37,7 @@ const PostTable = () => {
           </tr>
         </thead>
         <tbody>
-          {posts.map((post) => (
+          {posts.results.map((post) => (
             <tr key={post.id}>
               <td>{post.newsid}</td>
               <td>{post.newsid}</td>
@@ -66,7 +69,7 @@ const PostTable = () => {
           </tr>
         </thead>
         <tbody>
-          {posts.map((post) => (
+          {posts.results.map((post) => (
             <tr key={post.id}>
               <td>{post.postId}</td>
               <td>{post.userId}</td>

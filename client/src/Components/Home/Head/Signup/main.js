@@ -66,6 +66,7 @@ const RegistrationForm = () => {
         }
       } catch (error) {
         if (error.response && error.response.status === 409) {
+          console.log(error.response.status);
           alert("Email đã tồn tại !");
         } else {
           alert("Lỗi khi đăng ký !");
