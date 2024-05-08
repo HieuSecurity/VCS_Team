@@ -283,7 +283,7 @@ function Image_des() {
         </Link>
       ))}
 
-      <div className="page">
+      {/* <div className="page">
         <span className="separator"></span>
         <ul className="pagination">
           <li>Trang trước</li>
@@ -295,7 +295,7 @@ function Image_des() {
           <li>Trang sau</li>
         </ul>
         <span className="separator"></span>
-      </div>
+      </div> */}
       {showScrollButton && (
         <button id="scroll-top-btn" onClick={handleScrollTop}>
           <FontAwesomeIcon icon={faArrowAltCircleUp} />

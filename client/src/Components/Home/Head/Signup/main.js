@@ -54,17 +54,19 @@ const RegistrationForm = () => {
           "http://localhost:3000/api/signup",
           formData
         );
-        setFormData({
-          username: "",
-          email: "",
-          phone: "",
-          password: "",
-        });
-        alert("Đã tạo tài khoản thành công !");
+        if (response.status === 201) {
+          setFormData({
+            username: "",
+            email: "",
+            phone: "",
+            password: "",
+          });
+          console.log(response.status);
+          alert("Đã tạo tài khoản thành công !");
+        }
       } catch (error) {
         if (error.response && error.response.status === 409) {
-          // Kiểm tra nếu email đã tồn tại
-          alert("Email đã tồn tại!"); // Thiết lập thông báo lỗi
+          alert("Email đã tồn tại !");
         } else {
           alert("Lỗi khi đăng ký !");
         }
