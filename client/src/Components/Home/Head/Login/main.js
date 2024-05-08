@@ -38,7 +38,7 @@ const Main = () => {
       if (response.status === 200) {
         const { role } = response.data.user;
         console.log(role === 1);
-        if (role == 1) {
+        if (role === 1) {
           history("/admin");
         } else {
           history("/user");
@@ -46,7 +46,12 @@ const Main = () => {
       }
     } catch (error) {
       // Nếu xảy ra lỗi, hiển thị thông báo lỗi
-      alert("Tài khoản hoặc mật khẩu không chính xác !");
+      if (error.response && error.response.status === 403) {
+        // Kiểm tra nếu tài khoản bị khóa
+        alert("Tài khoản đã bị khóa. Vui lòng liên hệ Admin!!!"); // Thiết lập thông báo lỗi
+      } else {
+        alert("Tài khoản hoặc mật khẩu không chính xác !");
+      }
     }
   };
 
