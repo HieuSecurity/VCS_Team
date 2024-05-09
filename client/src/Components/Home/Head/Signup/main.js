@@ -69,6 +69,7 @@ const RegistrationForm = () => {
           console.log(error.response.status);
           alert("Email đã tồn tại !");
         } else {
+          alert(error);
           alert("Lỗi khi đăng ký !");
         }
       }

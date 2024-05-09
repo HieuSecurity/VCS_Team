@@ -259,40 +259,92 @@ app.get("/api/latest-posts", (req, res) => {
   });
 });
 
-app.post("/api/signup", async (req, res) => {
+app.post("/api/signup", (req, res) => {
   const { username, email, phone, password } = req.body;
   console.log(email);
   try {
     // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu hay không
-    const existingUser = await connection.query(
+    connection.query(
       "SELECT * FROM account WHERE email = ?",
-      [email]
-    );
-    if (existingUser.length != 0) {
-      // Nếu email đã tồn tại, trả về lỗi 409 (Conflict)
-      console.log(`Statis : 409`);
-      return res.status(409).json({ message: "Email already exists" });
-    }
+      [email],
+      (error, results) => {
+        if (error) {
+          console.error("Error checking existing user:", error);
+          return res.status(500).json({ message: "Internal server error" });
+        }
 
-    // Nếu email không tồn tại, tiến hành tạo tài khoản mới.
-    // Insert new user into the database
-    await connection.query(
-      "INSERT INTO account (email, state, password, role) VALUES (?, ?, ?, ?)",
-      [email, 1, password, 2]
-    );
+        if (results.length > 0) {
+          console.log("Status : 409");
+          return res.status(409).json({ message: "Email already exists" });
+        }
 
-    // Insert user information into the userinfo table
-    await connection.query(
-      "INSERT INTO userinfo (name, phone, email) VALUES (?, ?, ?)",
-      [username, phone, email]
+        // Nếu email không tồn tại, tiến hành tạo tài khoản mới.
+        // Insert new user into the database
+        connection.query(
+          "INSERT INTO account (email, state, password, role) VALUES (?, ?, ?, ?)",
+          [email, 1, password, 2],
+          (error, results) => {
+            if (error) {
+              console.error("Error creating user:", error);
+              return res.status(500).json({ message: "Internal server error" });
+            }
+
+            // Insert user information into the userinfo table
+            connection.query(
+              "INSERT INTO userinfo (name, phone, email) VALUES (?, ?, ?)",
+              [username, phone, email],
+              (error, results) => {
+                if (error) {
+                  console.error("Error inserting userinfo:", error);
+                  return res.status(500).json({ message: "Internal server error" });
+                }
+
+                console.log("Status : 201");
+                res.status(201).json({ message: "User created successfully" });
+              }
+            );
+          }
+        );
+      }
     );
-    console.log("Status : 201");
-    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+// Định nghĩa endpoint API để xử lý yêu cầu thay đổi mật khẩu
+app.post("/api/forgot-password", async (req, res) => {
+  try {
+    // Lấy dữ liệu từ body của yêu cầu
+    const { username, email, password } = req.body;
+    // Kiểm tra xem email và tên người dùng có tồn tại trong cơ sở dữ liệu hay không
+    const existingUser = await connection.query(
+      "SELECT * FROM userinfo WHERE name = ? AND email = ?",
+      [username, email]
+    );
+
+    // Nếu không tìm thấy người dùng với tên người dùng và email đã cung cấp, trả về lỗi 404
+    if (existingUser.length === undefined || existingUser.length === null) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update mật khẩu mới trong cơ sở dữ liệu
+    await connection.query(
+      "UPDATE account SET password = ? WHERE email = ?",
+      [password, email]
+    );
+
+    // Trả về phản hồi thành công
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 
 app.get("/api/detail/:id", (req, res) => {
   const postId = req.params.id;

@@ -3,6 +3,7 @@ import "./forgot.css"; // Import CSS file for styling
 import { useNavigate } from "react-router-dom"; // Import useHistory hook
 import Back from "../../../Back/back.js"; //
 import Slogan from "../../../Slogan/slogan";
+import axios from "axios"; // Import Axios for making HTTP requests
 import validator from "validator"; // Import thư viện validator
 
 const Main = () => {
@@ -23,7 +24,7 @@ const Main = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -40,10 +41,22 @@ const Main = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      setErrors("");
-      alert("Đã thay đổi tài khoản thành công");
-      // Thực hiện xử lý khi form hợp lệ
-      history("/login"); // Điều hướng đến trang đăng nhập
+      try {
+        const response = await axios.post(
+          "http://localhost:3000/api/forgot-password",
+          formData
+        ); 
+        if (response.status === 404) {
+          alert("Tên hoặc Email không đúng!");
+        }
+        if (response.status === 200) {
+          alert("Đã thay đổi mật khẩu thành công");
+          history("/login"); // Điều hướng đến trang đăng nhập
+        }
+      } catch (error) {
+        alert(error);
+        alert("Có lỗi xảy ra khi thay đổi mật khẩu");
+      }
     }
   };
 
@@ -77,7 +90,7 @@ const Main = () => {
             {errors.email && <p className="error">{errors.email}</p>}
           </div>
           <div className="form-group">
-            <label htmlFor="password">Mật khẩu:</label>
+            <label htmlFor="password">Mật khẩu mới:</label>
             <input
               type="password"
               id="password"
