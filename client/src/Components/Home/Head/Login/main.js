@@ -36,9 +36,9 @@ const Main = () => {
       console.log(response.data.user.role);
       // Nếu đăng nhập thành công, chuyển hướng đến trang admin hoặc user tùy thuộc vào vai trò của người dùng
       if (response.status === 200) {
-        const { role } = response.data.user;
-        console.log(role === 1);
-        if (role == 1) {
+        const { ROLE } = response.data.user;
+        console.log(ROLE === 1);
+        if (ROLE === 1) {
           history("/admin");
         } else {
           history("/user");
@@ -46,11 +46,16 @@ const Main = () => {
       }
     } catch (error) {
       // Nếu xảy ra lỗi, hiển thị thông báo lỗi
-      if (error.response && error.response.status === 403) {
-        // Kiểm tra nếu tài khoản bị khóa
-        alert("Tài khoản đã bị khóa. Vui lòng liên hệ Admin!!!"); // Thiết lập thông báo lỗi
-      } else {
+      if (error.response && error.response.status === 401) {
+        // Kiểm tra nếu tài khoản hoặc mật khẩu không chính xác
         alert("Tài khoản hoặc mật khẩu không chính xác !");
+      } else if (error.response && error.response.status === 403){
+        // Kiểm tra nếu tài khoản bị khóa
+        alert("Tài khoản đã bị khóa. Vui lòng liên hệ Admin!!!");
+      } else {
+        // Xử lý các lỗi khác không được xác định trước
+        alert(error);
+        //alert("Lỗi khi đăng nhập !");
       }
     }
   };

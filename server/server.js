@@ -14,9 +14,9 @@ app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
-  user: "goodog", // Thay username bằng tên người dùng của bạn
-  password: "Ptit2021", // Thay password bằng mật khẩu của bạn
-  database: "CNPM", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  user: "root", // Thay username bằng tên người dùng của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 // Route để xác thực người dùng
@@ -62,8 +62,9 @@ app.post("/api/login", (req, res) => {
     return res.status(400).json({ message: "Missing email or password" });
   }
 
-  const query = `SELECT * FROM account WHERE email = '${email}' AND password = '${password}'`;
-  connection.query(query, (error, results) => {
+  const query = "SELECT * FROM account WHERE email = ? AND password = ?";
+  connection.query(query, [email, password], (error, results) => {
+    // Xử lý kết quả trạng thái hoạt động
     if (error) {
       console.error("Error executing query", error);
       return res.status(500).json({ message: "Internal server error" });
@@ -73,11 +74,17 @@ app.post("/api/login", (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    // Truy vấn thành công, trả về thông tin người dùng
     const user = results[0];
+    if (user.STATE === "0") {
+      return res.status(403).json({ message: "Blocked account" });
+    }
+
+    // Truy vấn thành công, trả về thông tin người dùng
     res.status(200).json({ message: "Login successful", user });
   });
 });
+
+
 app.post("/api/create-post", upload.single("image"), (req, res) => {
   const { description, price, area, location } = req.body;
 
@@ -107,7 +114,7 @@ app.post("/api/create-post", upload.single("image"), (req, res) => {
 app.get("/api/posts", (req, res) => {
   // Thực hiện truy vấn SELECT để lấy tất cả bài đăng kèm thông tin người dùng từ bảng userinfo
   const selectQuery = `
-   SELECT 
+  SELECT 
       newslist.userid,
       newslist.newsid,
       newslist.description,
