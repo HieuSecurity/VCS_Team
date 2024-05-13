@@ -41,7 +41,8 @@ const Main = () => {
         if (ROLE === 1) {
           history("/admin");
         } else {
-          history("/user");
+          alert("Đăng nhập thành công!!!");
+          history("/");
         }
       }
     } catch (error) {

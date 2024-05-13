@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../Main_posts/main_posts.css";
-import { Link } from "react-router-dom";
+import { Link, useFetcher } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
@@ -112,6 +112,7 @@ function Image_des() {
           console.error("Error fetching data:", error);
         });
     } else {
+      
     }
   };
   return (
@@ -218,7 +219,7 @@ function Image_des() {
                     {/* Chuyển đổi số tiền thành dạng tiền tệ Việt Nam */}
                   </li>
                   <li className="area">{item.acreage} m2</li>
-                  <li className="location">{item.namedistrict} </li>
+                  <li className="location">{item.district} </li>
                 </div>
                 <span
                   style={{
@@ -237,7 +238,7 @@ function Image_des() {
                     marginTop: "200px",
                   }}
                 >
-                  {item.description}
+                  {/*Chỗ này trước là mô tả nhưng mô tả nên để trong chi tiết bài đăng*/}
                 </span>
                 <div
                   className="img-name"

@@ -117,11 +117,12 @@ app.get("/api/posts", (req, res) => {
   SELECT 
       newslist.userid,
       newslist.newsid,
+      newslist.title,
       newsdetail.describe,
       newslist.price,
       newslist.acreage,
       newslist.address,
-      hcmdistrict.name,
+      hcmdistrict.district,
       image.image,
       newsdetail.timestart,
       newsdetail.timeend,
@@ -172,11 +173,13 @@ app.get("/api/search-by-location", (req, res) => {
     SELECT 
       newslist.userid,
       newslist.newsid,
-      newslist.description,
+      newslist.title,
+      newsdetail.describe,
       newslist.price,
-      newslist.area,
-      newslist.location,
-      newslist.image,
+      newslist.acreage,
+      newslist.address,
+      hcmdistrict.district,
+      image.image,
       newsdetail.timestart,
       newsdetail.timeend,
       userinfo.phone,
@@ -188,8 +191,12 @@ app.get("/api/search-by-location", (req, res) => {
       newsdetail ON newslist.newsid = newsdetail.newsid
     LEFT JOIN 
       userinfo ON newslist.userid = userinfo.userid
+    LEFT JOIN 
+      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
+    LEFT JOIN 
+      image ON newslist.newsid = image.newsid
     WHERE
-      newslist.location LIKE '%${selectedDistrict}%'
+      hcmdistrict.district LIKE '%${selectedDistrict}%'
   `;
 
   // Thực hiện truy vấn SELECT để lấy dữ liệu dựa trên giá trị Quận
