@@ -117,11 +117,12 @@ app.get("/api/posts", (req, res) => {
   SELECT 
       newslist.userid,
       newslist.newsid,
-      newslist.description,
+      newsdetail.describe,
       newslist.price,
-      newslist.area,
-      newslist.location,
-      newslist.image,
+      newslist.acreage,
+      newslist.address,
+      hcmdistrict.name,
+      image.image,
       newsdetail.timestart,
       newsdetail.timeend,
       userinfo.phone,
@@ -133,7 +134,10 @@ app.get("/api/posts", (req, res) => {
       newsdetail ON newslist.newsid = newsdetail.newsid
     LEFT JOIN 
       userinfo ON newslist.userid = userinfo.userid
-      
+    LEFT JOIN 
+      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
+    LEFT JOIN 
+      image ON newslist.newsid = image.newsid
   `;
 
   // Thực hiện truy vấn COUNT để tính tổng số bài đăng
@@ -151,7 +155,7 @@ app.get("/api/posts", (req, res) => {
     // Thực hiện truy vấn SELECT để lấy danh sách bài đăng
     connection.query(selectQuery, (error, results) => {
       if (error) {
-        console.error("Error executing SELECT query", error);
+        console.error("Error executing SELECT query 158", error);
         return res.status(500).json({ message: "Internal server error" });
       }
 

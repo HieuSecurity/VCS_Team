@@ -217,8 +217,8 @@ function Image_des() {
                     {formatMoney(item.price)} đồng/tháng
                     {/* Chuyển đổi số tiền thành dạng tiền tệ Việt Nam */}
                   </li>
-                  <li className="area">{item.area} m2</li>
-                  <li className="location">{item.location} </li>
+                  <li className="area">{item.acreage} m2</li>
+                  <li className="location">{item.namedistrict} </li>
                 </div>
                 <span
                   style={{
