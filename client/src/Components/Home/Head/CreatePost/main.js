@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./create.css"; // Import file CSS
 import Back from "../../../Back/back";
 import Slogan from "../../../Slogan/slogan";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Login from "../Login/login";
+import { faBox } from "@fortawesome/free-solid-svg-icons";
 
 function PostForm() {
   const history = useNavigate();
@@ -14,7 +15,25 @@ function PostForm() {
     area: "",
     location: "",
     image: "",
+    district: "", 
+    agreeTerms: false,
   });
+  // State để lưu danh sách các quận từ cơ sở dữ liệu
+  const [districts, setDistricts] = useState([]);
+
+  useEffect(() => {
+    // Lấy danh sách các quận từ cơ sở dữ liệu
+    async function fetchDistricts() {
+      try {
+        const response = await axios.get("http://localhost:3000/api/hcmdistrict"); // API endpoint
+        setDistricts(response.data);
+      } catch (error) {
+        console.error("Error fetching districts:", error);
+      }
+    }
+    fetchDistricts();
+  }, []); // Thực hiện fetch một lần duy nhất khi component được render
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -24,6 +43,7 @@ function PostForm() {
       formDataToSend.append("area", formData.area);
       formDataToSend.append("location", formData.location);
       formDataToSend.append("image", formData.image);
+      formDataToSend.append("district", formData.district);
 
       const response = await axios.post(
         "http://localhost:3000/api/create-post",
@@ -45,6 +65,7 @@ function PostForm() {
         area: "",
         location: "",
         image: null,
+        district: "",
       });
       document.getElementById("image-input").value = "";
 
@@ -56,7 +77,12 @@ function PostForm() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    if (formData.agreeTerms){
+      alert("Vui lòng đồng ý với điều khoản và dịch vụ ");
+      return;
+    }
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
@@ -79,45 +105,97 @@ function PostForm() {
       <div className="post-form-container">
         <h2>Tạo bài đăng mới</h2>
         <form onSubmit={handleSubmit}>
-          <div style={{ maxWidth: "450px" }}>
-            <label>Mô tả:</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label>Giá:</label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label>Diện tích:</label>
-            <input
-              type="number"
-              name="area"
-              value={formData.area}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label>Địa điểm:</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-            />
-          </div>
+       <div style={{ display: "flex" }}>
+        <div style={{ flex: 1 }}>
+        <label>Tiêu đề bài đăng:</label>
+          <input
+          type="text2"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+          />       
+        </div>
+        <div style={{ flex: 1 }}>
+         <label 
+          className="select-label">Thời hạn bài đăng:</label>
+         <select
+          id="post-duration"
+          name="postDuration"
+          value={formData.postDuration}
+          onChange={handleChange}
+          required
+         >
+          <option value="">Chọn thời hạn</option>
+          <option value="30"> 30 ngày</option>
+          <option value="90"> 90 ngày</option>
+          <option value="180">180 ngày</option>
+          <option value="365">365 ngày</option>
+          </select>
+        </div>
+      </div>
+      <div style={{ display: "flex" }}>
+        <div style={{ flex: 1 }}>
+          <label>Mô tả:</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+          />
+        </div>
+      </div>
+      <div style={{ display: "flex" }}>
+        <div style={{ flex: 1 }}>
+          <label>Giá:</label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label>Diện tích:</label>
+          <input
+            type="number"
+            name="area"
+            value={formData.area}
+            onChange={handleChange}
+            required
+          />
+        </div>
+      </div>
+      <div style={{ display: "flex" }}>
+        <div style={{ flex: 1 }}>
+          <label>Địa điểm:</label>
+          <input
+            type="text"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label>Quận/Huyện:</label>
+          <select
+            name="district"
+            value={formData.district}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Chọn Quận/Huyện</option>
+            {/* Dùng dữ liệu từ database để tạo các option */}
+            {districts.map((district) => (
+              <option key={district.id} value={district.id}>
+                {district.DISTRICT}
+              </option>
+            ))}
+          </select>
+        </div> 
+      </div>
           <div>
             <label>Hình ảnh:</label>
             <input
@@ -131,6 +209,20 @@ function PostForm() {
           <button type="submit">Đăng bài</button>
         </form>
       </div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+         <input
+          type="checkbox"
+          id="agreeTerms"
+          name="agreeTerms"
+          checked={formData.agreeTerms}
+          onChange={handleChange}
+          required
+        />
+        <label htmlFor="agreeTerms" style={{ marginLeft: "10px"}}>
+          Tôi đồng ý với điều khoản và dịch vụ
+        </label>
+      </div>
+
     </div>
   );
 }

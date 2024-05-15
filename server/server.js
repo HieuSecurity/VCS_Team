@@ -15,8 +15,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 // Route để xác thực người dùng
@@ -111,6 +111,18 @@ app.post("/api/create-post", upload.single("image"), (req, res) => {
     }
   );
 });
+
+// 
+app.get('/api/hcmdistrict', (req, res) => {
+  const sql = 'SELECT * FROM hcmdistrict';
+  connection.query(sql, (err, result) => {
+    if (err) {
+      throw err;
+    }
+    res.json(result);
+  });
+});
+
 app.get("/api/posts", (req, res) => {
   // Thực hiện truy vấn SELECT để lấy tất cả bài đăng kèm thông tin người dùng từ bảng userinfo
   const selectQuery = `

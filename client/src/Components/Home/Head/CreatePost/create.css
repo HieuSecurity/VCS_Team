@@ -20,14 +20,73 @@
   font-size: 20px;
 }
 
-.post-form-container form textarea,
-.post-form-container form input[type="number"],
-.post-form-container form input[type="text"],
-.post-form-container form input[type="file"] {
-  width: 100%;
+/* Box tiêu đề */
+.post-form-container form input[type="text2"] {
+  width: 105%; 
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 10px;
+  font-size: 17px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+/* Box select chọn khoảng thời gian đăng bài */
+.post-form-container form select#post-duration {
+  margin-left: 20%;
+  width: calc(80% - 1px); 
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 17px;
+  margin-right: 1px;
+}
+.post-form-container form .select-label {
+  display: flex;
+  margin-left: 20%;
+  font-weight: bold;
+  font-size: 20px;
+}
+/* Box mô tả */
+.post-form-container form textarea {
+  width: 95%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 17px;
+}
+
+
+/* Box giá và diện tích*/
+.post-form-container form input[type="number"]{
+  width: 85%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 17px;
+}
+/* Box địa điểm */
+.post-form-container form input[type="text"] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 85%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 17px;
+}
+/* Select box quận*/
+.post-form-container form select {
+  width: calc(100% - 1px); 
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 17px;
+  margin-right: 1px; 
+}
+/* Box hình ảnh */
+.post-form-container form input[type="file"] { 
+  width: 95%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
   font-size: 17px;
 }
 
@@ -38,7 +97,7 @@
   background-color: #007bff;
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -46,3 +105,11 @@
 .post-form-container form button:hover {
   background-color: #0056b3;
 }
+
+.post-form-container form .input-group {
+  display: flex;
+}
+
+
+
+
