@@ -18,6 +18,43 @@ function PostForm() {
     district: "", 
     agreeTerms: false,
   });
+  
+function PostForm() {
+  const history = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    async function checkLoginStatus() {
+      try {
+        const response = await axios.get("http://localhost:3000/api/login");
+        if (response.data.isLoggedIn) {
+          // Nếu đăng nhập thành công, cập nhật state và tiếp tục
+          setIsLoggedIn(true);
+        } else {
+          // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
+          history.push("/login");
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+        // Xử lý lỗi nếu có
+      }
+    }
+
+    checkLoginStatus();
+  }, [history]);
+
+
+  return (
+    <div>
+      {isLoggedIn ? (
+        history.push("/CreatePost")
+      ) : (
+         <div></div>
+      )}
+    </div>
+  );
+}
+
   // State để lưu danh sách các quận từ cơ sở dữ liệu
   const [districts, setDistricts] = useState([]);
 

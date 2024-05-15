@@ -1,4 +1,5 @@
 const express = require("express");
+const session = require('express-session')
 const cors = require("cors");
 const mysql = require("mysql");
 const { check, validationResult } = require("express-validator");
@@ -18,8 +19,8 @@ const connection = mysql.createConnection({
   password: "admin", // Thay password bằng mật khẩu của bạn
   database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
+ 
 
-// Route để xác thực người dùng
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -45,7 +46,7 @@ const upload = multer({
 });
 
 // API to upload an image
-app.post("/upload", upload.single("image"), (req, res) => {
+app.post("/upload",upload.single("image"), (req, res) => {
   res.json({ message: "Image uploaded successfully" });
 });
 
@@ -80,36 +81,37 @@ app.post("/api/login", (req, res) => {
     }
 
     // Truy vấn thành công, trả về thông tin người dùng
+    res.session.isLoggedIn = true;
     res.status(200).json({ message: "Login successful", user });
   });
 });
 
 
 app.post("/api/create-post", upload.single("image"), (req, res) => {
-  const { description, price, area, location } = req.body;
+    const { description, price, area, location } = req.body;
 
-  // Assuming 'image' field is optional, check if req.file exists
-  const imageUrl = req.file ? req.file.filename : null;
-
-  // Thực hiện truy vấn INSERT vào cơ sở dữ liệu
-  const insertQuery =
-    "INSERT INTO newslist (description, price, area, location, image) VALUES (?, ?, ?, ?, ?)";
-  connection.query(
-    insertQuery,
-    [description, price, area, location, imageUrl],
-    (error, insertResults) => {
-      if (error) {
-        console.error("Error executing INSERT query", error);
-        return res.status(500).json({ message: "Internal server error" });
+    // Assuming 'image' field is optional, check if req.file exists
+    const imageUrl = req.file ? req.file.filename : null;
+  
+    // Thực hiện truy vấn INSERT vào cơ sở dữ liệu
+    const insertQuery =
+      "INSERT INTO newslist (description, price, area, location, image) VALUES (?, ?, ?, ?, ?)";
+    connection.query(
+      insertQuery,
+      [description, price, area, location, imageUrl],
+      (error, insertResults) => {
+        if (error) {
+          console.error("Error executing INSERT query", error);
+          return res.status(500).json({ message: "Internal server error" });
+        }
+  
+        // Nếu không có lỗi, trả về thông báo thành công và ID của bài đăng mới
+        res.status(200).json({
+          message: "Post created successfully",
+          postId: insertResults.insertId,
+        });
       }
-
-      // Nếu không có lỗi, trả về thông báo thành công và ID của bài đăng mới
-      res.status(200).json({
-        message: "Post created successfully",
-        postId: insertResults.insertId,
-      });
-    }
-  );
+    );
 });
 
 // 
@@ -447,6 +449,17 @@ app.get("/api/search", (req, res) => {
     });
   });
 });
+
+app.get('/api/logout', (req, res) => {
+  req.session.destroy((err) => {
+      if (err) {
+          console.log(err);
+      } else {
+          res.redirect('/api/login'); 
+      }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
