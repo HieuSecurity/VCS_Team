@@ -22,7 +22,7 @@
 
 /* Box tiêu đề */
 .post-form-container form input[type="text2"] {
-  width: 105%; 
+  width: 95%; 
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 10px;
@@ -32,8 +32,8 @@
 }
 /* Box select chọn khoảng thời gian đăng bài */
 .post-form-container form select#post-duration {
-  margin-left: 20%;
-  width: calc(80% - 1px); 
+  margin-left: 10%;
+  width: calc(95% - 1px); 
   padding: 10px;
   border-radius: 10px;
   font-size: 17px;
@@ -41,7 +41,7 @@
 }
 .post-form-container form .select-label {
   display: flex;
-  margin-left: 20%;
+  margin-left: 10%;
   font-weight: bold;
   font-size: 20px;
 }

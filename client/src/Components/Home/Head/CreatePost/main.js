@@ -118,7 +118,7 @@ function PostForm() {
         </div>
         <div style={{ flex: 1 }}>
          <label 
-          className="select-label">Thời hạn bài đăng:</label>
+          className="select-label">Thời hạn đăng bài:</label>
          <select
           id="post-duration"
           name="postDuration"
@@ -126,7 +126,7 @@ function PostForm() {
           onChange={handleChange}
           required
          >
-          <option value="">Chọn thời hạn</option>
+          <option value="">Chọn khoảng thời gian</option>
           <option value="30"> 30 ngày</option>
           <option value="90"> 90 ngày</option>
           <option value="180">180 ngày</option>
