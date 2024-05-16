@@ -21,7 +21,6 @@ const connection = mysql.createConnection({
 });
  
 
-
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.resolve(__dirname, "./uploads"));
@@ -80,8 +79,6 @@ app.post("/api/login", (req, res) => {
       return res.status(403).json({ message: "Blocked account" });
     }
 
-    // Truy vấn thành công, trả về thông tin người dùng
-    res.session.isLoggedIn = true;
     res.status(200).json({ message: "Login successful", user });
   });
 });
@@ -447,16 +444,6 @@ app.get("/api/search", (req, res) => {
 
       res.status(200).json({ results, total }); // Send results and total count as JSON response
     });
-  });
-});
-
-app.get('/api/logout', (req, res) => {
-  req.session.destroy((err) => {
-      if (err) {
-          console.log(err);
-      } else {
-          res.redirect('/api/login'); 
-      }
   });
 });
 
