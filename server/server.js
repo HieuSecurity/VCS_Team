@@ -16,10 +16,9 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
- 
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -232,10 +231,10 @@ app.get("/api/latest-posts", (req, res) => {
     SELECT 
       newslist.userid,
       newslist.newsid,
-      newslist.description,
+      newslist.describe,
       newslist.price,
-      newslist.area,
-      newslist.location,
+      newslist.acreage,
+      newslist.address,
       newslist.image,
       newsdetail.timestart,
       newsdetail.timeend,
