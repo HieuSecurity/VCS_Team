@@ -10,6 +10,7 @@ import Admin from "./Components/Admin/admin";
 import User from "./Components/User/user";
 import DetailPostUser from "./Components/User/user_post/detailPost";
 import DetailPostAdmin from "./Components/Admin/admin_post/detailPost";
+import Footer from "./Components/Home/Footer/footer";
 
 function App() {
   return (
@@ -72,6 +73,7 @@ function App() {
       <Routes>
         <Route path="/forgot" element={<MainForgot />} />
       </Routes>
+      <Footer />
     </div>
   );
 }
