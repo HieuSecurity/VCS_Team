@@ -99,7 +99,19 @@ function Image_des() {
   };
   const handleSearch = (selectedDistrict) => {
     setSelectedDistrict(selectedDistrict);
-    if (selectedDistrict) {
+    if (selectedDistrict == "all") {
+      axios
+        .get(
+          `http://localhost:3000/api/posts`
+        )
+        .then((response) => {
+          setData(response.data);
+          setSortBy("default");
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    } else if (selectedDistrict) {
       axios
         .get(
           `http://localhost:3000/api/search-by-location?district=${selectedDistrict}`

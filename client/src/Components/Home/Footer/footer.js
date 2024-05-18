@@ -41,19 +41,19 @@ function Footer() {
             <h3 className="footer__heading">Theo dõi</h3>
             <ul className="footer__list">
               <li className="footer__item">
-                <a href="#" className="footer__item__link">
+                <a href="https://www.facebook.com/nguyenhieuxt23" className="footer__item__link">
                   <ion-icon className="footer__item__icon" name="logo-facebook"></ion-icon>
                   Facebook
                 </a>
               </li>
               <li className="footer__item">
-                <a href="#" className="footer__item__link">
+                <a href="https://www.instagram.com/hieu1tuoi_/" className="footer__item__link">
                   <ion-icon className="footer__item__icon" name="logo-instagram"></ion-icon>
                   Instagram
                 </a>
               </li>
               <li className="footer__item">
-                <a href="#" className="footer__item__link">
+                <a href="https://www.tiktok.com/@hieu1tuoi_" className="footer__item__link">
                   <ion-icon className="footer__item__icon" name="logo-tiktok"></ion-icon>
                   Tiktok
                 </a>
