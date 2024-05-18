@@ -375,11 +375,14 @@ app.get("/api/detail/:id", (req, res) => {
     SELECT 
       newslist.userid,
       newslist.newsid,
-      newslist.description,
+      newslist.title,
+      newsdetail.describe,
       newslist.price,
-      newslist.area,
-      newslist.location,
-      newslist.image,
+      newslist.acreage,
+      newslist.address,
+      hcmdistrict.district,
+      newsdetail.specificaddress,
+      image.image,
       newsdetail.timestart,
       newsdetail.timeend,
       userinfo.phone,
@@ -391,7 +394,11 @@ app.get("/api/detail/:id", (req, res) => {
       newsdetail ON newslist.newsid = newsdetail.newsid
     LEFT JOIN 
       userinfo ON newslist.userid = userinfo.userid
-    WHERE 
+    LEFT JOIN 
+      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
+    LEFT JOIN 
+      image ON newslist.newsid = image.newsid
+    WHERE
       newslist.newsid = ?
   `;
 

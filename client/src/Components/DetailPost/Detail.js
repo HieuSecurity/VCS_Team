@@ -12,6 +12,11 @@ function Detail() {
   const { id } = useParams();
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
   function formatMoney(amount) {
+    // Kiểm tra nếu amount không phải là một số
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      return '0 đồng'; // Trả về một giá trị mặc định khi amount không hợp lệ
+    }
+  
     // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
       return (amount / 1000).toFixed(0) + " ngàn";
@@ -22,20 +27,25 @@ function Detail() {
     }
     // Chia số tiền cho 1 triệu để kiểm tra nếu nó lớn hơn 1 triệu
     else if (amount >= 1000000) {
-      return (amount / 1000000).toFixed(1) + " triệu";
+      return (amount / 1000000).toFixed(2) + " triệu";
     } else {
-      return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " đồng"; // Định dạng lại số tiền với dấu phẩy ngăn cách hàng nghìn và thêm đơn vị đồng
+      return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " đồng";
     }
   }
+  
   useEffect(() => {
     // Hàm gọi API khi component được render và id thay đổi
     fetchData();
   }, [id]);
   const formatDate = (dateString) => {
+    if (!dateString) return ''; // Kiểm tra nếu dateString không tồn tại
+  
     const date = new Date(dateString);
-    // Use slice to extract the first 10 characters which represent the date
+    if (isNaN(date.getTime())) return ''; // Kiểm tra nếu date không hợp lệ
+  
     return date.toISOString().slice(0, 10);
   };
+  
   const fetchData = async () => {
     try {
       // Gọi API để lấy dữ liệu chi tiết
@@ -47,7 +57,7 @@ function Detail() {
       console.error("Error fetching detail data:", error);
     }
   };
-
+  
   if (!detailData) {
     return <div>Loading...</div>; // Hiển thị thông báo loading trong quá trình lấy dữ liệu
   }
@@ -100,7 +110,7 @@ function Detail() {
                   fontWeight: "1000",
                 }}
               >
-                {detailData.location}
+                {"Địa chỉ: " + detailData.specificaddress + ", " +detailData.district + ", TP.HCM"}
               </span>
             </div>
             <div
@@ -118,6 +128,7 @@ function Detail() {
                   fontSize: "27px",
                   fontWeight: "800",
                   borderRight: "2px solid red",
+                  textAlign: "center",
                 }}
               >
                 {formatMoney(detailData.price)}/tháng
@@ -130,10 +141,11 @@ function Detail() {
                   fontSize: "27px",
                   fontWeight: "800",
                   borderRight: "2px solid red",
+                  textAlign: "center",
                 }}
               >
                 {" "}
-                {detailData.area} m2
+                {detailData.acreage} m2
               </p>
               <p
                 style={{
@@ -143,21 +155,10 @@ function Detail() {
                   fontSize: "27px",
                   fontWeight: "800",
                   borderRight: "2px solid red",
+                  textAlign: "center",
                 }}
               >
-                Hôm nay
-              </p>
-              <p
-                style={{
-                  padding: "10px",
-                  margin: "5px",
-                  color: "#16c784",
-                  fontSize: "27px",
-                  fontWeight: "800",
-                  borderRight: "2px solid red",
-                }}
-              >
-                #{detailData.newsid}
+                {"Mã tin: " + detailData.newsid}
               </p>
             </div>
             <div>
@@ -174,16 +175,16 @@ function Detail() {
               <div
                 style={{
                   backgroundColor: "white",
-                  textAlign: "center",
-                  display: "flex",
+                  textAlign: "left",
+                  display: "block",
                   alignItems: "center",
                   fontSize: "18px",
                   justifyContent: "flex-start",
                   margin: "10px 0",
                 }}
               >
-                <li>Mã tin : </li>
-                <p>#{detailData.newsid}</p>
+                <li style={{textAlign: "left",}}>Mô tả : </li>
+                <p>{detailData.describe}</p>
               </div>
               <div
                 style={{
@@ -269,18 +270,14 @@ function Detail() {
                 }}
               ></p>
               <button>
+                {detailData.name}
+              </button>
+              <button>
                 <FontAwesomeIcon
                   icon={faPhone}
                   style={{ marginRight: "10px" }}
                 />
                 {detailData.phone}
-              </button>
-              <button>
-                <FontAwesomeIcon
-                  icon={faFacebook}
-                  style={{ marginRight: "10px" }}
-                />
-                Facebook
               </button>
             </div>
           </div>
