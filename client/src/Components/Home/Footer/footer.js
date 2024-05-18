@@ -20,7 +20,7 @@ function Footer() {
                 <a href="#" className="footer__item__link">Tuyển dụng</a>
               </li>
               <li className="footer__item">
-                <a href="#" className="footer__item__link">Liên hệ</a>
+                <a href="https://phongtro123.com/lien-he" className="footer__item__link">Liên hệ</a>
               </li>
             </ul>
           </div>
@@ -30,10 +30,13 @@ function Footer() {
 
 
               <li className="footer__item">
-                <a href="#" className="footer__item__link">Chính sách bảo mật</a>
+                <a href="https://phongtro123.com/chinh-sach-bao-mat" className="footer__item__link">Chính sách bảo mật</a>
               </li>
               <li className="footer__item">
                 <a href="#" className="footer__item__link">Điều khoản sử dụng</a>
+              </li>
+              <li className="footer__item">
+                <a href="https://phongtro123.com/quy-dinh-dang-tin" className="footer__item__link">Quy định đăng tin</a>
               </li>
             </ul>
           </div>
