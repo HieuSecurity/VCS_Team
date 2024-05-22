@@ -47,7 +47,7 @@ const PostTable = () => {
               <td className="">
                 <Link
                   className="detail-link update-button"
-                  to={`/detail/admin/${post.newsid}`}
+                  to={`/detail/${post.newsid}`}
                 >
                   Chi tiết
                 </Link>
@@ -77,7 +77,7 @@ const PostTable = () => {
               <td>{post.username}</td>
               <td>{post.status}</td>
               <td className="">
-                <Link className="detail-link update-button" to={`/detail/1`}>
+                <Link className="detail-link update-button" to={`/detail/${post.newsid}`}>
                   Chi tiết
                 </Link>
               </td>
