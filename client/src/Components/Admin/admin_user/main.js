@@ -55,17 +55,18 @@ function Main() {
 
   return (
     <div className="Main">
-      <h1>Thông tin quản trị viên tại VCS !</h1>
+      <h1>Thông tin người dùng tại Phongtro123</h1>
       <div className="table-container">
         <table className="table">
           <thead>
             <tr>
               <th>Mã ID</th>
               <th>Tên</th>
+              <th>Giới tính</th>
+              <th>Ngày sinh</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Mật Khẩu</th>
-              <th>Quyền</th>
+              <th>Bài viết</th>
               <th>Trạng Thái</th>
               <th className="function-cell">Chức năng</th>
             </tr>
@@ -73,19 +74,21 @@ function Main() {
           <tbody>
             {userData.map((user) => (
               <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.name}</td>
-                <td>{user.phone}</td>
-                <td>{user.email}</td>
-                <td>{user.password}</td>
-                <td>{user.role}</td>
-                <td>{user.status}</td>
+                <td>{user.USERID}</td>
+                <td>{user.NAME}</td>
+                <td>{user.SEX}</td>
+                <td>{user.DOB}</td>
+                <td>{user.PHONE}</td>
+                <td>{user.EMAIL}</td>
+                <td>{user.PASSWORD}</td>
+                <td>{user.NEWSCOUNT}</td>
+                <td>{user.STATUS}</td>
                 <td>
                   <button
                     className="detail-link update-button"
                     onClick={() => handleEdit(user)}
                   >
-                    Cập nhật
+                    Xóa
                   </button>
                 </td>
               </tr>
@@ -94,7 +97,7 @@ function Main() {
         </table>
         {editingUser && (
           <div className="edit-form">
-            <h2>Chỉnh sửa thông tin quản trị viên</h2>
+            <h2>Chỉnh sửa thông tin người dùng</h2>
             <input
               type="text"
               name="fullName"

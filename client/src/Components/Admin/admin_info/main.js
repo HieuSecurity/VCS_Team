@@ -12,7 +12,7 @@ function Main() {
 
   const fetchData = () => {
     axios
-      .get("http://localhost:3000/api/info")
+      .get("http://localhost:3000/api/admin-info")
       .then((response) => {
         setUserData(response.data);
       })
@@ -35,7 +35,7 @@ function Main() {
   const saveEdit = () => {
     // Gửi dữ liệu chỉnh sửa lên server
     axios
-      .put(`http://localhost:3000/api/info/${editingUser.id}`, editingUser)
+      .put(`http://localhost:3000/api/admin-info/${editingUser.id}`, editingUser)
       .then(() => {
         // Cập nhật lại state userData sau khi chỉnh sửa
         fetchData();
@@ -55,33 +55,31 @@ function Main() {
 
   return (
     <div className="Main">
-      <h1>Thông tin quản trị viên tại VCS !</h1>
+      <h1>Xin chào Admin</h1>
       <div className="table-container">
         <table className="table">
           <thead>
             <tr>
               <th>Mã ID</th>
-              <th>Số CMT/CCCD</th>
               <th>Họ và Tên</th>
-              <th>Ngày Sinh</th>
               <th>Giới Tính</th>
+              <th>Ngày Sinh</th>
               <th>Số Điện Thoại</th>
+              <th>Email</th>
               <th>Địa Chỉ</th>
-              <th>Trạng Thái</th>
               <th className="function-cell">Chức năng</th>
             </tr>
           </thead>
           <tbody>
             {userData.map((user) => (
               <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.cmt}</td>
-                <td>{user.fullName}</td>
-                <td>{user.birthDate}</td>
-                <td>{user.gender}</td>
-                <td>{user.phoneNumber}</td>
-                <td>{user.address}</td>
-                <td>{user.status}</td>
+                <td>{user.ADMINID}</td>
+                <td>{user.NAME}</td>
+                <td>{user.SEX}</td>
+                <td>{user.DOB}</td>
+                <td>{user.PHONE}</td>
+                <td>{user.EMAIL}</td>
+                <td>{user.ADDRESS}</td>
                 <td>
                   <button
                     className="detail-link update-button"
@@ -100,43 +98,37 @@ function Main() {
             <input
               type="text"
               name="fullName"
-              value={editingUser.fullName}
+              value={editingUser.NAME}
               onChange={handleChange}
             />
             <input
               type="text"
               name="birthDate"
-              value={editingUser.birthDate}
+              value={editingUser.DOB}
               onChange={handleChange}
             />
             <input
               type="text"
               name="gender"
-              value={editingUser.gender}
+              value={editingUser.SEX}
               onChange={handleChange}
             />
             <input
               type="text"
               name="phoneNumber"
-              value={editingUser.phoneNumber}
+              value={editingUser.PHONE}
               onChange={handleChange}
             />
             <input
               type="text"
               name="email"
-              value={editingUser.email}
+              value={editingUser.EMAIL}
               onChange={handleChange}
             />
             <input
               type="text"
               name="address"
-              value={editingUser.address}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="status"
-              value={editingUser.status}
+              value={editingUser.ADDRESS}
               onChange={handleChange}
             />
             <button onClick={saveEdit}>Lưu</button>

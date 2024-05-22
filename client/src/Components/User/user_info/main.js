@@ -12,7 +12,7 @@ function Main() {
 
   const fetchData = () => {
     axios
-      .get("http://localhost:3000/api/info")
+      .get("http://localhost:3000/api/user-info")
       .then((response) => {
         setUserData(response.data);
       })
@@ -35,7 +35,7 @@ function Main() {
   const saveEdit = () => {
     // Gửi dữ liệu chỉnh sửa lên server
     axios
-      .put(`http://localhost:3000/api/info/${editingUser.id}`, editingUser)
+      .put(`http://localhost:3000/api/user-info/${editingUser.USERID}`, editingUser)
       .then(() => {
         // Cập nhật lại state userData sau khi chỉnh sửa
         fetchData();
@@ -66,22 +66,22 @@ function Main() {
               <th>Giới Tính</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Địa Chỉ</th>
-              <th>Trạng Thái</th>
+              <th>Địa chỉ</th>
+              <th>Bài đăng</th>
               <th className="function-cell">Chức năng</th>
             </tr>
           </thead>
           <tbody>
             {userData.map((user) => (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.fullName}</td>
-                <td>{user.birthDate}</td>
-                <td>{user.gender}</td>
-                <td>{user.phoneNumber}</td>
-                <td>{user.email}</td>
-                <td>{user.address}</td>
-                <td>{user.status}</td>
+              <tr key={user.USERID}>
+                <td>{user.USERID}</td>
+                <td>{user.NAME}</td>
+                <td>{user.DOB}</td>
+                <td>{user.SEX}</td>
+                <td>{user.PHONE}</td>
+                <td>{user.EMAIL}</td>
+                <td>{user.ADDRESS}</td>
+                <td>{user.NEWSCOUNT}</td>
                 <td>
                   <button
                     className="detail-link update-button"
@@ -99,44 +99,38 @@ function Main() {
             <h2>Chỉnh sửa thông tin người dùng</h2>
             <input
               type="text"
-              name="fullName"
-              value={editingUser.fullName}
+              name="NAME"
+              value={editingUser.NAME}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="birthDate"
-              value={editingUser.birthDate}
+              name="DOB"
+              value={editingUser.DOB}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="gender"
-              value={editingUser.gender}
+              name="SEX"
+              value={editingUser.SEX}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="phoneNumber"
-              value={editingUser.phoneNumber}
+              name="PHONE"
+              value={editingUser.PHONE}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="email"
-              value={editingUser.email}
+              name="EMAIL"
+              value={editingUser.EMAIL}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="address"
-              value={editingUser.address}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="status"
-              value={editingUser.status}
+              name="STATUS"
+              value={editingUser.STATUS}
               onChange={handleChange}
             />
             <button onClick={saveEdit}>Lưu</button>

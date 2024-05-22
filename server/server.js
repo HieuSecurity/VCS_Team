@@ -453,6 +453,82 @@ app.get("/api/search", (req, res) => {
   });
 });
 
+// API lấy thông tin quản trị viên
+app.get('/api/admin-info', (req, res) => {
+  const query = 'SELECT * FROM admininfo';
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching admin data:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    res.status(200).json(results);
+  });
+});
+
+// API cập nhật thông tin quản trị viên
+app.put('/api/admin-info/:id', (req, res) => {
+  const adminId = req.params.id;
+  const { name, sex, dob, phone, email, address } = req.body;
+
+  const query = `
+    UPDATE admininfo SET
+      name = ?,
+      sex = ?,
+      dob = ?,
+      phone = ?,
+      email = ?,
+      address = ?
+    WHERE id = ?
+  `;
+
+  connection.query(query, [name, sex, dob, phone, email, address, adminId], (err, results) => {
+    if (err) {
+      console.error('Error updating admin data:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    res.status(200).json({ message: 'User updated successfully' });
+  });
+});
+
+// API lấy thông tin người dùng và tổng số bài đăng theo USERID
+app.get('/api/user-info/:userid', (req, res) => {
+  const userId = req.params.userid;
+
+  // Truy vấn đầu tiên để lấy thông tin người dùng
+  const userQuery = 'SELECT * FROM userinfo WHERE USERID = ?';
+
+  connection.query(userQuery, [userId], (err, userResults) => {
+    if (err) {
+      console.error('Error fetching user data:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    if (userResults.length === 0) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    const user = userResults[0];
+
+    // Truy vấn thứ hai để đếm số lượng bài đăng của người dùng
+    const newsCountQuery = 'SELECT COUNT(*) AS NEWSCOUNT FROM newslist WHERE USERID = ?';
+
+    connection.query(newsCountQuery, [userId], (err, newsCountResults) => {
+      if (err) {
+        console.error('Error fetching news count:', err);
+        res.status(500).json({ message: 'Internal server error' });
+        return;
+      }
+
+      user.NEWSCOUNT = newsCountResults[0].NEWSCOUNT;
+      res.status(200).json(user);
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

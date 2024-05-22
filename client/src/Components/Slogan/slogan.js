@@ -11,7 +11,7 @@ function Slogan() {
           fontWeight: "700",
         }}
       >
-        VCS hãy nói theo cách của bạn !
+        Phongtro123.com
       </span>
     </div>
   );
