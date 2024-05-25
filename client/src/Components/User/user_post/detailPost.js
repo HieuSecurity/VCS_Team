@@ -20,6 +20,7 @@ function Detail() {
     else if (amount >= 1000000000) {
       return (amount / 1000000000).toFixed(1) + " tỷ";
     }
+    
     // Chia số tiền cho 1 triệu để kiểm tra nếu nó lớn hơn 1 triệu
     else if (amount >= 1000000) {
       return (amount / 1000000).toFixed(1) + " triệu";
@@ -96,7 +97,7 @@ function Detail() {
                   fontWeight: "1000",
                 }}
               >
-                {detailData.location}
+                {detailData.address}
               </span>
             </div>
             <div
@@ -129,7 +130,7 @@ function Detail() {
                 }}
               >
                 {" "}
-                {detailData.area} m2
+                {detailData.acreage} m2
               </p>
               <p
                 style={{
@@ -153,7 +154,7 @@ function Detail() {
                   borderRight: "2px solid red",
                 }}
               >
-                #{detailData.id}
+                #{detailData.newsid}
               </p>
             </div>
             <div>
@@ -179,7 +180,7 @@ function Detail() {
                 }}
               >
                 <li>Mã tin : </li>
-                <p>#{detailData.id}</p>
+                <p>#{detailData.newsid}</p>
               </div>
               <div
                 style={{
@@ -234,7 +235,7 @@ function Detail() {
                 }}
               >
                 <li style={{ textAlign: "left" }}>Liên lệ : </li>
-                <p>{detailData.userName}</p>
+                <p>{detailData.name}</p>
               </div>
               <div
                 style={{
@@ -247,7 +248,7 @@ function Detail() {
                 }}
               >
                 <li style={{ textAlign: "left" }}>Điện thoại : </li>
-                <p>{detailData.phoneNumber}</p>
+                <p>{detailData.phone}</p>
               </div>
               <div
                 style={{
@@ -261,7 +262,7 @@ function Detail() {
                 }}
               >
                 <li style={{ textAlign: "left" }}>Zalo : </li>
-                <p>{detailData.phoneNumber}</p>
+                <p>{detailData.phone}</p>
               </div>
             </div>
           </div>
@@ -278,14 +279,14 @@ function Detail() {
                   fontWeight: 900,
                 }}
               >
-                {detailData.userName}
+                {detailData.name}
               </p>
               <button>
                 <FontAwesomeIcon
                   icon={faPhone}
                   style={{ marginRight: "10px" }}
                 />
-                {detailData.phoneNumber}
+                {detailData.phone}
               </button>
               <button>
                 <FontAwesomeIcon

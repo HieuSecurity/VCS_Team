@@ -5,6 +5,7 @@ const mysql = require("mysql");
 const { check, validationResult } = require("express-validator");
 const multer = require("multer");
 const path = require("path");
+const { start } = require("repl");
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
@@ -16,8 +17,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -84,17 +85,16 @@ app.post("/api/login", (req, res) => {
 
 
 app.post("/api/create-post", upload.single("image"), (req, res) => {
-    const { description, price, area, location } = req.body;
+    const { title, timestart, describe, price, acreage, address,district} = req.body;
 
     // Assuming 'image' field is optional, check if req.file exists
     const imageUrl = req.file ? req.file.filename : null;
   
     // Thực hiện truy vấn INSERT vào cơ sở dữ liệu
-    const insertQuery =
-      "INSERT INTO newslist (description, price, area, location, image) VALUES (?, ?, ?, ?, ?)";
-    connection.query(
+    const insertQuery ="INSERT INTO `newslist` SET `title`=?; INSERT INTO `newsdetail` SET `timestart`=?, `describe`=?; INSERT INTO `newslist` SET `price`=?, `acreage`=?, `address`=?; INSERT INTO `hcmdistrict` SET `district`=?; INSERT INTO `image` SET `image`=? "
+    connection.query( 
       insertQuery,
-      [description, price, area, location, imageUrl],
+      [title, timestart,describe, price, acreage, address, district, imageUrl],
       (error, insertResults) => {
         if (error) {
           console.error("Error executing INSERT query", error);
@@ -109,6 +109,78 @@ app.post("/api/create-post", upload.single("image"), (req, res) => {
       }
     );
 });
+// app.post("/api/create-post", upload.single("image"), (req, res) => {
+//   const { title, timestart, describe, price, acreage, address, district } = req.body;
+
+//   // Kiểm tra nếu có file được upload
+//   const imageUrl = req.file ? req.file.filename : null;
+//   // Bắt đầu giao dịch
+//   connection.beginTransaction((err) => {
+//       if (err) {
+//           console.error("Error starting transaction", err);
+//           return res.status(500).json({ message: "Internal server error" });
+//       }
+
+//       // Thực hiện các truy vấn INSERT
+//       const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address) VALUES (?, ?, ?, ?)';
+//       connection.query(insertNewslistQuery, [title, acreage, price, address], (error, newslistResults) => {
+//           if (error) {
+//               return connection.rollback(() => {
+//                   console.error("Error executing INSERT into newslist", error);
+//                   res.status(500).json({ message: "Internal server error" });
+//               });
+//           }
+
+//           const insertNewsdetailQuery = 'INSERT INTO newsdetail (describe, timestart) VALUES (?, ?)';
+//           connection.query(insertNewsdetailQuery, [describe, timestart], (error, newsdetailResults) => {
+//               if (error) {
+//                   return connection.rollback(() => {
+//                       console.error("Error executing INSERT into newsdetail", error);
+//                       res.status(500).json({ message: "Internal server error" });
+//                   });
+//               }
+
+//               const insertHcmdistrictQuery = 'INSERT INTO hcmdistrict (district) VALUES (?)';
+//               connection.query(insertHcmdistrictQuery, [district], (error, hcmdistrictResults) => {
+//                   if (error) {
+//                       return connection.rollback(() => {
+//                           console.error("Error executing INSERT into hcmdistrict", error);
+//                           res.status(500).json({ message: "Internal server error" });
+//                       });
+//                   }
+
+//                   const insertImageQuery = 'INSERT INTO image (image) VALUES (?)';
+//                   connection.query(insertImageQuery, [imageUrl], (error, imageResults) => {
+//                       if (error) {
+//                           return connection.rollback(() => {
+//                               console.error("Error executing INSERT into image", error);
+//                               res.status(500).json({ message: "Internal server error" });
+//                           });
+//                       }
+
+//                       // Hoàn tất giao dịch
+//                       connection.commit((err) => {
+//                           if (err) {
+//                               return connection.rollback(() => {
+//                                   console.error("Error committing transaction", err);
+//                                   res.status(500).json({ message: "Internal server error" });
+//                               });
+//                           }
+
+//                           // Trả về thông báo thành công và ID của bài đăng mới
+//                           res.status(200).json({
+//                               message: "Post created successfully",
+//                               postId: newslistResults.insertId,
+//                           });
+//                       });
+//                   });
+//               });
+//           });
+//       });
+//   });
+// });
+
+
 
 // 
 app.get('/api/hcmdistrict', (req, res) => {
@@ -375,6 +447,7 @@ app.get("/api/detail/:id", (req, res) => {
     SELECT 
       newslist.userid,
       newslist.newsid,
+<<<<<<< Updated upstream
       newslist.title,
       newsdetail.describe,
       newslist.price,
@@ -383,11 +456,18 @@ app.get("/api/detail/:id", (req, res) => {
       hcmdistrict.district,
       newsdetail.specificaddress,
       image.image,
+=======
+      newslist.price,
+      newslist.acreage,
+      newslist.address,
+      newsdetail.describe,
+>>>>>>> Stashed changes
       newsdetail.timestart,
       newsdetail.timeend,
       userinfo.phone,
       userinfo.name,
-      userinfo.avatar
+      userinfo.avatar,
+      image.image
     FROM 
       newslist
     LEFT JOIN 
