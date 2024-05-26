@@ -6,12 +6,11 @@ const { check, validationResult } = require("express-validator");
 const multer = require("multer");
 const path = require("path");
 const { start } = require("repl");
-const app = express();
+const app = express();  
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
-app.use;
-express.static("public");
+app.use(express.static("public"));
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
@@ -20,6 +19,8 @@ const connection = mysql.createConnection({
   password: "admin", // Thay password bằng mật khẩu của bạn
   database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
+
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -40,7 +41,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 10 }, // 10 MB limit
+  limits: { fileSize: 10 * 1024 * 1024  }, // 10 MB limit
   fileFilter: fileFilter,
 });
 
@@ -55,6 +56,30 @@ app.get("/image/:filename", (req, res) => {
   const imagePath = path.resolve(__dirname, "./uploads", filename);
   res.sendFile(imagePath);
 });
+
+// route to handle multiple image upload
+app.post("/api/upload-multiple-images", upload.array("images", 5), (req, res) => {
+  const images = req.files;
+
+  // Check if any file is uploaded
+  if (!images || images.length === 0) {
+    return res.status(400).json({ message: "No images uploaded" });
+  }
+
+  // Multer to Insert each image into the database
+  images.forEach((image) => {
+    const insertQuery = "INSERT INTO image (NEWID, IMAGE) VALUES (?, ?)";
+    connection.query(insertQuery, [req.body.newsid, images.filename], (error, results) => {
+      if (error) {
+        console.error("Error inserting image:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+    });
+  });
+
+  res.status(200).json({ message: "Images uploaded successfully" });
+});
+
 
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
@@ -84,102 +109,182 @@ app.post("/api/login", (req, res) => {
 });
 
 
-app.post("/api/create-post", upload.single("image"), (req, res) => {
-    const { title, timestart, describe, price, acreage, address,district} = req.body;
-
-    // Assuming 'image' field is optional, check if req.file exists
-    const imageUrl = req.file ? req.file.filename : null;
-  
-    // Thực hiện truy vấn INSERT vào cơ sở dữ liệu
-    const insertQuery ="INSERT INTO `newslist` SET `title`=?; INSERT INTO `newsdetail` SET `timestart`=?, `describe`=?; INSERT INTO `newslist` SET `price`=?, `acreage`=?, `address`=?; INSERT INTO `hcmdistrict` SET `district`=?; INSERT INTO `image` SET `image`=? "
-    connection.query( 
-      insertQuery,
-      [title, timestart,describe, price, acreage, address, district, imageUrl],
-      (error, insertResults) => {
-        if (error) {
-          console.error("Error executing INSERT query", error);
-          return res.status(500).json({ message: "Internal server error" });
-        }
-  
-        // Nếu không có lỗi, trả về thông báo thành công và ID của bài đăng mới
-        res.status(200).json({
-          message: "Post created successfully",
-          postId: insertResults.insertId,
-        });
-      }
-    );
-});
-// app.post("/api/create-post", upload.single("image"), (req, res) => {
+// app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 //   const { title, timestart, describe, price, acreage, address, district } = req.body;
-
-//   // Kiểm tra nếu có file được upload
 //   const imageUrl = req.file ? req.file.filename : null;
-//   // Bắt đầu giao dịch
+
+//   console.log("Received form data:", req.body);
+//   console.log("Received images:", req.files);
+
+
 //   connection.beginTransaction((err) => {
-//       if (err) {
-//           console.error("Error starting transaction", err);
-//           return res.status(500).json({ message: "Internal server error" });
+//     if (err) {
+//       console.error("Error starting transaction", err);
+//       return res.status(500).json({ message: "Internal server error" });
+//     }
+
+//     const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address) VALUES (?, ?, ?, ?)';
+//     connection.query(insertNewslistQuery, [title, acreage, price, address], (error, newslistResults) => {
+//       if (error) {
+//         return connection.rollback(() => {
+//           console.error("Error executing INSERT into newslist", error);
+//           res.status(500).json({ message: "Internal server error" });
+//         });
 //       }
 
-//       // Thực hiện các truy vấn INSERT
-//       const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address) VALUES (?, ?, ?, ?)';
-//       connection.query(insertNewslistQuery, [title, acreage, price, address], (error, newslistResults) => {
+//       const insertNewsdetailQuery = 'INSERT INTO newsdetail (newsid, describe, timestart) VALUES (?, ?, ?)';
+//       connection.query(insertNewsdetailQuery, [newslistResults.insertId, describe, timestart], (error, newsdetailResults) => {
+//         if (error) {
+//           return connection.rollback(() => {
+//             console.error("Error executing INSERT into newsdetail", error);
+//             res.status(500).json({ message: "Internal server error" });
+//           });
+//         }
+
+//         const insertHcmdistrictQuery = 'INSERT INTO hcmdistrict (newsid, district) VALUES (?, ?)';
+//         connection.query(insertHcmdistrictQuery, [newslistResults.insertId, district], (error, hcmdistrictResults) => {
 //           if (error) {
-//               return connection.rollback(() => {
-//                   console.error("Error executing INSERT into newslist", error);
-//                   res.status(500).json({ message: "Internal server error" });
-//               });
+//             return connection.rollback(() => {
+//               console.error("Error executing INSERT into hcmdistrict", error);
+//               res.status(500).json({ message: "Internal server error" });
+//             });
 //           }
 
-//           const insertNewsdetailQuery = 'INSERT INTO newsdetail (describe, timestart) VALUES (?, ?)';
-//           connection.query(insertNewsdetailQuery, [describe, timestart], (error, newsdetailResults) => {
+//           if (imageUrl) {
+//             const postId = newslistResults.insertId
+//             const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
+//             connection.query(insertImageQuery, [postId, imageUrl], (error, imageResults) => {
 //               if (error) {
-//                   return connection.rollback(() => {
-//                       console.error("Error executing INSERT into newsdetail", error);
-//                       res.status(500).json({ message: "Internal server error" });
-//                   });
+//                 return connection.rollback(() => {
+//                   console.error("Error executing INSERT into image", error);
+//                   res.status(500).json({ message: "Internal server error" });
+//                 });
 //               }
 
-//               const insertHcmdistrictQuery = 'INSERT INTO hcmdistrict (district) VALUES (?)';
-//               connection.query(insertHcmdistrictQuery, [district], (error, hcmdistrictResults) => {
-//                   if (error) {
-//                       return connection.rollback(() => {
-//                           console.error("Error executing INSERT into hcmdistrict", error);
-//                           res.status(500).json({ message: "Internal server error" });
-//                       });
-//                   }
-
-//                   const insertImageQuery = 'INSERT INTO image (image) VALUES (?)';
-//                   connection.query(insertImageQuery, [imageUrl], (error, imageResults) => {
-//                       if (error) {
-//                           return connection.rollback(() => {
-//                               console.error("Error executing INSERT into image", error);
-//                               res.status(500).json({ message: "Internal server error" });
-//                           });
-//                       }
-
-//                       // Hoàn tất giao dịch
-//                       connection.commit((err) => {
-//                           if (err) {
-//                               return connection.rollback(() => {
-//                                   console.error("Error committing transaction", err);
-//                                   res.status(500).json({ message: "Internal server error" });
-//                               });
-//                           }
-
-//                           // Trả về thông báo thành công và ID của bài đăng mới
-//                           res.status(200).json({
-//                               message: "Post created successfully",
-//                               postId: newslistResults.insertId,
-//                           });
-//                       });
+//               connection.commit((err) => {
+//                 if (err) {
+//                   return connection.rollback(() => {
+//                     console.error("Error committing transaction", err);
+//                     res.status(500).json({ message: "Internal server error" });
 //                   });
+//                 }
+
+//                 res.status(200).json({
+//                   message: "Post created successfully",
+//                   postId: newslistResults.insertId,
+//                 });
 //               });
-//           });
+//             });
+//           } else {
+//             connection.commit((err) => {
+//               if (err) {
+//                 return connection.rollback(() => {
+//                   console.error("Error committing transaction", err);
+//                   res.status(500).json({ message: "Internal server error" });
+//                 });
+//               }
+
+//               res.status(200).json({
+//                 message: "Post created successfully",
+//                 postId: newslistResults.insertId,
+//               });
+//             });
+//           }
+//         });
 //       });
+//     });
 //   });
 // });
 
+// HARD CODE phần USERID và NEWSID
+app.post("/api/create-post", upload.array("images", 5), (req, res) => {
+  const { title, timestart, describe, price, acreage, address, district } = req.body;
+  const imageUrl = req.file ? req.file.filename : null;
+
+  console.log("Received form data:", req.body);
+  console.log("Received images:", req.files);
+
+  const USERID = 100;
+  const NEWSID = 100;
+  const iddistrict = 1;
+
+  connection.beginTransaction((err) => {
+    if (err) {
+      console.error("Error starting transaction", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid) VALUES (?, ?, ?, ?, ?)';
+    connection.query(insertNewslistQuery, [title, acreage, price, iddistrict, USERID], (error, newslistResults) => {
+      if (error) {
+        return connection.rollback(() => {
+          console.error("Error executing INSERT into newslist", error);
+          res.status(500).json({ message: "Internal server error" });
+        });
+      }
+
+      const insertNewsdetailQuery = 'INSERT INTO newsdetail (newsid, specificaddress, describe ) VALUES (?, ?, ?)';
+      connection.query(insertNewsdetailQuery, [NEWSID, address, describe], (error, newsdetailResults) => {
+        if (error) {
+          return connection.rollback(() => {
+            console.error("Error executing INSERT into newsdetail", error);
+            res.status(500).json({ message: "Internal server error" });
+          });
+        }
+
+        const insertHcmdistrictQuery = 'INSERT INTO hcmdistrict (newsid, iddistrict) VALUES (?, ?)';
+        connection.query(insertHcmdistrictQuery, [NEWSID, district], (error, hcmdistrictResults) => {
+          if (error) {
+            return connection.rollback(() => {
+              console.error("Error executing INSERT into hcmdistrict", error);
+              res.status(500).json({ message: "Internal server error" });
+            });
+          }
+
+          if (imageUrl) {
+            const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
+            connection.query(insertImageQuery, [NEWSID, imageUrl], (error, imageResults) => {
+              if (error) {
+                return connection.rollback(() => {
+                  console.error("Error executing INSERT into image", error);
+                  res.status(500).json({ message: "Internal server error" });
+                });
+              }
+
+              connection.commit((err) => {
+                if (err) {
+                  return connection.rollback(() => {
+                    console.error("Error committing transaction", err);
+                    res.status(500).json({ message: "Internal server error" });
+                  });
+                }
+
+                res.status(200).json({
+                  message: "Post created successfully",
+                  postId: newslistResults.insertId,
+                });
+              });
+            });
+          } else {
+            connection.commit((err) => {
+              if (err) {
+                return connection.rollback(() => {
+                  console.error("Error committing transaction", err);
+                  res.status(500).json({ message: "Internal server error" });
+                });
+              }
+
+              res.status(200).json({
+                message: "Post created successfully",
+                postId: newslistResults.insertId,
+              });
+            });
+          }
+        });
+      });
+    });
+  });
+});
 
 
 // 
@@ -447,7 +552,6 @@ app.get("/api/detail/:id", (req, res) => {
     SELECT 
       newslist.userid,
       newslist.newsid,
-<<<<<<< Updated upstream
       newslist.title,
       newsdetail.describe,
       newslist.price,
@@ -456,12 +560,10 @@ app.get("/api/detail/:id", (req, res) => {
       hcmdistrict.district,
       newsdetail.specificaddress,
       image.image,
-=======
       newslist.price,
       newslist.acreage,
       newslist.address,
       newsdetail.describe,
->>>>>>> Stashed changes
       newsdetail.timestart,
       newsdetail.timeend,
       userinfo.phone,

@@ -7,14 +7,17 @@ import axios from "axios";
 import Login from "../Login/login";
 import { faBox } from "@fortawesome/free-solid-svg-icons";
 
+
 function PostForm() {
   const history = useNavigate();
   const [formData, setFormData] = useState({
-    description: "",
+    title:"",
+    postDuration: "",
+    describe: "",
     price: "",
-    area: "",
-    location: "",
-    image: "",
+    acreage: "",
+    address: "",
+    images: [],
     district: "",
     agreeTerms: false,
   });
@@ -37,14 +40,35 @@ function PostForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!formData.agreeTerms) {
+      alert("Vui lòng đồng ý với điều khoản và dịch vụ");
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("description", formData.description);
+      formDataToSend.append("title", formData.title)
+      formDataToSend.append("postDuration",formData.postDuration)
+      formDataToSend.append("describe", formData.describe);
       formDataToSend.append("price", formData.price);
-      formDataToSend.append("area", formData.area);
-      formDataToSend.append("location", formData.location);
-      formDataToSend.append("image", formData.image);
+      formDataToSend.append("areage", formData.acreage);
+      formDataToSend.append("address", formData.address);
       formDataToSend.append("district", formData.district);
+      // Append từng hình ảnh vào formData
+      formData.images.forEach((image) => {
+        formDataToSend.append("images", image)       
+      });
+      // const formDataToSend = new FormData();
+      // Object.keys(formData).forEach((key) => {
+      //   if (key === "images") {
+      //     formData[key].forEach((image) => {
+      //       formDataToSend.append("images", image);
+      //     });
+      //   } else {
+      //     formDataToSend.append(key, formData[key]);
+      //   }
+      // });
+      // console.log("Sending formData:", formDataToSend);
 
       const response = await axios.post(
         "http://localhost:3000/api/create-post",
@@ -59,14 +83,17 @@ function PostForm() {
       const postId = response.data.postId;
       console.log("Post created with ID:", postId);
 
-      // Clear all form fields after successful posting
+      // Xóa tất cả các trường biểu mẫu sau khi đăng thành công
       setFormData({
-        description: "",
+        title: "",
+        postDuration: "",
+        describe: "",
         price: "",
-        area: "",
-        location: "",
-        image: null,
+        acreage: "",
+        address: "",
+        image: [],
         district: "",
+        agreeTerms: false,
       });
       document.getElementById("image-input").value = "";
 
@@ -78,24 +105,28 @@ function PostForm() {
   };
 
   const handleChange = (e) => {
-    if (formData.agreeTerms) {
-      alert("Vui lòng đồng ý với điều khoản và dịch vụ ");
-      return;
-    }
+    // if (formData.agreeTerms) {
+    //   alert("Vui lòng đồng ý với điều khoản và dịch vụ ");
+    //   return;
+    // }
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
   const handleImageChange = (e) => {
-    const imageFile = e.target.files[0]; // Get the selected file
-    console.log(imageFile);
+    const imageFiles = Array.from(e.target.files); // Get the selected file
+    console.log(imageFiles);
+    if (imageFiles.length > 5){
+      alert("Bạn chỉ được chọn tối đa 5 ảnh")
+      return;
+    }
     setFormData((prevFormData) => ({
       ...prevFormData,
-      image: imageFile, // Set the image file in the form data
+      images: imageFiles, // Set the image file in the form data
     }));
   };
 
@@ -139,8 +170,8 @@ function PostForm() {
             <div style={{ flex: 1 }}>
               <label>Mô tả:</label>
               <textarea
-                name="description"
-                value={formData.description}
+                name="describe"
+                value={formData.describe}
                 onChange={handleChange}
                 required
               />
@@ -162,8 +193,8 @@ function PostForm() {
               <label>Diện tích:</label>
               <input
                 type="number"
-                name="area"
-                value={formData.area}
+                name="acreage"
+                value={formData.acreage}
                 onChange={handleChange}
                 placeholder="mét"
                 required
@@ -175,8 +206,8 @@ function PostForm() {
               <label>Địa điểm:</label>
               <input
                 type="text"
-                name="location"
-                value={formData.location}
+                name="address"
+                value={formData.address}
                 onChange={handleChange}
                 placeholder="Phường, xã"
                 required
@@ -205,7 +236,8 @@ function PostForm() {
             <input
               id="image-input"
               type="file"
-              name="image"
+              name="images"
+              multiple // cho phép chọn nhiều ảnh
               onChange={handleImageChange}
               required
             />
