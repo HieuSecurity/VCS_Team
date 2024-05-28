@@ -55,7 +55,7 @@ function Main() {
   };
 
   const formatDate = (dateString) => {
-    return format(parseISO(dateString), 'yyyy/MM/dd');
+    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
   };
 
   return (
@@ -109,7 +109,7 @@ function Main() {
             <input
               type="text"
               name="DOB"
-              value={formatDate(editingUser.DOB)}
+              value={editingUser.DOB ? formatDate(editingUser.DOB) : "null"}
               onChange={handleChange}
             />
             <input

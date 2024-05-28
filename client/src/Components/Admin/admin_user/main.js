@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { format, parseISO } from "date-fns";
 import "./user.css";
 
 function Main() {
@@ -49,6 +50,10 @@ function Main() {
         });
     }
   };
+  
+  const formatDate = (dateString) => {
+    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
+  };
 
   return (
     <div className="Main">
@@ -63,7 +68,7 @@ function Main() {
               <th>Ngày sinh</th>
               <th>Số Điện Thoại</th>
               <th>Email</th>
-              <th>Bài viết</th>
+              <th>Số bài viết</th>
               <th>Trạng Thái</th>
               <th className="function-cell">Chức năng</th>
             </tr>
@@ -74,7 +79,7 @@ function Main() {
                 <td>{user.USERID}</td>
                 <td>{user.NAME}</td>
                 <td>{user.SEX}</td>
-                <td>{user.DOB}</td>
+                <td>{formatDate(user.DOB)}</td>
                 <td>{user.PHONE}</td>
                 <td>{user.EMAIL}</td>
                 <td>{user.NEWSCOUNT}</td>

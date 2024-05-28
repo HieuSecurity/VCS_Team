@@ -772,18 +772,104 @@ app.put('/api/update-user-state', (req, res) => {
   });
 });
 
-// API to fetch all payments
-app.get("/api/payment", (req, res) => {
+// API to fetch all payments with user and admin info
+app.get("/api/payment", async (req, res) => {
   const query = "SELECT * FROM payment";
-  connection.query(query, (err, results) => {
-    if (err) {
-      console.error("Error fetching payments:", err);
-      res.status(500).json({ message: "Failed to fetch payments" });
-      return;
-    }
-    res.status(200).json(results);
-  });
+  try {
+    connection.query(query, async (err, results) => {
+      if (err) {
+        console.error("Error fetching payments:", err);
+        res.status(500).json({ message: "Failed to fetch payments" });
+        return;
+      }
+
+      // Collecting all unique adminIds
+      const adminIds = results.map((payment) => payment.ADMINID).filter((adminId) => adminId != null);
+
+      // Collecting all unique newsIds
+      const newsIds = results.map((payment) => payment.NEWSID).filter((newsId) => newsId != null);
+
+      // Fetching admin names from admininfo table
+      const adminInfoQuery = `SELECT ADMINID, NAME FROM admininfo WHERE ADMINID IN (${adminIds.join(",")})`;
+      const admins = await new Promise((resolve, reject) => {
+        connection.query(adminInfoQuery, (err, adminResults) => {
+          if (err) {
+            console.error("Error fetching admin info:", err);
+            reject(err);
+            return;
+          }
+          resolve(adminResults);
+        });
+      });
+
+      // Fetching userIds from newslist table based on newsIds
+      const userIdQuery = `SELECT NEWSID, USERID FROM newslist WHERE NEWSID IN (${newsIds.join(",")})`;
+      const users = await new Promise((resolve, reject) => {
+        connection.query(userIdQuery, (err, userResults) => {
+          if (err) {
+            console.error("Error fetching user info:", err);
+            reject(err);
+            return;
+          }
+          resolve(userResults);
+        });
+      });
+
+      // Collecting all unique userIds
+      const userIds = users.map((user) => user.USERID);
+
+      // Fetching user names from userinfo table based on userIds
+      const userInfoQuery = `SELECT USERID, NAME FROM userinfo WHERE USERID IN (${userIds.join(",")})`;
+      const userNames = await new Promise((resolve, reject) => {
+        connection.query(userInfoQuery, (err, userNameResults) => {
+          if (err) {
+            console.error("Error fetching user names:", err);
+            reject(err);
+            return;
+          }
+          resolve(userNameResults);
+        });
+      });
+
+      // Mapping adminIds to respective names
+      const adminIdToNameMap = {};
+      admins.forEach((admin) => {
+        adminIdToNameMap[admin.ADMINID] = admin.NAME;
+      });
+
+      // Mapping newsIds to respective userIds
+      const newsIdToUserIdMap = {};
+      users.forEach((user) => {
+        newsIdToUserIdMap[user.NEWSID] = user.USERID;
+      });
+
+      // Mapping userIds to respective names
+      const userIdToNameMap = {};
+      userNames.forEach((userName) => {
+        userIdToNameMap[userName.USERID] = userName.NAME;
+      });
+
+      // Combining results with admin and user names
+      const paymentsWithNames = results.map((payment) => {
+        const ADMINNAME = adminIdToNameMap[payment.ADMINID];
+        const USERID = newsIdToUserIdMap[payment.NEWSID];
+        const USERNAME = userIdToNameMap[USERID];
+        return {
+          ...payment,
+          ADMINNAME,
+          USERNAME,
+        };
+      });
+
+      res.status(200).json(paymentsWithNames);
+    });
+  } catch (error) {
+    console.error("Error processing payments:", error);
+    res.status(500).json({ message: "Failed to process payments" });
+  }
 });
+
+
 
 // API to fetch payment by paymentId
 app.get("/api/payment/:paymentId", (req, res) => {
