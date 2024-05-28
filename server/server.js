@@ -685,8 +685,6 @@ app.get('/api/get-list-userID', (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
       return;
     }
-    
-    console.log('Fetched user IDs:', results);
     res.status(200).json(results);
   });
 });
@@ -695,8 +693,6 @@ app.get('/api/get-list-userID', (req, res) => {
 // API lấy thông tin người dùng và tổng số bài đăng theo USERID
 app.get('/api/user-info/:userid', (req, res) => {
   const userId = req.params.userid;
-
-  console.log('Received userId:', userId);
 
   // Truy vấn đầu tiên để lấy thông tin người dùng
   const userQuery = 'SELECT * FROM userinfo WHERE USERID = ?';
@@ -708,7 +704,6 @@ app.get('/api/user-info/:userid', (req, res) => {
       return;
     }
     
-    console.log('User query results:', userResults);
 
     if (userResults.length === 0) {
       res.status(404).json({ message: 'User not found' });
@@ -727,7 +722,6 @@ app.get('/api/user-info/:userid', (req, res) => {
         return;
       }
       
-      console.log('News count query results:', newsCountResults);
 
       user.NEWSCOUNT = newsCountResults[0].NEWSCOUNT;
 
@@ -742,8 +736,6 @@ app.get('/api/user-info/:userid', (req, res) => {
           return;
         }
 
-        console.log('Status query results:', statusResults);
-
         if (statusResults.length === 0) {
           res.status(404).json({ message: 'User status not found' });
           return;
@@ -756,7 +748,28 @@ app.get('/api/user-info/:userid', (req, res) => {
   });
 });
 
+// API cập nhật trạng thái tài khoản người dùng bằng email
+app.put('/api/update-user-state', (req, res) => {
+  const email = req.body.EMAIL;
+  const newStatus = req.body.STATUS;
 
+  const updateQuery = 'UPDATE account SET state = ? WHERE email = ?';
+
+  connection.query(updateQuery, [newStatus, email], (err, results) => {
+    if (err) {
+      console.error('Error updating user state:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+
+    if (results.affectedRows === 0) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.status(200).json({ message: 'User state updated successfully' });
+  });
+});
 
 
 app.listen(PORT, () => {

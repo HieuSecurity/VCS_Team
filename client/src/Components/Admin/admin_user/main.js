@@ -4,7 +4,6 @@ import "./user.css";
 
 function Main() {
   const [userData, setUserData] = useState([]);
-  const [editingUser, setEditingUser] = useState(null); // State để lưu trữ thông tin người dùng đang được chỉnh sửa
 
   useEffect(() => {
     fetchUserIds();
@@ -32,36 +31,23 @@ function Main() {
     }
   };
 
-  // Function để mở form chỉnh sửa
-  const handleEdit = (user) => {
-    setEditingUser(user);
-  };
+  const handleStatusChange = (user) => {
+    const newStatus = user.STATUS === "hoat dong" ? "khoa" : "hoat dong";
+    const confirmMessage = user.STATUS === "hoat dong" 
+      ? "Bạn có chắc muốn khóa người dùng này?" 
+      : "Bạn có chắc muốn mở khóa người dùng này?";
 
-  // Function để đóng form chỉnh sửa
-  const cancelEdit = () => {
-    setEditingUser(null);
-  };
-
-  // Function để gửi dữ liệu chỉnh sửa
-  const saveEdit = () => {
-    // Gửi dữ liệu chỉnh sửa lên server
-    axios
-      .put(`http://localhost:3000/api/listUser-info/${editingUser.USERID}`, editingUser)
-      .then(() => {
-        // Cập nhật lại state userData sau khi chỉnh sửa
-        fetchUserIds();
-        // Đóng form chỉnh sửa
-        cancelEdit();
-      })
-      .catch((error) => {
-        console.error("Error updating user:", error);
-      });
-  };
-
-  // Function để cập nhật giá trị của trường trong form chỉnh sửa
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditingUser({ ...editingUser, [name]: value });
+    if (window.confirm(confirmMessage)) {
+      axios
+        .put(`http://localhost:3000/api/update-user-state`, { EMAIL: user.EMAIL, STATUS: newStatus })
+        .then(() => {
+          // Cập nhật lại state userData sau khi chỉnh sửa
+          fetchUserIds();
+        })
+        .catch((error) => {
+          console.error("Error updating user:", error);
+        });
+    }
   };
 
   return (
@@ -94,46 +80,17 @@ function Main() {
                 <td>{user.NEWSCOUNT}</td>
                 <td>{user.STATUS}</td>
                 <td>
-                  {user.STATUS === "hoat dong" ? (
-                    <button
-                      className="detail-link update-button"
-                      onClick={() => handleEdit(user)}
-                    >
-                      Cấm
-                    </button>
-                  ) : (
-                    <button
-                      className="detail-link update-button"
-                      onClick={() => handleEdit(user)}
-                    >
-                      Bỏ Cấm
-                    </button>
-                  )}
+                  <button
+                    className="detail-link update-button"
+                    onClick={() => handleStatusChange(user)}
+                  >
+                    {user.STATUS === "hoat dong" ? "Khóa" : "Mở khóa"}
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {editingUser && (
-          <div className="edit-form">
-            <h2>Chỉnh sửa trạng thái người dùng</h2>
-            <p>Mã ID: {editingUser.USERID}</p>
-            <p>Tên: {editingUser.NAME}</p>
-            <p>
-              Trạng Thái: 
-              <select
-                name="STATUS"
-                value={editingUser.STATUS}
-                onChange={handleChange}
-              >
-                <option value="active">Hoạt động</option>
-                <option value="banned">Cấm</option>
-              </select>
-            </p>
-            <button onClick={saveEdit}>Lưu</button>
-            <button onClick={cancelEdit}>Hủy</button>
-          </div>
-        )}
       </div>
     </div>
   );
