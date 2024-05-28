@@ -32,8 +32,8 @@ function Main() {
   };
 
   const handleStatusChange = (user) => {
-    const newStatus = user.STATUS === "hoat dong" ? "khoa" : "hoat dong";
-    const confirmMessage = user.STATUS === "hoat dong" 
+    const newStatus = user.STATUS === "Hoạt động" ? "Khóa" : "Hoạt động";
+    const confirmMessage = user.STATUS === "Hoạt động" 
       ? "Bạn có chắc muốn khóa người dùng này?" 
       : "Bạn có chắc muốn mở khóa người dùng này?";
 
@@ -84,7 +84,7 @@ function Main() {
                     className="detail-link update-button"
                     onClick={() => handleStatusChange(user)}
                   >
-                    {user.STATUS === "hoat dong" ? "Khóa" : "Mở khóa"}
+                    {user.STATUS === "Hoạt động" ? "Khóa" : "Mở khóa"}
                   </button>
                 </td>
               </tr>

@@ -100,7 +100,7 @@ app.post("/api/login", (req, res) => {
     }
 
     const user = results[0];
-    if (user.STATE === "khoa") {
+    if (user.STATE === "Khóa") {
       return res.status(403).json({ message: "Blocked account" });
     }
 
@@ -307,6 +307,7 @@ app.get("/api/posts", (req, res) => {
       newslist.title,
       newsdetail.describe,
       newslist.price,
+      newslist.state,
       newslist.acreage,
       newslist.address,
       hcmdistrict.district,
@@ -480,7 +481,7 @@ app.post("/api/signup", (req, res) => {
         // Insert new user into the database
         connection.query(
           "INSERT INTO account (email, state, password, role) VALUES (?, ?, ?, ?)",
-          [email, 1, password, 2],
+          [email, "Hoạt động", password, 2],
           (error, results) => {
             if (error) {
               console.error("Error creating user:", error);
