@@ -35,12 +35,12 @@ const PostTable = () => {
         <tbody>
           {payments.map((payment) => (
             <tr key={payment.paymentId}>
-              <td>{payment.paymentId}</td>
-              <td>{payment.postId}</td>
-              <td>{payment.adminId}</td>
-              <td>{payment.amount}</td>
-              <td>{payment.paymentTime}</td>
-              <td>{payment.status}</td>
+              <td>{payment.PAYID}</td>
+              <td>{payment.NEWSID}</td>
+              <td>{payment.ADMINID}</td>
+              <td>{payment.PRICE}</td>
+              <td>{payment.TIME}</td>
+              <td>{payment.STATE}</td>
             </tr>
           ))}
         </tbody>

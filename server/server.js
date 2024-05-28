@@ -772,6 +772,36 @@ app.put('/api/update-user-state', (req, res) => {
   });
 });
 
+// API to fetch all payments
+app.get("/api/payment", (req, res) => {
+  const query = "SELECT * FROM payment";
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching payments:", err);
+      res.status(500).json({ message: "Failed to fetch payments" });
+      return;
+    }
+    res.status(200).json(results);
+  });
+});
+
+// API to fetch payment by paymentId
+app.get("/api/payment/:paymentId", (req, res) => {
+  const paymentId = req.params.paymentId;
+  const query = "SELECT * FROM payment WHERE paymentId = ?";
+  connection.query(query, [paymentId], (err, results) => {
+    if (err) {
+      console.error("Error fetching payment:", err);
+      res.status(500).json({ message: "Failed to fetch payment" });
+      return;
+    }
+    if (results.length === 0) {
+      res.status(404).json({ message: "Payment not found" });
+      return;
+    }
+    res.status(200).json(results[0]);
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
