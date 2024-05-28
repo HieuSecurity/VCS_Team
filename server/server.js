@@ -16,8 +16,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
@@ -100,7 +100,7 @@ app.post("/api/login", (req, res) => {
     }
 
     const user = results[0];
-    if (user.STATE === "0") {
+    if (user.STATE === "khoa") {
       return res.status(403).json({ message: "Blocked account" });
     }
 
@@ -675,9 +675,28 @@ app.put('/api/admin-info/:id', (req, res) => {
   });
 });
 
+// API lấy danh sách userID
+app.get('/api/get-list-userID', (req, res) => {
+  const userIdsQuery = 'SELECT USERID FROM userinfo';
+  
+  connection.query(userIdsQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching user IDs:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    
+    console.log('Fetched user IDs:', results);
+    res.status(200).json(results);
+  });
+});
+
+
 // API lấy thông tin người dùng và tổng số bài đăng theo USERID
 app.get('/api/user-info/:userid', (req, res) => {
   const userId = req.params.userid;
+
+  console.log('Received userId:', userId);
 
   // Truy vấn đầu tiên để lấy thông tin người dùng
   const userQuery = 'SELECT * FROM userinfo WHERE USERID = ?';
@@ -688,6 +707,9 @@ app.get('/api/user-info/:userid', (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
       return;
     }
+    
+    console.log('User query results:', userResults);
+
     if (userResults.length === 0) {
       res.status(404).json({ message: 'User not found' });
       return;
@@ -704,12 +726,38 @@ app.get('/api/user-info/:userid', (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
         return;
       }
+      
+      console.log('News count query results:', newsCountResults);
 
       user.NEWSCOUNT = newsCountResults[0].NEWSCOUNT;
-      res.status(200).json(user);
+
+      // Truy vấn thứ ba để lấy trạng thái từ bảng account sử dụng email
+      const email = user.EMAIL;
+      const statusQuery = 'SELECT state FROM account WHERE email = ?';
+
+      connection.query(statusQuery, [email], (err, statusResults) => {
+        if (err) {
+          console.error('Error fetching user status:', err);
+          res.status(500).json({ message: 'Internal server error' });
+          return;
+        }
+
+        console.log('Status query results:', statusResults);
+
+        if (statusResults.length === 0) {
+          res.status(404).json({ message: 'User status not found' });
+          return;
+        }
+
+        user.STATUS = statusResults[0].state;
+        res.status(200).json(user);
+      });
     });
   });
 });
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

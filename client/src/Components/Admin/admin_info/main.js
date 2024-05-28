@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { format, parseISO } from "date-fns";
 import "./info.css";
 
 function Main() {
@@ -53,6 +54,10 @@ function Main() {
     setEditingUser({ ...editingUser, [name]: value });
   };
 
+  const formatDate = (dateString) => {
+    return format(parseISO(dateString), 'yyyy/MM/dd');
+  };
+
   return (
     <div className="Main">
       <h1>Xin chào Admin</h1>
@@ -76,7 +81,7 @@ function Main() {
                 <td>{user.ADMINID}</td>
                 <td>{user.NAME}</td>
                 <td>{user.SEX}</td>
-                <td>{user.DOB}</td>
+                <td>{formatDate(user.DOB)}</td>
                 <td>{user.PHONE}</td>
                 <td>{user.EMAIL}</td>
                 <td>{user.ADDRESS}</td>
@@ -85,7 +90,7 @@ function Main() {
                     className="detail-link update-button"
                     onClick={() => handleEdit(user)}
                   >
-                    Cập nhật
+                    Xem thông tin
                   </button>
                 </td>
               </tr>
@@ -94,40 +99,40 @@ function Main() {
         </table>
         {editingUser && (
           <div className="edit-form">
-            <h2>Chỉnh sửa thông tin quản trị viên</h2>
+            <h2>Thông tin quản trị viên</h2>
             <input
               type="text"
-              name="fullName"
+              name="NAME"
               value={editingUser.NAME}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="birthDate"
-              value={editingUser.DOB}
+              name="DOB"
+              value={formatDate(editingUser.DOB)}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="gender"
+              name="SEX"
               value={editingUser.SEX}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="phoneNumber"
+              name="PHONE"
               value={editingUser.PHONE}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="email"
+              name="EMAIL"
               value={editingUser.EMAIL}
               onChange={handleChange}
             />
             <input
               type="text"
-              name="address"
+              name="ADDRESS"
               value={editingUser.ADDRESS}
               onChange={handleChange}
             />

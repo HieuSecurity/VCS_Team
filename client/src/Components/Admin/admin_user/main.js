@@ -7,18 +7,29 @@ function Main() {
   const [editingUser, setEditingUser] = useState(null); // State để lưu trữ thông tin người dùng đang được chỉnh sửa
 
   useEffect(() => {
-    fetchData();
+    fetchUserIds();
   }, []);
 
-  const fetchData = () => {
-    axios
-      .get("http://localhost:3000/api/info")
-      .then((response) => {
-        setUserData(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+  const fetchUserIds = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/get-list-userID");
+      const userIds = response.data;
+      fetchUserData(userIds);
+    } catch (error) {
+      console.error("Error fetching user IDs:", error);
+    }
+  };
+
+  const fetchUserData = async (userIds) => {
+    try {
+      const userPromises = userIds.map((user) => 
+        axios.get(`http://localhost:3000/api/user-info/${user.USERID}`)
+      );
+      const users = await Promise.all(userPromises);
+      setUserData(users.map(user => user.data));
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   };
 
   // Function để mở form chỉnh sửa
@@ -35,10 +46,10 @@ function Main() {
   const saveEdit = () => {
     // Gửi dữ liệu chỉnh sửa lên server
     axios
-      .put(`http://localhost:3000/api/info/${editingUser.id}`, editingUser)
+      .put(`http://localhost:3000/api/listUser-info/${editingUser.USERID}`, editingUser)
       .then(() => {
         // Cập nhật lại state userData sau khi chỉnh sửa
-        fetchData();
+        fetchUserIds();
         // Đóng form chỉnh sửa
         cancelEdit();
       })
@@ -73,23 +84,31 @@ function Main() {
           </thead>
           <tbody>
             {userData.map((user) => (
-              <tr key={user.id}>
+              <tr key={user.USERID}>
                 <td>{user.USERID}</td>
                 <td>{user.NAME}</td>
                 <td>{user.SEX}</td>
                 <td>{user.DOB}</td>
                 <td>{user.PHONE}</td>
                 <td>{user.EMAIL}</td>
-                <td>{user.PASSWORD}</td>
                 <td>{user.NEWSCOUNT}</td>
                 <td>{user.STATUS}</td>
                 <td>
-                  <button
-                    className="detail-link update-button"
-                    onClick={() => handleEdit(user)}
-                  >
-                    Xóa
-                  </button>
+                  {user.STATUS === "hoat dong" ? (
+                    <button
+                      className="detail-link update-button"
+                      onClick={() => handleEdit(user)}
+                    >
+                      Cấm
+                    </button>
+                  ) : (
+                    <button
+                      className="detail-link update-button"
+                      onClick={() => handleEdit(user)}
+                    >
+                      Bỏ Cấm
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -97,49 +116,20 @@ function Main() {
         </table>
         {editingUser && (
           <div className="edit-form">
-            <h2>Chỉnh sửa thông tin người dùng</h2>
-            <input
-              type="text"
-              name="fullName"
-              value={editingUser.fullName}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="birthDate"
-              value={editingUser.birthDate}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="gender"
-              value={editingUser.gender}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="phoneNumber"
-              value={editingUser.phoneNumber}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="email"
-              value={editingUser.email}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="address"
-              value={editingUser.address}
-              onChange={handleChange}
-            />
-            <input
-              type="text"
-              name="status"
-              value={editingUser.status}
-              onChange={handleChange}
-            />
+            <h2>Chỉnh sửa trạng thái người dùng</h2>
+            <p>Mã ID: {editingUser.USERID}</p>
+            <p>Tên: {editingUser.NAME}</p>
+            <p>
+              Trạng Thái: 
+              <select
+                name="STATUS"
+                value={editingUser.STATUS}
+                onChange={handleChange}
+              >
+                <option value="active">Hoạt động</option>
+                <option value="banned">Cấm</option>
+              </select>
+            </p>
             <button onClick={saveEdit}>Lưu</button>
             <button onClick={cancelEdit}>Hủy</button>
           </div>
