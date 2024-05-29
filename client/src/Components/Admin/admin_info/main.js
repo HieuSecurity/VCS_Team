@@ -5,15 +5,21 @@ import "./info.css";
 
 function Main() {
   const [userData, setUserData] = useState([]);
-  const [editingUser, setEditingUser] = useState(null); // State để lưu trữ thông tin người dùng đang được chỉnh sửa
+  const [editingUser, setEditingUser] = useState(null);
+  const [adminInfo, setAdminInfo] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    const storedUserInfo = localStorage.getItem("user");
+    if (storedUserInfo) {
+      const parsedUserInfo = JSON.parse(storedUserInfo);
+      setAdminInfo(parsedUserInfo);
+      fetchAdminData(parsedUserInfo.EMAIL);
+    }
   }, []);
 
-  const fetchData = () => {
+  const fetchAdminData = (email) => {
     axios
-      .get("http://localhost:3000/api/admin-info")
+      .get(`http://localhost:3000/api/admin-info/${email}`)
       .then((response) => {
         setUserData(response.data);
       })
@@ -22,25 +28,19 @@ function Main() {
       });
   };
 
-  // Function để mở form chỉnh sửa
   const handleEdit = (user) => {
     setEditingUser(user);
   };
 
-  // Function để đóng form chỉnh sửa
   const cancelEdit = () => {
     setEditingUser(null);
   };
 
-  // Function để gửi dữ liệu chỉnh sửa
   const saveEdit = () => {
-    // Gửi dữ liệu chỉnh sửa lên server
     axios
-      .put(`http://localhost:3000/api/admin-info/${editingUser.id}`, editingUser)
+      .put(`http://localhost:3000/api/admin-info/${editingUser.ADMINID}`, editingUser)
       .then(() => {
-        // Cập nhật lại state userData sau khi chỉnh sửa
-        fetchData();
-        // Đóng form chỉnh sửa
+        fetchAdminData(adminInfo.email);
         cancelEdit();
       })
       .catch((error) => {
@@ -48,7 +48,6 @@ function Main() {
       });
   };
 
-  // Function để cập nhật giá trị của trường trong form chỉnh sửa
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditingUser({ ...editingUser, [name]: value });
@@ -61,6 +60,7 @@ function Main() {
   return (
     <div className="Main">
       <h1>Xin chào Admin</h1>
+
       <div className="table-container">
         <table className="table">
           <thead>
@@ -77,7 +77,7 @@ function Main() {
           </thead>
           <tbody>
             {userData.map((user) => (
-              <tr key={user.id}>
+              <tr key={user.ADMINID}>
                 <td>{user.ADMINID}</td>
                 <td>{user.NAME}</td>
                 <td>{user.SEX}</td>
@@ -136,7 +136,7 @@ function Main() {
               value={editingUser.ADDRESS}
               onChange={handleChange}
             />
-            <button onClick={saveEdit}>Lưu</button>
+            <button onClick={saveEdit}>Sửa thông tin</button>
             <button onClick={cancelEdit}>Hủy</button>
           </div>
         )}

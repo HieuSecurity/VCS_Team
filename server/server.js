@@ -636,11 +636,12 @@ app.get("/api/search", (req, res) => {
   });
 });
 
-// API lấy thông tin quản trị viên
-app.get('/api/admin-info', (req, res) => {
-  const query = 'SELECT * FROM admininfo';
+// API lấy thông tin quản trị viên theo email
+app.get('/api/admin-info/:email', (req, res) => {
+  const email = req.params.email;
+  const query = 'SELECT * FROM admininfo WHERE EMAIL = ?';
 
-  connection.query(query, (err, results) => {
+  connection.query(query, [email], (err, results) => {
     if (err) {
       console.error('Error fetching admin data:', err);
       res.status(500).json({ message: 'Internal server error' });
@@ -649,6 +650,7 @@ app.get('/api/admin-info', (req, res) => {
     res.status(200).json(results);
   });
 });
+
 
 // API cập nhật thông tin quản trị viên
 app.put('/api/admin-info/:id', (req, res) => {

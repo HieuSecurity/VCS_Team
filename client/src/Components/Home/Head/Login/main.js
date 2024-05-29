@@ -36,10 +36,15 @@ const Main = () => {
       console.log(response.data.user.role);
       // Nếu đăng nhập thành công, chuyển hướng đến trang admin hoặc user tùy thuộc vào vai trò của người dùng
       if (response.status === 200) {
-        const { ROLE } = response.data.user;
+        const { ROLE, ...userData } = response.data.user;
         console.log(ROLE === 1);
+
+        // Lưu thông tin người dùng vào localStorage
+        localStorage.setItem("user", JSON.stringify(userData));
+
         if (ROLE === 1) {
-          history("/admin");
+          history("/admin/info");
+          alert("Xin chào Admin!!!");
         } else {
           alert("Đăng nhập thành công!!!");
           history("/");
