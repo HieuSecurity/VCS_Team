@@ -8,6 +8,7 @@ const path = require("path");
 const { start } = require("repl");
 const app = express();  
 const PORT = process.env.PORT || 3000;
+const { format, parseISO } = require('date-fns-tz'); // Import format và parseISO từ date-fns-tz
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -924,14 +925,19 @@ app.put('/api/update-paymentState/:PAYID', async (req, res) => {
 
     const ADMINID = row[0].ADMINID;
 
-    // Update payment table with STATE and ADMINID
+    // Get current timestamp in Vietnam timezone to update TIME in payment table
+    const currentTime = new Date();
+    const vietnamTimezone = 'Asia/Ho_Chi_Minh';
+    const formattedTime = format(currentTime, "yyyy-MM-dd HH:mm:ss", { timeZone: vietnamTimezone });
+
+    // Update payment table with STATE, ADMINID, and TIME
     const updateQuery = `
       UPDATE payment
-      SET STATE = ?, ADMINID = ?
+      SET STATE = ?, ADMINID = ?, TIME = ?
       WHERE PAYID = ?
     `;
 
-    const result = await query(updateQuery, [state, ADMINID, PAYID]);
+    const result = await query(updateQuery, [state, ADMINID, formattedTime, PAYID]);
 
     // Check if the update was successful
     if (result.affectedRows > 0) {
