@@ -9,6 +9,7 @@ const PostTable = () => {
   const [payments, setPayments] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   const adminEmail = user ? user.EMAIL : null; // Lấy EMAIL thay vì ADMINID
+  const [reason, setReason] = useState(""); // Lý do từ chối hoặc xóa bài viết
 
   useEffect(() => {
     fetchPayments();
@@ -63,40 +64,57 @@ const PostTable = () => {
   // Confirm reject action
   const confirmReject = (payment) => {
     if (window.confirm("Bạn có chắc muốn từ chối thanh toán này?")) {
-      handleReject(payment);
+      const reasonInput = prompt("Nhập lý do hủy giao dịch:");
+      if (reasonInput) {
+        setReason(reasonInput);
+        handleReject(payment, reasonInput);
+      }
     }
   };
 
   // Handle approve action
-const handleApprove = async (payment) => {
-  try {
-    // Update payment state
-    await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
-      state: "Thành công",
-      ADMINEMAIL: adminEmail,
-    });
+  const handleApprove = async (payment) => {
+    try {
+      // Update payment state
+      await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
+        state: "Thành công",
+        ADMINEMAIL: adminEmail,
+      });
 
-    // Update news state
-    await axios.post(`http://localhost:3000/api/update-newsState`, {
-      newsid: payment.NEWSID,
-      state: "Hoạt động",
-    });
+      // Update news state
+      await axios.post(`http://localhost:3000/api/update-newsState`, {
+        newsid: payment.NEWSID,
+        state: "Hoạt động",
+      });
 
-    // Update local state or fetch payments again
-    fetchPayments();
-  } catch (error) {
-    console.error("Error approving payment:", error);
-  }
-};
+      // Create notification
+      await axios.post(`http://localhost:3000/api/create-notification`, {
+        newsid: payment.NEWSID,
+        content: `Thanh toán có mã số ${payment.PAYID} đã hoàn tất. Bài đăng ${payment.NEWSID} đã được hiển thị.`,
+        reason: "", // Không có lý do khi đồng ý
+      });
 
+      // Update local state or fetch payments again
+      fetchPayments();
+    } catch (error) {
+      console.error("Error approving payment:", error);
+    }
+  };
 
   // Handle reject action
-  const handleReject = async (payment) => {
+  const handleReject = async (payment, reason) => {
     try {
       // Update payment state
       await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
         state: "Đã hủy",
         ADMINEMAIL: adminEmail,
+      });
+
+      // Create notification
+      await axios.post(`http://localhost:3000/api/create-notification`, {
+        newsid: payment.NEWSID,
+        content: `Thanh toán có mã số ${payment.PAYID} đã bị từ chối.`,
+        reason: reason, // Lý do từ chối
       });
 
       // Update local state or fetch payments again
@@ -128,8 +146,8 @@ const handleApprove = async (payment) => {
     if (a.STATE === "Chờ duyệt" && b.STATE === "Chờ duyệt") {
       return parseISO(b.TIME) - parseISO(a.TIME);
     }
-    // Sắp xếp những bài đăng còn lại theo mã thanh toán (PAYID)
-    return a.PAYID - b.PAYID;
+    // Sắp xếp những bài đăng còn lại theo thời gian
+    return parseISO(b.TIME) - parseISO(a.TIME);
   });
 
   return (

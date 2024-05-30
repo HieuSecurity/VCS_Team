@@ -947,7 +947,6 @@ app.put('/api/update-paymentState/:PAYID', async (req, res) => {
 // API tạo thông báo
 app.post('/api/create-notification', (req, res) => {
   const { newsid, content, reason } = req.body;
-
   try {
     // Lấy USERID từ NEWSLIST dựa trên NEWSID
     const getUserIdQuery = 'SELECT USERID FROM NEWSLIST WHERE NEWSID = ?';
