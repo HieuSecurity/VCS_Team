@@ -17,7 +17,7 @@ const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
   password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
