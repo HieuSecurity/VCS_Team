@@ -67,7 +67,7 @@ function PostForm() {
       formDataToSend.append("postDuration", formData.postDuration)
       formDataToSend.append("describe", formData.describe);
       formDataToSend.append("price", formData.price);
-      formDataToSend.append("areage", formData.acreage);
+      formDataToSend.append("acreage", formData.acreage);
       formDataToSend.append("address", formData.address);
       formDataToSend.append("district", formData.district);
 
