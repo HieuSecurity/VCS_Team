@@ -8,6 +8,7 @@ const path = require("path");
 const { start } = require("repl");
 const app = express();  
 const PORT = process.env.PORT || 3000;
+const { format, parseISO } = require('date-fns-tz'); // Import format và parseISO từ date-fns-tz
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -16,8 +17,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
@@ -123,12 +124,9 @@ app.get("/api/get-pricelist", (req, res) => {
 
 
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
-  const { title, timestart, describe, price, acreage, address, district } = req.body;
+  const { title, timestart, describe, price, acreage, address, district, postDuration } = req.body;
   //const imageUrl = req.file ? req.file.filename : null;
   const images = req.files; // lấy danh sách các hình ảnh từ req.files
-
-  console.log("Received form data:", req.body);
-  console.log("Received images:", req.files);
 
   const USERID_temp = 4;
   const state = 'Chờ duyệt';
@@ -157,8 +155,8 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 
       const IDDISTRICT = districtResults[0].IDDISTRICT;
 
-      const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid, state) VALUES (?, ?, ?, ?, ?, ?)';
-      connection.query(insertNewslistQuery, [title, acreage, price, IDDISTRICT, USERID_temp, state], (error, newslistResults) => {
+      const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      connection.query(insertNewslistQuery, [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration], (error, newslistResults) => {
         if (error) {
           return connection.rollback(() => {
             console.error("Error executing INSERT into newslist", error);
@@ -226,8 +224,25 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   });
 });
 
-
-
+// API cập nhật trạng thái bài viết
+app.post('/api/update-newsState', (req, res) => {
+  const { newsid, state } = req.body;
+  try {
+    // Update trạng thái của tin tức
+    const updateQuery = 'UPDATE NEWSLIST SET STATE = ? WHERE NEWSID = ?';
+    connection.query(updateQuery, [state, newsid], (error, results) => {
+      if (error) {
+        console.error('Lỗi khi cập nhật trạng thái tin tức:', error);
+        return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+      }
+      console.log('Cập nhật trạng thái tin tức thành công');
+      return res.status(200).json({ message: 'Cập nhật trạng thái tin tức thành công' });
+    });
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái tin tức:', error);
+    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+  }
+});
 
 // 
 app.get('/api/hcmdistrict', (req, res) => {
@@ -252,6 +267,7 @@ app.get("/api/posts", (req, res) => {
       newslist.state,
       newslist.acreage,
       newslist.address,
+      newslist.postduration,
       hcmdistrict.district,
       image.image,
       newsdetail.timestart,
@@ -402,7 +418,6 @@ app.get("/api/latest-posts", (req, res) => {
 
 app.post("/api/signup", (req, res) => {
   const { username, email, phone, password } = req.body;
-  console.log(email);
   try {
     // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu hay không
     connection.query(
@@ -415,7 +430,6 @@ app.post("/api/signup", (req, res) => {
         }
 
         if (results.length > 0) {
-          console.log("Status : 409");
           return res.status(409).json({ message: "Email already exists" });
         }
 
@@ -440,7 +454,6 @@ app.post("/api/signup", (req, res) => {
                   return res.status(500).json({ message: "Internal server error" });
                 }
 
-                console.log("Status : 201");
                 res.status(201).json({ message: "User created successfully" });
               }
             );
@@ -716,6 +729,58 @@ app.put('/api/update-user-state', (req, res) => {
   });
 });
 
+
+// API tạo phiếu thanh toán
+app.post('/api/create-payment', (req, res) => {
+  const { NEWSID, POSTDURATION, ADMINEMAIL } = req.body;
+
+  try {
+    // Lấy ADMINID từ ADMINEMAIL
+    const adminQuery = 'SELECT ADMINID FROM ADMININFO WHERE EMAIL = ?';
+    connection.query(adminQuery, [ADMINEMAIL], (error, adminResults) => {
+      if (adminResults.length === 0) {
+        return res.status(404).json({ error: 'Admin not found' });
+      }
+      if (error) {
+        console.error('Error querying admin:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      const ADMINID = adminResults[0].ADMINID;
+
+      // Lấy giá từ bảng giá
+      const priceQuery = 'SELECT PRICE FROM PRICELIST WHERE POSTDURATION = ?';
+      connection.query(priceQuery, [POSTDURATION], (error, priceResults) => {
+        if (priceResults.length === 0) {
+          return res.status(404).json({ error: 'Price not found' });
+        }
+
+        if (error) {
+          console.error('Error querying price:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        const PRICE = priceResults[0].PRICE;
+
+        // Tạo phiếu thanh toán
+        const paymentQuery = 'INSERT INTO PAYMENT (NEWSID, PRICE, ADMINID, STATE) VALUES (?, ?, ?, ?)';
+        connection.query(paymentQuery, [NEWSID, PRICE, ADMINID, 'Chờ duyệt'], (error, results) => {
+          if (error) {
+            console.error('Error creating payment:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+          }
+          console.log('Payment created successfully');
+          return res.status(201).json({ message: 'Payment created successfully' });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error creating payment:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // API to fetch all payments with user and admin info
 app.get("/api/payment", async (req, res) => {
   const query = "SELECT * FROM payment";
@@ -852,14 +917,19 @@ app.put('/api/update-paymentState/:PAYID', async (req, res) => {
 
     const ADMINID = row[0].ADMINID;
 
-    // Update payment table with STATE and ADMINID
+    // Get current timestamp in Vietnam timezone to update TIME in payment table
+    const currentTime = new Date();
+    const vietnamTimezone = 'Asia/Ho_Chi_Minh';
+    const formattedTime = format(currentTime, "yyyy-MM-dd HH:mm:ss", { timeZone: vietnamTimezone });
+
+    // Update payment table with STATE, ADMINID, and TIME
     const updateQuery = `
       UPDATE payment
-      SET STATE = ?, ADMINID = ?
+      SET STATE = ?, ADMINID = ?, TIME = ?
       WHERE PAYID = ?
     `;
 
-    const result = await query(updateQuery, [state, ADMINID, PAYID]);
+    const result = await query(updateQuery, [state, ADMINID, formattedTime, PAYID]);
 
     // Check if the update was successful
     if (result.affectedRows > 0) {
@@ -873,6 +943,44 @@ app.put('/api/update-paymentState/:PAYID', async (req, res) => {
     res.status(500).json({ error: 'Error updating payment state' });
   }
 });
+
+// API tạo thông báo
+app.post('/api/create-notification', (req, res) => {
+  const { newsid, content, reason } = req.body;
+
+  try {
+    // Lấy USERID từ NEWSLIST dựa trên NEWSID
+    const getUserIdQuery = 'SELECT USERID FROM NEWSLIST WHERE NEWSID = ?';
+    connection.query(getUserIdQuery, [newsid], (error, userResults) => {
+      if (error) {
+        console.error('Lỗi khi lấy USERID từ NEWSLIST:', error);
+        return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+      }
+
+      if (userResults.length === 0) {
+        return res.status(404).json({ error: 'Bài viết không tồn tại' });
+      }
+
+      const userid = userResults[0].USERID;
+
+      // Tạo thông báo
+      const createNotificationQuery = 'INSERT INTO NOTIFICATION (USERID, CONTENT, REASON) VALUES (?, ?, ?)';
+      connection.query(createNotificationQuery, [userid, content, reason], (error, results) => {
+        if (error) {
+          console.error('Lỗi khi tạo thông báo:', error);
+          return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+        }
+        console.log('Tạo thông báo thành công');
+        return res.status(200).json({ message: 'Tạo thông báo thành công' });
+      });
+    });
+  } catch (error) {
+    console.error('Lỗi khi tạo thông báo:', error);
+    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+  }
+});
+
+
 
 
 app.listen(PORT, () => {

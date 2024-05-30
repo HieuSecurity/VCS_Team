@@ -1,5 +1,3 @@
-/* post.css */
-
 .table-container {
   margin-top: 20px;
 }
@@ -8,35 +6,15 @@
   width: 100%;
   border-collapse: collapse;
 }
+
 .user-table th,
 .user-table td {
   font-size: 20px;
   text-align: center;
+  vertical-align: middle; /* Căn giữa theo chiều dọc */
   text-decoration: none;
   margin: 0 auto;
-}
-/* CSS cho form nhập nội dung vi phạm */
-.violation-form {
-  display: none; /* Ẩn form ban đầu */
-}
-.duyet-post {
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  margin: 10px;
-}
-/* CSS khi hiển thị form */
-.show-form {
-  display: block; /* Hiển thị form khi được áp dụng */
-}
-
-.user-table th,
-.user-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
+  padding: 8px; /* Thêm padding để tạo khoảng trống xung quanh nội dung */
 }
 
 .user-table th {
@@ -59,6 +37,47 @@
 .user-table button:hover {
   background-color: #0056b3;
 }
+
 .detail-link {
   font-size: 30px;
+}
+
+.violation-form {
+  display: none; /* Ẩn form ban đầu */
+}
+
+/* CSS khi hiển thị form */
+.show-form {
+  display: block; /* Hiển thị form khi được áp dụng */
+}
+
+/* Đặt chung cho các icon hành động */
+.action-icon {
+  padding: 5px;
+  border: 1px solid transparent; /* Màu viền trong suốt */
+  border-radius: 4px; /* Bo góc nhẹ cho viền */
+  cursor: pointer;
+  transition: border-color 0.3s ease; /* Hiệu ứng mượt khi thay đổi màu viền */
+  vertical-align: middle; /* Căn giữa theo chiều dọc */
+}
+
+/* Màu xanh cho icon tick */
+.action-icon.approve-icon {
+  color: green;
+}
+
+/* Màu đỏ cho icon x */
+.action-icon.reject-icon {
+  color: red;
+  margin-right: 20px;
+}
+
+/* Màu xám cho icon xóa */
+.action-icon.delete-icon {
+  color: gray;
+}
+
+/* Thêm viền màu khi hover */
+.action-icon:hover {
+  border-color: currentColor; /* Đặt màu viền theo màu của icon */
 }

@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import Search from "../../Search/search";
+import { format, parseISO } from "date-fns";
 
 function Image_des() {
   const [data, setData] = useState({ results: [], total: 0 });
@@ -35,9 +36,7 @@ function Image_des() {
     }
   };
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    // Use slice to extract the first 10 characters which represent the date
-    return date.toISOString().slice(0, 10);
+    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
   };
   const fetchData = () => {
     axios
