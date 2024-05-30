@@ -196,6 +196,20 @@ app.post("/api/login", (req, res) => {
 //   });
 // });
 
+// API lấy thông tin bảng giá
+app.get("/api/get-pricelist", (req, res) => {
+  const sql = "SELECT * FROM pricelist";
+  connection.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching price list:", err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.status(200).json(results);
+  });
+});
+
+
 // HARD CODE phần USERID và NEWSID
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const { title, timestart, describe, price, acreage, address, district } = req.body;

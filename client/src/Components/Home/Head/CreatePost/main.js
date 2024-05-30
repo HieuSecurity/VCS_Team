@@ -4,6 +4,7 @@ import Back from "../../../Back/back";
 import Slogan from "../../../Slogan/slogan";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { format, parseISO } from "date-fns";
 import Login from "../Login/login";
 import { faBox } from "@fortawesome/free-solid-svg-icons";
 
@@ -11,7 +12,7 @@ import { faBox } from "@fortawesome/free-solid-svg-icons";
 function PostForm() {
   const history = useNavigate();
   const [formData, setFormData] = useState({
-    title:"",
+    title: "",
     postDuration: "",
     describe: "",
     price: "",
@@ -25,6 +26,9 @@ function PostForm() {
   // State để lưu danh sách các quận từ cơ sở dữ liệu
   const [districts, setDistricts] = useState([]);
 
+  // State để lưu danh sách thời hạn đăng bài và giá
+  const [priceList, setPriceList] = useState([]);
+
   useEffect(() => {
     // Lấy danh sách các quận từ cơ sở dữ liệu
     async function fetchDistricts() {
@@ -35,7 +39,19 @@ function PostForm() {
         console.error("Error fetching districts:", error);
       }
     }
+
+    // Lấy danh sách thời hạn đăng bài từ API
+    async function fetchPriceList() {
+      try {
+        const response = await axios.get("http://localhost:3000/api/get-pricelist"); // API endpoint
+        setPriceList(response.data);
+      } catch (error) {
+        console.error("Error fetching price list:", error);
+      }
+    }
+
     fetchDistricts();
+    fetchPriceList();
   }, []); // Thực hiện fetch một lần duy nhất khi component được render
 
   const handleSubmit = async (event) => {
@@ -48,27 +64,17 @@ function PostForm() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title)
-      formDataToSend.append("postDuration",formData.postDuration)
+      formDataToSend.append("postDuration", formData.postDuration)
       formDataToSend.append("describe", formData.describe);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("areage", formData.acreage);
       formDataToSend.append("address", formData.address);
       formDataToSend.append("district", formData.district);
+
       // Append từng hình ảnh vào formData
       formData.images.forEach((image) => {
-        formDataToSend.append("images", image)       
+        formDataToSend.append("images", image)
       });
-      // const formDataToSend = new FormData();
-      // Object.keys(formData).forEach((key) => {
-      //   if (key === "images") {
-      //     formData[key].forEach((image) => {
-      //       formDataToSend.append("images", image);
-      //     });
-      //   } else {
-      //     formDataToSend.append(key, formData[key]);
-      //   }
-      // });
-      // console.log("Sending formData:", formDataToSend);
 
       const response = await axios.post(
         "http://localhost:3000/api/create-post",
@@ -105,10 +111,6 @@ function PostForm() {
   };
 
   const handleChange = (e) => {
-    // if (formData.agreeTerms) {
-    //   alert("Vui lòng đồng ý với điều khoản và dịch vụ ");
-    //   return;
-    // }
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
     setFormData((prevFormData) => ({
@@ -119,8 +121,7 @@ function PostForm() {
 
   const handleImageChange = (e) => {
     const imageFiles = Array.from(e.target.files); // Get the selected file
-    console.log(imageFiles);
-    if (imageFiles.length > 5){
+    if (imageFiles.length > 5) {
       alert("Bạn chỉ được chọn tối đa 5 ảnh")
       return;
     }
@@ -128,6 +129,10 @@ function PostForm() {
       ...prevFormData,
       images: imageFiles, // Set the image file in the form data
     }));
+  };
+  
+  const formatMoney = (amount) => {
+    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' }).replace(/\$/, '').replace(/\.00$/, '');
   };
 
   return (
@@ -149,8 +154,7 @@ function PostForm() {
               />
             </div>
             <div style={{ flex: 1 }}>
-              <label
-                className="select-label">Thời hạn đăng bài:</label>
+              <label className="select-label">Thời hạn đăng bài:</label>
               <select
                 id="post-duration"
                 name="postDuration"
@@ -159,10 +163,12 @@ function PostForm() {
                 required
               >
                 <option value="">Chọn khoảng thời gian</option>
-                <option value="30"> 30 ngày - {30 * 20}K</option>
-                <option value="90"> 90 ngày - {90 * 19}K</option>
-                <option value="180">180 ngày - {180 * 17}K</option>
-                <option value="365">365 ngày - {365 * 15}K</option>
+                {/* Hiển thị danh sách thời hạn đăng bài và giá */}
+                {priceList.map((item) => (
+                  <option key={item.postduration} value={item.postduration}>
+                    {`${item.POSTDURATION} ngày - ${formatMoney(item.PRICE)} VND`}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -258,8 +264,6 @@ function PostForm() {
           <button type="submit">Gửi yêu cầu</button>
         </form>
       </div>
-
-
     </div>
   );
 }
