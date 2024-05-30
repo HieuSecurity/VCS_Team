@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import "./payment.css"; // Import CSS file for styling
 
 const PostTable = () => {
   const [payments, setPayments] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [newPayment, setNewPayment] = useState({
-    NEWSID: "",
-    PRICE: "",
-    TIME: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
-  });
+  const user = JSON.parse(localStorage.getItem("user"));
+  const adminEmail = user ? user.EMAIL : null; // Lấy EMAIL thay vì ADMINID
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -30,101 +28,111 @@ const PostTable = () => {
   };
 
   const formatMoney = (amount) => {
-    return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' }).replace(/\$/, '').replace(/\.00$/, '');
+    return amount.toLocaleString("en-US", { style: "currency", currency: "USD" }).replace(/\$/, "").replace(/\.00$/, "");
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewPayment((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const storedUserInfo = JSON.parse(localStorage.getItem("user"));
-    const adminId = storedUserInfo ? storedUserInfo.ADMINID : null;
-
-    const paymentData = {
-      ...newPayment,
-      ADMINID: adminId,
-    };
-
-    try {
-      await axios.post("http://localhost:3000/api/create-payment", paymentData);
-      setShowForm(false);
-      setNewPayment({
-        NEWSID: "",
-        PRICE: "",
-        TIME: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
-      });
-      const response = await axios.get("http://localhost:3000/api/payment");
-      setPayments(response.data);
-    } catch (error) {
-      console.error("Error creating payment:", error);
+  // Function to render icon based on payment state
+  const renderIcon = (state, payment) => {
+    switch (state) {
+      case "Chờ duyệt":
+        return (
+          <>
+            <FontAwesomeIcon
+              icon={faTimes}
+              title="Từ chối"
+              className="icon"
+              style={{ color: "red", cursor: "pointer", marginRight: "10px", backgroundColor: "white" }}
+              onClick={() => confirmReject(payment)}
+            />
+            <FontAwesomeIcon
+              icon={faCheck}
+              title="Duyệt"
+              className="icon"
+              style={{ color: "green", cursor: "pointer", backgroundColor: "white" }}
+              onClick={() => confirmApprove(payment)}
+            />
+          </>
+        );
+      case "Thành công":
+        return <FontAwesomeIcon icon={faCheck} title="Đã duyệt" style={{ color: "green" }} />;
+      case "Đã hủy":
+        return <FontAwesomeIcon icon={faTimes} title="Đã hủy" style={{ color: "red" }} />;
+      default:
+        return null;
     }
   };
 
-  const handleCancel = () => {
-    setShowForm(false);
-    setNewPayment({
-      NEWSID: "",
-      PRICE: "",
-      TIME: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
-    });
+  // Confirm approve action
+  const confirmApprove = (payment) => {
+    if (window.confirm("Bạn có chắc muốn duyệt thanh toán này?")) {
+      handleApprove(payment);
+    }
+  };
+
+  // Confirm reject action
+  const confirmReject = (payment) => {
+    if (window.confirm("Bạn có chắc muốn từ chối thanh toán này?")) {
+      handleReject(payment);
+    }
+  };
+
+  // Handle approve action
+  const handleApprove = async (payment) => {
+    try {
+      await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
+        state: "Thành công",
+        ADMINEMAIL: adminEmail,
+      });
+      // Update local state or fetch payments again
+      fetchPayments();
+    } catch (error) {
+      console.error("Error approving payment:", error);
+    }
+  };
+
+  // Handle reject action
+  const handleReject = async (payment) => {
+    try {
+      await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
+        state: "Đã hủy",
+        ADMINEMAIL: adminEmail,
+      });
+      // Update local state or fetch payments again
+      fetchPayments();
+    } catch (error) {
+      console.error("Error rejecting payment:", error);
+    }
+  };
+
+  // Sort payments
+  const sortedPayments = [...payments].sort((a, b) => {
+    // Đặt các bài đăng chờ duyệt lên đầu, sắp xếp theo thời gian
+    if (a.STATE === "Chờ duyệt" && b.STATE !== "Chờ duyệt") {
+      return -1;
+    }
+    if (b.STATE === "Chờ duyệt" && a.STATE !== "Chờ duyệt") {
+      return 1;
+    }
+    if (a.STATE === "Chờ duyệt" && b.STATE === "Chờ duyệt") {
+      return parseISO(b.TIME) - parseISO(a.TIME);
+    }
+    // Sắp xếp những bài đăng còn lại theo mã thanh toán (PAYID)
+    return a.PAYID - b.PAYID;
+  });
+
+  // Fetch payments
+  const fetchPayments = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/payment");
+      setPayments(response.data);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+    }
   };
 
   return (
     <div className="table-container">
       <h1>Thông tin thanh toán tại Phongtro123</h1>
-      <button className="create-payment-button" onClick={() => setShowForm(true)}>
-        Tạo thanh toán
-      </button>
-      {showForm && (
-        <div className="form-container">
-          <h2>Tạo thanh toán mới</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="NEWSID">Mã bài đăng:</label>
-              <input
-                type="text"
-                id="NEWSID"
-                name="NEWSID"
-                value={newPayment.NEWSID}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="PRICE">Số tiền:</label>
-              <input
-                type="number"
-                id="PRICE"
-                name="PRICE"
-                value={newPayment.PRICE}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="TIME">Thời gian thanh toán:</label>
-              <input
-                type="datetime-local"
-                id="TIME"
-                name="TIME"
-                value={newPayment.TIME}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-buttons">
-              <button type="submit">Tạo mới</button>
-              <button type="button" onClick={handleCancel}>Hủy</button>
-            </div>
-          </form>
-        </div>
-      )}
       <table className="payment-table">
         <thead>
           <tr>
@@ -135,11 +143,12 @@ const PostTable = () => {
             <th>Thời gian thanh toán</th>
             <th>Admin</th>
             <th>Trạng thái</th>
+            <th>Chức năng</th>
           </tr>
         </thead>
         <tbody>
-          {payments.map((payment) => (
-            <tr key={payment.PAYID}>
+          {sortedPayments.map((payment) => (
+            <tr key={payment.PAYID} style={{ backgroundColor: payment.STATE === "Chờ duyệt" ? "#16c784" : "transparent" }}>
               <td>{payment.PAYID}</td>
               <td>{payment.NEWSID}</td>
               <td>{payment.USERNAME}</td>
@@ -147,6 +156,7 @@ const PostTable = () => {
               <td>{formatDate(payment.TIME)}</td>
               <td>{payment.ADMINNAME}</td>
               <td>{payment.STATE}</td>
+              <td>{renderIcon(payment.STATE, payment)}</td>
             </tr>
           ))}
         </tbody>

@@ -832,6 +832,48 @@ app.get("/api/payment/:paymentId", (req, res) => {
     res.status(200).json(results[0]);
   });
 });
+const util = require('util');
+const query = util.promisify(connection.query).bind(connection);
+
+// API PUT để cập nhật trạng thái và ADMINID trong bảng payment
+app.put('/api/update-paymentState/:PAYID', async (req, res) => {
+  const PAYID = req.params.PAYID;
+  const { state, ADMINEMAIL } = req.body;
+  
+  try {
+    // Query to get ADMINID from admininfo table using ADMINEMAIL
+    const adminIdQuery = `SELECT ADMINID FROM admininfo WHERE EMAIL = ?`;
+
+    const row = await query(adminIdQuery, [ADMINEMAIL]);
+
+    if (!row || row.length === 0 || !row[0].ADMINID) {
+      return res.status(404).json({ error: 'Admin not found or ADMINID not available' });
+    }
+
+    const ADMINID = row[0].ADMINID;
+
+    // Update payment table with STATE and ADMINID
+    const updateQuery = `
+      UPDATE payment
+      SET STATE = ?, ADMINID = ?
+      WHERE PAYID = ?
+    `;
+
+    const result = await query(updateQuery, [state, ADMINID, PAYID]);
+
+    // Check if the update was successful
+    if (result.affectedRows > 0) {
+      console.log(`Payment with PAYID ${PAYID} updated successfully`);
+      res.status(200).json({ message: 'Payment updated successfully' });
+    } else {
+      res.status(404).json({ error: `Payment with PAYID ${PAYID} not found` });
+    }
+  } catch (error) {
+    console.error('Error updating payment state:', error);
+    res.status(500).json({ error: 'Error updating payment state' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
