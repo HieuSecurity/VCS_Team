@@ -11,15 +11,6 @@ const PostTable = () => {
   const adminEmail = user ? user.EMAIL : null; // Lấy EMAIL thay vì ADMINID
 
   useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/payment");
-        setPayments(response.data);
-      } catch (error) {
-        console.error("Error fetching payments:", error);
-      }
-    };
-
     fetchPayments();
   }, []);
 
@@ -77,30 +68,51 @@ const PostTable = () => {
   };
 
   // Handle approve action
-  const handleApprove = async (payment) => {
-    try {
-      await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
-        state: "Thành công",
-        ADMINEMAIL: adminEmail,
-      });
-      // Update local state or fetch payments again
-      fetchPayments();
-    } catch (error) {
-      console.error("Error approving payment:", error);
-    }
-  };
+const handleApprove = async (payment) => {
+  try {
+    // Update payment state
+    await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
+      state: "Thành công",
+      ADMINEMAIL: adminEmail,
+    });
+
+    // Update news state
+    await axios.post(`http://localhost:3000/api/update-newsState`, {
+      newsid: payment.NEWSID,
+      state: "Hoạt động",
+    });
+
+    // Update local state or fetch payments again
+    fetchPayments();
+  } catch (error) {
+    console.error("Error approving payment:", error);
+  }
+};
+
 
   // Handle reject action
   const handleReject = async (payment) => {
     try {
+      // Update payment state
       await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
         state: "Đã hủy",
         ADMINEMAIL: adminEmail,
       });
+
       // Update local state or fetch payments again
       fetchPayments();
     } catch (error) {
       console.error("Error rejecting payment:", error);
+    }
+  };
+
+  // Fetch payments
+  const fetchPayments = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/payment");
+      setPayments(response.data);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
     }
   };
 
@@ -119,16 +131,6 @@ const PostTable = () => {
     // Sắp xếp những bài đăng còn lại theo mã thanh toán (PAYID)
     return a.PAYID - b.PAYID;
   });
-
-  // Fetch payments
-  const fetchPayments = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/payment");
-      setPayments(response.data);
-    } catch (error) {
-      console.error("Error fetching payments:", error);
-    }
-  };
 
   return (
     <div className="table-container">

@@ -235,7 +235,7 @@ app.post('/api/update-newsState', (req, res) => {
         console.error('Lỗi khi cập nhật trạng thái tin tức:', error);
         return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
       }
-      console.log('Cập nhật trạng thái tin tức thành công');
+      console.log(`Cập nhật trạng thái tin tức ${newsid} thành công`);
       return res.status(200).json({ message: 'Cập nhật trạng thái tin tức thành công' });
     });
   } catch (error) {
