@@ -13,14 +13,14 @@ const PostTable = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/posts");
+        const response = await axios.get("http://localhost:3000/api/get-posts");
         const allPosts = response.data.results;
-        const newPosts = allPosts.filter((post) => post.state === "Chờ duyệt");
-        const filteredPosts = allPosts.filter((post) => post.state !== "Chờ duyệt");
+        const newPosts = allPosts.filter((post) => post.STATE === "Chờ duyệt");
+        const filteredPosts = allPosts.filter((post) => post.STATE !== "Chờ duyệt");
 
         // Sắp xếp newPosts và allPosts theo mã bài đăng
-        newPosts.sort((a, b) => a.newsid - b.newsid);
-        filteredPosts.sort((a, b) => a.newsid - b.newsid);
+        newPosts.sort((a, b) => a.NEWSID - b.NEWSID);
+        filteredPosts.sort((a, b) => a.NEWSID - b.NEWSID);
 
         setPosts({ newPosts, allPosts: filteredPosts });
       } catch (error) {
@@ -147,28 +147,28 @@ const PostTable = () => {
         </thead>
         <tbody>
           {posts.newPosts.map((post) => (
-            <tr key={post.newsid}>
-              <td>{post.newsid}</td>
+            <tr key={post.NEWSID}>
+              <td>{post.NEWSID}</td>
               <td>{post.district}</td>
-              <td>{post.title}</td>
-              <td>{post.name}</td>
-              <td>{post.postduration} ngày</td>
-              <td>{post.state}</td>
-              <td>
-                <Link className="detail-link update-button" to={`/detail/${post.newsid}`}>
+              <td>{post.TITLE}</td>
+              <td>{post.NAME}</td>
+              <td>{post.POSTDURATION} ngày</td>
+              <td>{post.STATE}</td>
+              <td className="chuc-Nang">
+                <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>
                   Chi tiết
                 </Link>
                 <FontAwesomeIcon
                   icon={faTimes}
                   className="action-icon reject-icon"
                   title="Từ chối"
-                  onClick={() => handleReject(post.newsid)}
+                  onClick={() => handleReject(post.NEWSID)}
                 />
                 <FontAwesomeIcon
                   icon={faCheck}
                   className="action-icon approve-icon"
                   title="Duyệt"
-                  onClick={() => handleApprove(post.newsid, post.postduration)}
+                  onClick={() => handleApprove(post.NEWSID, post.POSTDURATION)}
                 />
               </td>
             </tr>
@@ -191,22 +191,22 @@ const PostTable = () => {
         </thead>
         <tbody>
           {posts.allPosts.map((post) => (
-            <tr key={post.newsid}>
-              <td>{post.newsid}</td>
-              <td>{post.district}</td>
-              <td>{post.title}</td>
-              <td>{post.name}</td>
-              <td>{post.postduration} ngày</td>
-              <td>{post.state}</td>
-              <td>
-                <Link className="detail-link update-button" to={`/detail/${post.newsid}`}>
+            <tr key={post.NEWSID}>
+              <td>{post.NEWSID}</td>
+              <td>{post.district  }</td>
+              <td>{post.TITLE}</td>
+              <td>{post.NAME}</td>
+              <td>{post.POSTDURATION} ngày</td>
+              <td>{post.STATE}</td>
+              <td className="chuc-Nang">
+                <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>
                   Chi tiết
                 </Link>
                 <FontAwesomeIcon
                   icon={faTrashAlt}
                   className="action-icon delete-icon"
                   title="Xóa"
-                  onClick={() => handleDelete(post.newsid)}
+                  onClick={() => handleDelete(post.NEWSID)}
                 />
               </td>
             </tr>

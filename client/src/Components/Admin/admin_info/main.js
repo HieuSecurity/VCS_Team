@@ -37,15 +37,16 @@ function Main() {
   };
 
   const saveEdit = () => {
-    axios
-      .put(`http://localhost:3000/api/admin-info/${editingUser.ADMINID}`, editingUser)
-      .then(() => {
-        fetchAdminData(adminInfo.email);
-        cancelEdit();
-      })
-      .catch((error) => {
-        console.error("Error updating user:", error);
-      });
+    alert("Nhân viên không có quyền chỉnh sửa thông tin. Vui lòng liên hệ với chủ sở hũu!")
+    // axios
+    //   .put(`http://localhost:3000/api/admin-info/${editingUser.ADMINID}`, editingUser)
+    //   .then(() => {
+    //     fetchAdminData(adminInfo.email);
+    //     cancelEdit();
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error updating user:", error);
+    //   });
   };
 
   const handleChange = (e) => {
@@ -137,7 +138,7 @@ function Main() {
               onChange={handleChange}
             />
             <button onClick={saveEdit}>Sửa thông tin</button>
-            <button onClick={cancelEdit}>Hủy</button>
+            <button onClick={cancelEdit}>Đóng</button>
           </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 .table-container {
   margin-top: 20px;
+  margin-bottom: 50px;
 }
 
 .user-table {
@@ -69,7 +70,7 @@
 /* Màu đỏ cho icon x */
 .action-icon.reject-icon {
   color: red;
-  margin-right: 20px;
+  margin-right: 10px;
 }
 
 /* Màu xám cho icon xóa */
@@ -81,3 +82,10 @@
 .action-icon:hover {
   border-color: currentColor; /* Đặt màu viền theo màu của icon */
 }
+
+/*Cân chúc năng cùng dòng*/
+.chuc-Nang {
+  display: inline-block;
+  width: 250px;
+}
+

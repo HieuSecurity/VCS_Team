@@ -84,6 +84,7 @@ h1 {
   display: inline-block; /* Hiển thị theo dòng */
   font-size: 16px; /* Kích thước chữ */
   cursor: pointer; /* Bảng chuột */
+  width: 100px;
 }
 
 .update-button:hover {

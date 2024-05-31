@@ -17,8 +17,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
@@ -274,40 +274,13 @@ app.get('/api/hcmdistrict', (req, res) => {
   });
 });
 
-app.get("/api/posts", (req, res) => {
-  // Thực hiện truy vấn SELECT để lấy tất cả bài đăng kèm thông tin người dùng từ bảng userinfo
-  const selectQuery = `
-  SELECT 
-      newslist.userid,
-      newslist.newsid,
-      newslist.title,
-      newsdetail.describe,
-      newslist.price,
-      newslist.state,
-      newslist.acreage,
-      newslist.address,
-      newslist.postduration,
-      hcmdistrict.district,
-      image.image,
-      newsdetail.timestart,
-      newsdetail.timeend,
-      userinfo.phone,
-      userinfo.name,
-      userinfo.avatar
-    FROM 
-      newslist
-    LEFT JOIN 
-      newsdetail ON newslist.newsid = newsdetail.newsid
-    LEFT JOIN 
-      userinfo ON newslist.userid = userinfo.userid
-    LEFT JOIN 
-      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
-    LEFT JOIN 
-      image ON newslist.newsid = image.newsid
-  `;
+// API lấy thông tin bài viết
+app.get("/api/get-posts", (req, res) => {
+  // Thực hiện truy vấn SELECT để lấy tất cả bài đăng từ bảng NEWSLIST
+  const selectNewslistQuery = "SELECT * FROM NEWSLIST";
 
   // Thực hiện truy vấn COUNT để tính tổng số bài đăng
-  const countQuery = `SELECT COUNT(*) AS total FROM newslist`;
+  const countQuery = `SELECT COUNT(*) AS total FROM NEWSLIST`;
 
   // Thực hiện truy vấn để lấy số lượng kết quả
   connection.query(countQuery, (error, countResult) => {
@@ -319,17 +292,85 @@ app.get("/api/posts", (req, res) => {
     const total = countResult[0].total; // Lấy tổng số kết quả từ kết quả truy vấn COUNT
 
     // Thực hiện truy vấn SELECT để lấy danh sách bài đăng
-    connection.query(selectQuery, (error, results) => {
+    connection.query(selectNewslistQuery, async (error, newslistResults) => {
       if (error) {
-        console.error("Error executing SELECT query 158", error);
+        console.error("Error executing SELECT query", error);
         return res.status(500).json({ message: "Internal server error" });
       }
 
-      // Trả về dữ liệu và số lượng bài đăng
-      res.status(200).json({ results, total });
+      try {
+        // Duyệt qua từng bài đăng để thực hiện các truy vấn phụ
+        const posts = await Promise.all(
+          newslistResults.map(async (news) => {
+            const newsid = news.NEWSID;
+            const userId = news.USERID;
+            const districtId = news.ADDRESS;
+
+            // Truy vấn chi tiết bài đăng từ NEWSDETAIL
+            const newsDetail = await new Promise((resolve, reject) => {
+              connection.query("SELECT * FROM NEWSDETAIL WHERE NEWSID = ?", [newsid], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
+              });
+            });
+
+            // Truy vấn tên quận từ HCMDISTRICT
+            const district = await new Promise((resolve, reject) => {
+              connection.query("SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?", [districtId], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0].DISTRICT);
+                }
+              });
+            });
+
+            // Truy vấn thông tin người dùng từ USERINFO
+            const userInfo = await new Promise((resolve, reject) => {
+              connection.query("SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?", [userId], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
+              });
+            });
+
+            // Truy vấn hình ảnh từ bảng IMAGE
+            const image = await new Promise((resolve, reject) => {
+              connection.query("SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1", [newsid], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0] ? results[0].IMAGE : null);
+                }
+              });
+            });
+
+            // Kết hợp các thông tin lại thành một đối tượng
+            return {
+              ...news,
+              ...newsDetail,
+              district,
+              ...userInfo,
+              image, // Thêm đường dẫn hình ảnh
+            };
+          })
+        );
+
+        // Trả về dữ liệu và số lượng bài đăng
+        res.status(200).json({ results: posts, total });
+      } catch (error) {
+        console.error("Error executing subqueries", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
     });
   });
 });
+
 app.get("/api/search-by-location", (req, res) => {
   const selectedDistrict = req.query.district;
 
