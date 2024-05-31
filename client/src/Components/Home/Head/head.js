@@ -8,6 +8,7 @@ function Head() {
       <div className="login_create">
         <Login className="Login" />
         <CreatePost className="CreatePost" />
+        123{" "}
       </div>
       <Title />
     </div>
