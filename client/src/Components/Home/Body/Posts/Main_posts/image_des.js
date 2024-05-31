@@ -116,7 +116,7 @@ function Image_des() {
     } else if (selectedDistrict) {
       axios
         .get(
-          `http://localhost:3000/api/search-by-location?district=${selectedDistrict}`
+          `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
         )
         .then((response) => {
           setData(response.data);

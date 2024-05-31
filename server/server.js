@@ -371,54 +371,101 @@ app.get("/api/get-posts", (req, res) => {
   });
 });
 
-app.get("/api/search-by-location", (req, res) => {
+// API lọc bài đăng theo Quận
+app.get("/api/search-posts-location", (req, res) => {
   const selectedDistrict = req.query.district;
 
-  // Thực hiện truy vấn SELECT từ cơ sở dữ liệu với điều kiện là selectedDistrict
-  const selectQuery = `
-    SELECT 
-      newslist.userid,
-      newslist.newsid,
-      newslist.title,
-      newsdetail.describe,
-      newslist.price,
-      newslist.acreage,
-      newslist.address,
-      hcmdistrict.district,
-      image.image,
-      newsdetail.timestart,
-      newsdetail.timeend,
-      userinfo.phone,
-      userinfo.name,
-      userinfo.avatar
+  // Truy vấn SELECT từ NEWSLIST với điều kiện Quận
+  const selectNewslistQuery = `
+    SELECT NEWSID, USERID, TITLE, PRICE, ACREAGE, ADDRESS
     FROM 
-      newslist
-    LEFT JOIN 
-      newsdetail ON newslist.newsid = newsdetail.newsid
-    LEFT JOIN 
-      userinfo ON newslist.userid = userinfo.userid
-    LEFT JOIN 
-      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
-    LEFT JOIN 
-      image ON newslist.newsid = image.newsid
-    WHERE
-      hcmdistrict.district LIKE '%${selectedDistrict}%'
+      NEWSLIST
+    WHERE 
+      ADDRESS IN (SELECT IDDISTRICT FROM HCMDISTRICT WHERE DISTRICT LIKE '%${selectedDistrict}%')
   `;
 
-  // Thực hiện truy vấn SELECT để lấy dữ liệu dựa trên giá trị Quận
-  connection.query(selectQuery, (error, results) => {
+  // Thực hiện truy vấn SELECT để lấy danh sách bài đăng với điều kiện Quận
+  connection.query(selectNewslistQuery, async (error, newslistResults) => {
     if (error) {
       console.error("Error executing SELECT query", error);
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // Lấy số lượng kết quả
-    const totalResults = results.length;
+    try {
+      // Duyệt qua từng bài đăng để thực hiện các truy vấn phụ
+      const posts = await Promise.all(
+        newslistResults.map(async (news) => {
+          const newsid = news.NEWSID;
+          const userId = news.USERID;
+          const districtId = news.ADDRESS;
 
-    // Trả về dữ liệu và số lượng kết quả
-    res.status(200).json({ results, total: totalResults });
+          // Truy vấn chi tiết bài đăng từ NEWSDETAIL
+          const newsDetail = await new Promise((resolve, reject) => {
+            connection.query("SELECT * FROM NEWSDETAIL WHERE NEWSID = ?", [newsid], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0]);
+              }
+            });
+          });
+
+          // Truy vấn tên quận từ HCMDISTRICT
+          const district = await new Promise((resolve, reject) => {
+            connection.query("SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?", [districtId], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0].DISTRICT);
+              }
+            });
+          });
+
+          // Truy vấn thông tin người dùng từ USERINFO
+          const userInfo = await new Promise((resolve, reject) => {
+            connection.query("SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?", [userId], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0]);
+              }
+            });
+          });
+
+          // Truy vấn hình ảnh từ bảng IMAGE
+          const image = await new Promise((resolve, reject) => {
+            connection.query("SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1", [newsid], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0] ? results[0].IMAGE : null);
+              }
+            });
+          });
+
+          // Kết hợp các thông tin lại thành một đối tượng
+          return {
+            ...news,
+            ...newsDetail,
+            district,
+            ...userInfo,
+            image, // Thêm đường dẫn hình ảnh
+          };
+        })
+      );
+
+      // Lấy số lượng bài đăng
+      const total = posts.length;
+
+      // Trả về dữ liệu và số lượng bài đăng
+      res.status(200).json({ results: posts, total });
+    } catch (error) {
+      console.error("Error executing subqueries", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 });
+
 
 // API /api/latest-posts
 app.get("/api/latest-posts", (req, res) => {
