@@ -7,10 +7,18 @@ import Back from "../Back/back";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
+
 function Detail() {
   const { id } = useParams();
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
+  const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+    fetchImages();
+  }, [id]);
+
   function formatMoney(amount) {
     // Kiểm tra nếu amount không phải là một số
     if (typeof amount !== 'number' || isNaN(amount)) {
@@ -33,10 +41,7 @@ function Detail() {
     }
   }
   
-  useEffect(() => {
-    // Hàm gọi API khi component được render và id thay đổi
-    fetchData();
-  }, [id]);
+
   const formatDate = (dateString) => {
     if (!dateString) return ''; // Kiểm tra nếu dateString không tồn tại
   
@@ -55,6 +60,40 @@ function Detail() {
       setDetailData(response.data); // Lưu dữ liệu vào state
     } catch (error) {
       console.error("Error fetching detail data:", error);
+    }
+  };
+
+  const fetchImages = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/images/${id}`);
+      setImages(response.data.images);
+    } catch (error){
+      console.error("Error fetching images: ", error);
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const formData = new FormData();
+    for (const file of event.target.files){
+      formData.append('images', file);
+    }
+  
+    try {
+      const response = await axios.post(`http://localhost:3000/api/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        data: {
+          newsid: id
+        }
+      });
+  
+      // Handle the response here
+      console.log(response.data); // Log the response data
+      alert('Images uploaded successfully'); // Show an alert to the user
+    } catch (error) {
+      console.error("Error uploading images: ", error);
+      alert('An error occurred while uploading images'); // Show an alert to the user in case of error
     }
   };
   
@@ -78,10 +117,14 @@ function Detail() {
               alignItems: "center",
             }}
           >
-            <img
-              style={{ width: "100%", height: "380px" }}
-              src={`http://localhost:3000/uploads/${detailData.image}`}
-            />
+            {images.map((image, index) => (
+              <img
+                key = {index}
+                style = {{width: "100%", height: "380ox", marginBottom: "10px"}}
+                src={`http://localhost:3000/uploads/${image}`}
+                alt={`Image ${index + 1}`}
+              />
+            ))}
             <div
               style={{
                 margin: "10px 0",

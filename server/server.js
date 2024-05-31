@@ -17,8 +17,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
@@ -46,10 +46,6 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-// // API to upload an image
-// app.post("/upload",upload.single("image"), (req, res) => {
-//   res.json({ message: "Image uploaded successfully" });
-// });
 
 // API to get an image
 app.get("/image/:filename", (req, res) => {
@@ -59,28 +55,40 @@ app.get("/image/:filename", (req, res) => {
 });
 
 // route to handle multiple image upload
-app.post("/api/upload", upload.array("images", 5), (req, res) => {
+app.post("/api/upload-images/:postId", upload.array("images", 10), async (req, res) => {
   const images = req.files;
+  const postId = req.params.newslistId;
 
   // Check if any file is uploaded
   if (!images || images.length === 0) {
     return res.status(400).json({ message: "No images uploaded" });
   }
 
-  // Multer to Insert each image into the database
-  images.forEach((image) => {
-    const insertQuery = "INSERT INTO image (NEWID, IMAGE) VALUES (?, ?)";
-    connection.query(insertQuery, [req.body.newsid, image.filename], (error, results) => {
-      if (error) {
-        console.error("Error inserting image:", error);
-        return res.status(500).json({ message: "Internal server error" });
-      }
+  try {
+    // Use a promise-based approach to handle image insertions
+    const insertImagePromises = images.map((image) => {
+      const insertImageQuery = "INSERT INTO image (newsid, image) VALUES (?, ?)";
+      return executeQuery(connection, insertImageQuery, [postId, image.filename]);
     });
-  });
 
-  res.status(200).json({ message: "Images uploaded successfully" });
+    // Wait for all image insertions to complete
+    await Promise.all(insertImagePromises);
+
+    const fileInfos = images.map(image => ({
+      filename: image.filename,
+      path: image.path
+    }));
+
+    // Send response after all insertions are successful
+    res.status(200).json({
+      message: 'Images uploaded and associated with the post successfully.',
+      files: fileInfos
+    });
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    res.status(500).json({ message: 'An error occurred during image upload.', error });
+  }
 });
-
 
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
@@ -125,9 +133,7 @@ app.get("/api/get-pricelist", (req, res) => {
 
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const { title, timestart, describe, price, acreage, address, district, postDuration } = req.body;
-  //const imageUrl = req.file ? req.file.filename : null;
-  const images = req.files; // lấy danh sách các hình ảnh từ req.files
-
+  const images = req.files; // Get the list of uploaded images from req.files
   const USERID_temp = 4;
   const state = 'Chờ duyệt';
 
@@ -137,7 +143,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // Truy vấn để lấy IDDISTRICT từ cơ sở dữ liệu
+    // lấy IDDISTRICT từ database tương ứng với option người dùng chọn
     const getDistrictQuery = 'SELECT IDDISTRICT FROM hcmdistrict WHERE DISTRICT = ?';
     connection.query(getDistrictQuery, [district], (error, districtResults) => {
       if (error) {
@@ -155,6 +161,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 
       const IDDISTRICT = districtResults[0].IDDISTRICT;
 
+      // Insert post details into newslist table
       const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)';
       connection.query(insertNewslistQuery, [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration], (error, newslistResults) => {
         if (error) {
@@ -166,6 +173,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 
         const newslistId = newslistResults.insertId;
 
+        // Insert post details into newsdetail table
         const insertNewsdetailQuery = 'INSERT INTO newsdetail (newsid, specificaddress, `describe` ) VALUES (?, ?, ?)';
         connection.query(insertNewsdetailQuery, [newslistId ,address, describe], (error, newsdetailResults) => {
           if (error) {
@@ -175,35 +183,8 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
             });
           }
 
-
-          if (images && images.length > 0) {
-            images.forEach((image) => {
-              const imageUrl = image.filename;
-              const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
-              connection.query(insertImageQuery, [newslistId, imageUrl], (error, imageResults) => {
-              if (error) {
-                return connection.rollback(() => {
-                  console.error("Error executing INSERT into image", error);
-                  res.status(500).json({ message: "Internal server error" });
-                });
-              }
-
-              connection.commit((err) => {
-                if (err) {
-                  return connection.rollback(() => {
-                    console.error("Error committing transaction", err);
-                    res.status(500).json({ message: "Internal server error" });
-                  });
-                }
-
-                res.status(200).json({
-                  message: "Post created successfully",
-                  postId: newslistId,
-                });
-              });
-            });
-            })
-          } else {
+          if (!images || images.length === 0) {
+            // No images uploaded
             connection.commit((err) => {
               if (err) {
                 return connection.rollback(() => {
@@ -217,6 +198,44 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
                 postId: newslistId,
               });
             });
+          } else {
+            // Images uploaded, insert them into the database
+            const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
+            const promises = images.map((image) => {
+              const imageUrl = image.filename;
+              return new Promise((resolve, reject) => {
+                connection.query(insertImageQuery, [newslistId, imageUrl], (error, imageResults) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve();
+                  }
+                });
+              });
+            });
+
+            Promise.all(promises)
+              .then(() => {
+                connection.commit((err) => {
+                  if (err) {
+                    return connection.rollback(() => {
+                      console.error("Error committing transaction", err);
+                      res.status(500).json({ message: "Internal server error" });
+                    });
+                  }
+
+                  res.status(200).json({
+                    message: "Post created successfully",
+                    postId: newslistId,
+                  });
+                });
+              })
+              .catch((error) => {
+                return connection.rollback(() => {
+                  console.error("Error executing INSERT into image", error);
+                  res.status(500).json({ message: "Internal server error" });
+                });
+              });
           }
         });
       });
