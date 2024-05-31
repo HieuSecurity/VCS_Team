@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faTimes, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import "./payment.css"; // Import CSS file for styling
 
 const PostTable = () => {
@@ -43,6 +43,13 @@ const PostTable = () => {
               style={{ color: "green", cursor: "pointer", backgroundColor: "white" }}
               onClick={() => confirmApprove(payment)}
             />
+            <FontAwesomeIcon
+              icon={faExclamationTriangle}
+              title="Lỗi"
+              className="icon"
+              style={{ color: "orange", cursor: "pointer", backgroundColor: "white" }}
+              onClick={() => confirmError(payment)}
+            />
           </>
         );
       case "Thành công":
@@ -63,11 +70,22 @@ const PostTable = () => {
 
   // Confirm reject action
   const confirmReject = (payment) => {
-    if (window.confirm("Bạn có chắc muốn từ chối thanh toán này?")) {
+    if (window.confirm("Bạn có chắc muốn hủy thanh toán này?")) {
       const reasonInput = prompt("Nhập lý do hủy giao dịch:");
       if (reasonInput) {
         setReason(reasonInput);
         handleReject(payment, reasonInput);
+      }
+    }
+  };
+
+  // Confirm error action
+  const confirmError = (payment) => {
+    if (window.confirm("Bạn có chắc muốn thông báo giao dịch lỗi tới người dùng?")) {
+      const errorInput = prompt("Nhập lỗi:");
+      if (errorInput) {
+        setReason(errorInput);
+        handleError(payment, errorInput);
       }
     }
   };
@@ -122,6 +140,24 @@ const PostTable = () => {
     } catch (error) {
       console.error("Error rejecting payment:", error);
     }
+  };
+
+  // Handle error action
+  const handleError = async (payment, errorInput) => {
+    try {
+      // Create notification
+      await axios.post(`http://localhost:3000/api/create-notification`, {
+        newsid: payment.NEWSID,
+        content: `Thanh toán có mã số ${payment.PAYID} bị lỗi: ${errorInput}`,
+        reason: "", // Không có lý do khi thông báo lỗi
+      });
+
+      // Update local state or fetch payments again
+      fetchPayments();
+    } catch (error) {
+      console.error("Error notifying payment error:", error);
+    }
+    alert("Gửi thông báo thành công.")
   };
 
   // Fetch payments
