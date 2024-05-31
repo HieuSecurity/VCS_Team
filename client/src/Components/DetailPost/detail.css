@@ -53,15 +53,41 @@ li {
  /* vị trí các nút điều hướng của slideshow và có thiệt ứng di chuột */
 .slideshow-container {
   position: relative;
-  max-width: 100%;
+  width: 100%; /* Adjust as needed */
+  margin: auto;
+  overflow: hidden;
 }
 
-.slide {
-  display: none;
+
+
+.black-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 15%; /* Adjust as needed */
+  background-color: black;
+  z-index: 1;
 }
 
-.slide.active {
+.left-bar {
+  left: 0;
+}
+
+.right-bar {
+  right: 0;
+}
+
+img {
+  width: 100%;
+  height: 380px;
   display: block;
+  margin: 0 auto;
+}
+
+/* Hiding slideshow navigation buttons if there is only one image */
+.slide:not(.active) .prev,
+.slide:not(.active) .next {
+  display: none;
 }
 
 .prev, .next {
@@ -71,12 +97,14 @@ li {
   width: auto;
   padding: 16px;
   margin-top: -22px;
-  color: white;
+  color:#000000;
+  background-color: rgba(242, 211, 12, 0.816);
   font-weight: bold;
   font-size: 18px;
   transition: 0.6s ease;
   border-radius: 0 3px 3px 0;
   user-select: none;
+  z-index: 2;
 }
 
 .next {
@@ -84,7 +112,14 @@ li {
   border-radius: 3px 0 0 3px;
 }
 
+.prev {
+  left: 15px;
+  border-radius: 3px 3px 0 0;
+}
+
+/* làm mờ background của 2 button khi di chuột tới */
 .prev:hover, .next:hover {
   background-color: rgba(0, 0, 0, 0.8);
+  color: yellow;
 }
 

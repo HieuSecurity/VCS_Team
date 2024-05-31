@@ -124,6 +124,8 @@ function Detail() {
             }}
           >
             <div className = "slideshow-container">
+              <div className="black-bar left-bar"></div>
+              <div className="black-bar right-bar"></div>
               {images.map((image, index) => (
                 <div
                   key = {index}
@@ -137,8 +139,12 @@ function Detail() {
                   />
                 </div>
               ))}
-              <a className="prev" onClick={prevSlide}>&#10094;</a>
-              <a className="next" onClick={nextSlide}>&#10095;</a>
+              {images.length > 1 && (
+                <>
+                  <a className="prev" onClick={prevSlide}>&#10094;</a>
+                  <a className="next" onClick={nextSlide}>&#10095;</a>
+                </>
+              )}
             </div>
           
             <div
