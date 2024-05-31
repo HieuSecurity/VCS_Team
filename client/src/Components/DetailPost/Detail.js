@@ -7,7 +7,7 @@ import Back from "../Back/back";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from 'react';
 
 function Detail() {
   const { id } = useParams();
@@ -53,11 +53,8 @@ function Detail() {
   
   const fetchData = async () => {
     try {
-      // Gọi API để lấy dữ liệu chi tiết
-      const response = await axios.get(
-        `http://localhost:3000/api/detail/${id}`
-      );
-      setDetailData(response.data); // Lưu dữ liệu vào state
+      const response = await axios.get(`http://localhost:3000/api/detail/${id}`);
+      setDetailData(response.data);
     } catch (error) {
       console.error("Error fetching detail data:", error);
     }
@@ -67,8 +64,8 @@ function Detail() {
     try {
       const response = await axios.get(`http://localhost:3000/api/images/${id}`);
       setImages(response.data.images);
-    } catch (error){
-      console.error("Error fetching images: ", error);
+    } catch (error) {
+      console.error("Error fetching images:", error);
     }
   };
 
@@ -119,8 +116,8 @@ function Detail() {
           >
             {images.map((image, index) => (
               <img
-                key = {index}
-                style = {{width: "100%", height: "380ox", marginBottom: "10px"}}
+                key={index}
+                style={{ width: "100%", height: "380px", marginBottom: "10px" }}
                 src={`http://localhost:3000/uploads/${image}`}
                 alt={`Image ${index + 1}`}
               />

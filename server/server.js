@@ -12,13 +12,15 @@ const { format, parseISO } = require('date-fns-tz'); // Import format và parseI
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+
+
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
@@ -52,82 +54,6 @@ app.get("/image/:filename", (req, res) => {
   const filename = req.params.filename;
   const imagePath = path.resolve(__dirname, "./uploads", filename);
   res.sendFile(imagePath);
-});
-
-// route to handle multiple image upload
-app.post("/api/upload-images/:postId", upload.array("images", 10), async (req, res) => {
-  const images = req.files;
-  const postId = req.params.newslistId;
-
-  // Check if any file is uploaded
-  if (!images || images.length === 0) {
-    return res.status(400).json({ message: "No images uploaded" });
-  }
-
-  try {
-    // Use a promise-based approach to handle image insertions
-    const insertImagePromises = images.map((image) => {
-      const insertImageQuery = "INSERT INTO image (newsid, image) VALUES (?, ?)";
-      return executeQuery(connection, insertImageQuery, [postId, image.filename]);
-    });
-
-    // Wait for all image insertions to complete
-    await Promise.all(insertImagePromises);
-
-    const fileInfos = images.map(image => ({
-      filename: image.filename,
-      path: image.path
-    }));
-
-    // Send response after all insertions are successful
-    res.status(200).json({
-      message: 'Images uploaded and associated with the post successfully.',
-      files: fileInfos
-    });
-  } catch (error) {
-    console.error("Error uploading images:", error);
-    res.status(500).json({ message: 'An error occurred during image upload.', error });
-  }
-});
-
-app.post("/api/login", (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ message: "Missing email or password" });
-  }
-
-  const query = "SELECT * FROM account WHERE email = ? AND password = ?";
-  connection.query(query, [email, password], (error, results) => {
-    // Xử lý kết quả trạng thái hoạt động
-    if (error) {
-      console.error("Error executing query", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-
-    if (results.length === 0) {
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const user = results[0];
-    if (user.STATE === "Khóa") {
-      return res.status(403).json({ message: "Blocked account" });
-    }
-
-    res.status(200).json({ message: "Login successful", user });
-  });
-});
-
-// API lấy thông tin bảng giá
-app.get("/api/get-pricelist", (req, res) => {
-  const sql = "SELECT * FROM pricelist";
-  connection.query(sql, (err, results) => {
-    if (err) {
-      console.error("Error fetching price list:", err);
-      res.status(500).json({ message: "Internal server error" });
-      return;
-    }
-    res.status(200).json(results);
-  });
 });
 
 
@@ -240,6 +166,102 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
         });
       });
     });
+  });
+});
+
+app.get('/api/images/:newsid', (req, res) => {
+  const newsid = req.params.newsid;
+  const query = "SELECT IMAGE FROM image WHERE NEWSID = ?";
+
+  connection.query(query, [newsid], (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: 'Error fetching images', error });
+    }
+
+    const imagePaths = results.map(row => row.IMAGE);
+    res.status(200).json({ images: imagePaths });
+  });
+});
+
+app.post("/api/upload", upload.array("images", 10), async (req, res) => {
+  const images = req.files;
+  // Check if any file is uploaded
+  if (!images || images.length === 0) {
+    return res.status(400).json({ message: "No images uploaded" });
+  }
+
+  try {
+    // Use a promise-based approach to handle database insertions
+    const insertPromises = images.map((image) => {
+      const insertQuery = "INSERT INTO image (NEWID, IMAGE) VALUES (?, ?)";
+      return new Promise((resolve, reject) => {
+        connection.query(insertQuery, [req.body.newsid, image.filename], (error, results) => {
+          if (error) {
+            console.error("Error inserting image:", error);
+            reject(error);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+    });
+
+    // Wait for all insertions to complete
+    await Promise.all(insertPromises);
+
+    const fileInfos = images.map(image => ({
+      filename: image.filename,
+      path: image.path
+    }));
+
+    // Send response after all insertions are successful
+    res.status(200).json({
+      message: 'Images uploaded and inserted successfully.',
+      files: fileInfos
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred during the upload and insert.', error });
+  }
+});
+
+
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "Missing email or password" });
+  }
+
+  const query = "SELECT * FROM account WHERE email = ? AND password = ?";
+  connection.query(query, [email, password], (error, results) => {
+    // Xử lý kết quả trạng thái hoạt động
+    if (error) {
+      console.error("Error executing query", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const user = results[0];
+    if (user.STATE === "Khóa") {
+      return res.status(403).json({ message: "Blocked account" });
+    }
+
+    res.status(200).json({ message: "Login successful", user });
+  });
+});
+
+// API lấy thông tin bảng giá
+app.get("/api/get-pricelist", (req, res) => {
+  const sql = "SELECT * FROM pricelist";
+  connection.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error fetching price list:", err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.status(200).json(results);
   });
 });
 
