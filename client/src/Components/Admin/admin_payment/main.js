@@ -128,11 +128,24 @@ const PostTable = () => {
         ADMINEMAIL: adminEmail,
       });
 
+      // Update news state
+      await axios.post(`http://localhost:3000/api/update-newsState`, {
+        newsid: payment.NEWSID,
+        state: "Bị từ chối",
+      });
+
       // Create notification
       await axios.post(`http://localhost:3000/api/create-notification`, {
         newsid: payment.NEWSID,
         content: `Thanh toán có mã số ${payment.PAYID} đã bị từ chối.`,
         reason: reason, // Lý do từ chối
+      });
+
+      // Create notification
+      await axios.post(`http://localhost:3000/api/create-notification`, {
+        newsid: payment.NEWSID,
+        content: `Bài đăng ${payment.NEWSID} bị từ chối`,
+        reason: `Thanh toán mã số ${payment.PAYID} không thành công`, // Lý do từ chối
       });
 
       // Update local state or fetch payments again
