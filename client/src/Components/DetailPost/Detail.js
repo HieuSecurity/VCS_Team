@@ -1,6 +1,7 @@
 import Slogan from "../Slogan/slogan";
 import "../DetailPost/detail.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTags, faRulerCombined, faClock, faHashtag, faMoneyBill1} from '@fortawesome/free-solid-svg-icons';
 import { faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 import Back from "../Back/back";
@@ -114,7 +115,7 @@ function Detail() {
         <Slogan />
       </div>
       <div className="container_form" style={{ height: "100%" }}>
-        <div class="container-posts" style={{ border: "1px solid red" }}>
+        <div class="container-posts" /*style={{ border: "1px solid red" }}*/>
           <div
             class="left-part left-part-detail"
             style={{
@@ -147,25 +148,12 @@ function Detail() {
               )}
             </div>
           
-            <div
-              style={{
-                margin: "10px 0",
-                display: "flex",
-                justifyContent: "center", // căn giữa theo chiều ngang
-                alignItems: "center", // căn giữa theo chiều dọc
-              }}
-            >
-              <span
-                style={{
-                  textAlign: "center",
-                  color: "#E13427",
-                  fontSize: "32px",
-                  fontWeight: "1000",
-                  borderBottom: "2px solid blue",
-                }}
-              >
+            <div className="detail-title">
+              <p className="detail-title-text"
+                style={{color: "#E13427"}}
+                >
                 {detailData.title}
-              </span>
+              </p>
             </div>
 
             <div>
@@ -175,7 +163,7 @@ function Detail() {
                   fontWeight: "1000",
                 }}
               >
-                {"Địa chỉ: " + detailData.specificaddress + ", " +detailData.district + ", TP.HCM"}
+                {"Địa chỉ: " + detailData.specificaddress + ", " + detailData.district + ", TP.HCM"}
               </span>
             </div>
             <div
@@ -192,40 +180,75 @@ function Detail() {
                   color: "#16c784",
                   fontSize: "27px",
                   fontWeight: "800",
-                  borderRight: "2px solid red",
+                  // borderRight: "2px solid red",
                   textAlign: "center",
                 }}
               >
+                <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: "10px" }} />
                 {formatMoney(detailData.price)}/tháng
               </p>
               <p
                 style={{
-                  padding: "10px",
+                  padding: "0px",
                   margin: "5px",
-                  color: "#16c784",
+                  color: "black",
                   fontSize: "27px",
-                  fontWeight: "800",
-                  borderRight: "2px solid red",
+                  fontWeight: "500",
+                  // borderRight: "2px solid red",
                   textAlign: "center",
                 }}
               >
-                {" "}
-                {detailData.acreage} m2
+                <FontAwesomeIcon icon={faRulerCombined} style={{ marginRight: "3px", fontSize: "15px" }} />
+                {detailData.acreage}m2
               </p>
               <p
                 style={{
                   padding: "10px",
                   margin: "5px",
-                  color: "#16c784",
-                  fontSize: "27px",
-                  fontWeight: "800",
-                  borderRight: "2px solid red",
+                  color: "black",
+                  fontSize: "25px",
+                  fontWeight: "500",
+                  // borderRight: "2px solid red",
                   textAlign: "center",
                 }}
               >
-                {"Mã tin: " + detailData.newsid}
+                <FontAwesomeIcon icon={faHashtag} style={{ marginRight: "1px", fontSize: "20px" }} />
+                {detailData.newsid}
               </p>
             </div>
+            
+            
+            <div>
+              <p
+                style={{
+                fontSize: "25px",
+                fontWeight: "900",
+                margin: "5px",
+                padding: "5px",
+                // margin: "10px 0",
+                // borderRight: "2px solid red",
+              }}
+            >
+                Thông tin mô tả
+              </p>
+              <div
+                style={{
+                backgroundColor: "white",
+                textAlign: "left",
+                marginLeft: "18px",
+                display: "block",
+                alignItems: "center",
+                fontSize: "18px",
+                justifyContent: "flex-start",
+                margin: "10px 0",
+                whiteSpace: "pre-wrap",
+                }}
+              >
+                <p style={{ fontWeight: "initial" }}>{detailData.describe}</p>
+              </div>
+            </div>
+
+            
             <div>
               <p
                 style={{
@@ -247,14 +270,13 @@ function Detail() {
                   justifyContent: "flex-start",
                   margin: "10px 0",
                 }}
-              >
-                <li style={{textAlign: "left",}}>Mô tả : </li>
-                <p>{detailData.describe}</p>
+              > 
               </div>
               <div
                 style={{
                   backgroundColor: "white",
                   textAlign: "center",
+                  marginLeft: "18px",
                   display: "flex",
                   alignItems: "center",
                   fontSize: "18px",
@@ -262,13 +284,15 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <li>Ngày đăng :</li>
-                <p>{formatDate(detailData.timestart)}</p>
+                <span style={{ marginRight: "55px"}}>Mã tin : </span>
+                <p style={{ fontWeight: "initial" }}>{detailData.newsid}</p>
               </div>
+
               <div
                 style={{
                   backgroundColor: "white",
                   textAlign: "center",
+                  marginLeft: "18px",
                   display: "flex",
                   alignItems: "center",
                   fontSize: "18px",
@@ -276,8 +300,23 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <li>Ngày hết hạn : </li>
-                <p>{formatDate(detailData.timeend)}</p>
+                <span style={{ marginRight: "25px"}}>Ngày đăng : </span>
+                <p style={{ fontWeight: "initial" }}>{formatDate(detailData.timestart)}</p>
+              </div>
+              <div
+                style={{
+                  backgroundColor: "white",
+                  textAlign: "center",
+                  marginLeft: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "18px",
+                  justifyContent: "flex-start",
+                  margin: "10px 0",
+                }}
+              >
+                <span style={{ marginRight: "7px"}}>Ngày hết hạn : </span>
+                <p style={{ fontWeight: "initial" }}>{formatDate(detailData.timeend)}</p>
               </div>
             </div>
             <div>
@@ -287,8 +326,8 @@ function Detail() {
                   fontWeight: "900",
                   margin: "5px",
                   padding: "5px",
-                  margin: "10px 0",
-                  borderRight: "2px solid red",
+                  // margin: "10px 0",
+                  // borderRight: "2px solid red",
                 }}
               >
                 Thông tin liên hệ
@@ -296,6 +335,8 @@ function Detail() {
               <div
                 style={{
                   backgroundColor: "white",
+                  textAlign: "left",
+                  marginLeft: "18px", 
                   display: "flex",
                   alignItems: "center",
                   fontSize: "18px",
@@ -303,12 +344,13 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <li style={{ textAlign: "left" }}>Liên lệ : </li>
-                <p>{detailData.name}</p>
+                <span style={{ marginRight: "50px"}}>Liên lệ : </span>
+                <p style={{ fontWeight: "initial" }}>{detailData.name}</p>
               </div>
               <div
                 style={{
                   backgroundColor: "white",
+                  marginLeft: "18px",
                   display: "flex",
                   alignItems: "center",
                   fontSize: "18px",
@@ -316,8 +358,8 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <li style={{ textAlign: "left" }}>Điện thoại : </li>
-                <p>{detailData.phone}</p>
+                <span style={{ marginRight: "25px" }}>Điện thoại : </span>
+                <p style={{ fontWeight: "initial" }}>{detailData.phone}</p>
               </div>
             </div>
           </div>

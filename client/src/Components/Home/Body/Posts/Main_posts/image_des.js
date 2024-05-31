@@ -202,7 +202,7 @@ function Image_des() {
                   width: "100%",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: "380px",
+                  height: "600px",
                 }}
               />
             </div>
@@ -233,8 +233,8 @@ function Image_des() {
                     {formatMoney(item.PRICE)} đồng/tháng
                     {/* Chuyển đổi số tiền thành dạng tiền tệ Việt Nam */}
                   </li>
-                  <li className="area">{item.ACREAGE} m2</li>
-                  <li className="location">{item.district}</li>
+                  <li className="acreage">{item.ACREAGE} m2</li>
+                  <li className="district">{item.district}</li>
                 </div>
                 <span
                   style={{
