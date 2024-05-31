@@ -13,14 +13,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-
+  
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 

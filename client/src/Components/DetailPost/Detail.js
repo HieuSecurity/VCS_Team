@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 
 function Detail() {
   const { id } = useParams();
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
   const [images, setImages] = useState([]);
 
@@ -93,6 +94,14 @@ function Detail() {
       alert('An error occurred while uploading images'); // Show an alert to the user in case of error
     }
   };
+
+  const nextSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide === images.length - 1 ? 0 : prevSlide + 1));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prevSlide) => (prevSlide === 0 ? images.length - 1 :prevSlide - 1));
+  };
   
   if (!detailData) {
     return <div>Loading...</div>; // Hiển thị thông báo loading trong quá trình lấy dữ liệu
@@ -114,14 +123,24 @@ function Detail() {
               alignItems: "center",
             }}
           >
-            {images.map((image, index) => (
-              <img
-                key={index}
-                style={{ width: "100%", height: "380px", marginBottom: "10px" }}
-                src={`http://localhost:3000/uploads/${image}`}
-                alt={`Image ${index + 1}`}
-              />
-            ))}
+            <div className = "slideshow-container">
+              {images.map((image, index) => (
+                <div
+                  key = {index}
+                  className = {index === currentSlide ? "slide active" : "slide"}
+                  style = {{ display: index === currentSlide ? "block" : "none"}}
+                >
+                  <img
+                    src = {`http://localhost:3000/uploads/${image}`}
+                    alt = {`Image ${index + 1}`}
+                    style = {{ width: "100%", height: "380px", marginBottom: "10px"}}
+                  />
+                </div>
+              ))}
+              <a className="prev" onClick={prevSlide}>&#10094;</a>
+              <a className="next" onClick={nextSlide}>&#10095;</a>
+            </div>
+          
             <div
               style={{
                 margin: "10px 0",
