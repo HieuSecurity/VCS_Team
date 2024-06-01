@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { format, parseISO, isBefore, subYears } from "date-fns";
+import { format, parseISO, isBefore, subYears, addYears } from "date-fns";
 import "./info.css";
 
 function Main() {
@@ -65,9 +65,9 @@ function Main() {
       return;
     }
 
-    // Kiểm tra ngày sinh có đủ 16 tuổi chưa
-    if (!isOldEnough(editedUser.DOB)) {
-      alert("Trang web dành cho người từ đủ 16 tuổi. Vui lòng quay lại sau!");
+    // Kiểm tra tuổi hợp lệ
+    if (!isValidAge(editedUser.DOB)) {
+      alert("Tuổi không hợp lệ! Vui lòng nhập tuổi từ 16 đến 100.");
       return;
     }
 
@@ -102,10 +102,11 @@ function Main() {
     return phonePattern.test(phoneNumber);
   };
 
-  const isOldEnough = (dob) => {
+  const isValidAge = (dob) => {
     const birthDate = parseISO(dob);
     const sixteenYearsAgo = subYears(new Date(), 16);
-    return isBefore(birthDate, sixteenYearsAgo);
+    const oneHundredYearsAgo = subYears(new Date(), 100);
+    return isBefore(birthDate, sixteenYearsAgo) && isBefore(oneHundredYearsAgo, birthDate);
   };
 
   const formatDate = (dateString) => {
