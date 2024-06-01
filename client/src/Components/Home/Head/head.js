@@ -15,18 +15,15 @@ function Head() {
     if (loggedIn) {
       setState(true); // Cập nhật state từ localStorage
     }
-  }, []);
+  }, [state]);
 
   console.log(state);
 
   return (
     <div className="Head">
       <div className="login_create">
-        {state ? (
-          <CreatePost className="CreatePost" />
-        ) : (
-          <Login className="Login" />
-        )}
+        <CreatePost className="CreatePost" />
+        {state ? <></> : <Login className="Login" />}
         {state ? <User /> : null}
       </div>
       <Title />
