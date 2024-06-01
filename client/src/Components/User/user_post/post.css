@@ -9,15 +9,11 @@
   border-collapse: collapse;
 }
 
-.user-table th,
+.user-table th, 
 .user-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-}
-/* post.css */
-.user-table {
-  /* Thêm CSS cho bảng nếu cần */
 }
 
 .function-cell {
@@ -52,4 +48,13 @@
 
 .user-table button:hover {
   background-color: #0056b3;
+}
+
+.action-icon.delete-icon {
+  color: gray;
+}
+
+.chuc-Nang {
+  display: inline-block;
+  width: 250px;
 }

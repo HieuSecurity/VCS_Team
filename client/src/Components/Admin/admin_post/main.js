@@ -16,7 +16,7 @@ const PostTable = () => {
         const response = await axios.get("http://localhost:3000/api/get-posts");
         const allPosts = response.data.results;
         const newPosts = allPosts.filter((post) => post.STATE === "Chờ duyệt");
-        const filteredPosts = allPosts.filter((post) => post.STATE !== "Chờ duyệt");
+        const filteredPosts = allPosts.filter((post) => post.STATE !== "Chờ duyệt");  
 
         // Sắp xếp newPosts và allPosts theo mã bài đăng
         newPosts.sort((a, b) => a.NEWSID - b.NEWSID);
