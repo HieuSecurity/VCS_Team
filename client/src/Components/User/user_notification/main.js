@@ -36,11 +36,11 @@ function Main() {
   const getLink = (category, newsId) => {
     switch (category) {
       case "Thanh toán":
-        return "/user/payment";
+        return "payment";
       case "Bài viết":
-        return `/user/post`;
+        return `post`;
       default:
-        return "/user";
+        return "";
     }
   };
 
@@ -52,7 +52,7 @@ function Main() {
         return (
           <div key={notification.NOTIFICATIONID} className="post">
             <Link
-              to={url}
+              to={`/user/${url}`}
               style={{ fontSize: "20px", fontWeight: "800" }}
               className="update-button"
             >

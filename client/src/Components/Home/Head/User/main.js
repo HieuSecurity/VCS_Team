@@ -1,15 +1,40 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../User/style.css";
+import axios from "axios";
 import { StateContext } from "../MyProvider"; // Import context từ MyProvider
 
 function Main() {
   const [showModal, setShowModal] = useState(false);
   const { state, setState } = useContext(StateContext); // Sử dụng context từ MyProvider
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.EMAIL) {
+      axios
+        .get(`http://localhost:3000/api/get-userid-byEmail/${user.EMAIL}`)
+        .then((response) => {
+          const userId = response.data.USERID;
+          axios
+            .get(`http://localhost:3000/api/user-info/${userId}`)
+            .then((response) => {
+              setUserName(response.data.NAME);
+            })
+            .catch((error) => {
+              console.error("Error fetching user info:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error fetching user ID:", error);
+        });
+    }
+  }, []);
 
   const handleLogout = () => {
     // Xóa dữ liệu từ localStorage khi đăng xuất
     localStorage.removeItem("loggedIn");
+    localStorage.removeItem("user");
     setState(false);
   };
 
@@ -44,12 +69,10 @@ function Main() {
             fontWeight: "700",
           }}
         >
-          Nguyễn Minh Hiếu
+          {userName}
         </span>
       </div>
-      {showModal && (
-        <div className="overlay" onClick={handleOverlayClick}></div>
-      )}
+      {showModal && <div className="overlay" onClick={handleOverlayClick}></div>}
       {showModal && (
         <div className="modal">
           <div
