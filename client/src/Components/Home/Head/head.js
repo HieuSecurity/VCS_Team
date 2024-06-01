@@ -1,10 +1,11 @@
 import CreatePost from "./CreatePost/createPost";
 import Login from "./Login/login";
+import User from "./User/main";
 import Title from "./Title/title";
 import "../homeCSS/home.css";
 import { useEffect, useState } from "react";
 function Head() {
-  const [isLogined, SetIsLogined] = useState(false);
+  const [isLogined, SetIsLogined] = useState(true);
   useEffect(() => {
     console.log(isLogined);
   });
@@ -15,7 +16,8 @@ function Head() {
     <div className="Head">
       <div className="login_create">
         <Login onSendValue={SendValue} className="Login" />
-        <CreatePost className="CreatePost" />
+        {isLogined && <CreatePost className="CreatePost" />}
+        <User />
       </div>
       <Title />
     </div>

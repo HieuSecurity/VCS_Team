@@ -11,12 +11,16 @@ import User from "./Components/User/user";
 import DetailPostUser from "./Components/User/user_post/detailPost";
 import DetailPostAdmin from "./Components/Admin/admin_post/detailPost";
 import Footer from "./Components/Home/Footer/footer";
+import ChangePassWord from "./Components/Home/Head/ChangePass/main";
 
 function App() {
   return (
     <div className="App">
       <Routes>
         <Route path="/detail" element={<DetailPostUser />} />
+      </Routes>
+      <Routes>
+        <Route path="/changepassword" element={<ChangePassWord />} />
       </Routes>
       <Routes>
         <Route path="/admin" element={<Admin />} />
