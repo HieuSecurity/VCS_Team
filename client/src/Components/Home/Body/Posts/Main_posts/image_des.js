@@ -194,10 +194,11 @@ function Image_des() {
               <img
                 src={`http://localhost:3000/uploads/${item.image}`}
                 style={{
-                  width: "100%",
+                  width: "600px",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: "600px",
+                  height: "450px",
+                  borderRadius: "5px",
                 }}
               />
             </div>
@@ -261,11 +262,13 @@ function Image_des() {
                   }}
                 >
                   <img
-                    src="https://tse4.mm.bing.net/th?id=OIP.XtlXmrujgxcWTyVw8iThMgHaE7&pid=Api&P=0&h=220"
+                    src="https://t4.ftcdn.net/jpg/03/49/49/79/360_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg"
                     style={{
                       borderRadius: "50%",
-                      width: "150px",
+                      width: "100px",
                       marginRight: "10px",
+                      height: "100px",
+                      marginLeft: "-30px",
                     }}
                   />
                   <span

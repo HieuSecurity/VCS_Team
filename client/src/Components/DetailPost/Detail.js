@@ -1,14 +1,20 @@
 import Slogan from "../Slogan/slogan";
 import "../DetailPost/detail.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTags, faRulerCombined, faClock, faHashtag, faMoneyBill1} from '@fortawesome/free-solid-svg-icons';
+import {
+  faTags,
+  faRulerCombined,
+  faClock,
+  faHashtag,
+  faMoneyBill1,
+} from "@fortawesome/free-solid-svg-icons";
 import { faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 import Back from "../Back/back";
 import { useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 function Detail() {
   const { id } = useParams();
@@ -23,10 +29,10 @@ function Detail() {
 
   function formatMoney(amount) {
     // Kiểm tra nếu amount không phải là một số
-    if (typeof amount !== 'number' || isNaN(amount)) {
-      return '0 đồng'; // Trả về một giá trị mặc định khi amount không hợp lệ
+    if (typeof amount !== "number" || isNaN(amount)) {
+      return "0 đồng"; // Trả về một giá trị mặc định khi amount không hợp lệ
     }
-  
+
     // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
       return (amount / 1000).toFixed(0) + " ngàn";
@@ -42,20 +48,21 @@ function Detail() {
       return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " đồng";
     }
   }
-  
 
   const formatDate = (dateString) => {
-    if (!dateString) return ''; // Kiểm tra nếu dateString không tồn tại
-  
+    if (!dateString) return ""; // Kiểm tra nếu dateString không tồn tại
+
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return ''; // Kiểm tra nếu date không hợp lệ
-  
+    if (isNaN(date.getTime())) return ""; // Kiểm tra nếu date không hợp lệ
+
     return date.toISOString().slice(0, 10);
   };
-  
+
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/detail/${id}`);
+      const response = await axios.get(
+        `http://localhost:3000/api/detail/${id}`
+      );
       setDetailData(response.data);
     } catch (error) {
       console.error("Error fetching detail data:", error);
@@ -64,7 +71,9 @@ function Detail() {
 
   const fetchImages = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/images/${id}`);
+      const response = await axios.get(
+        `http://localhost:3000/api/images/${id}`
+      );
       setImages(response.data.images);
     } catch (error) {
       console.error("Error fetching images:", error);
@@ -73,37 +82,45 @@ function Detail() {
 
   const handleImageUpload = async (event) => {
     const formData = new FormData();
-    for (const file of event.target.files){
-      formData.append('images', file);
+    for (const file of event.target.files) {
+      formData.append("images", file);
     }
-  
+
     try {
-      const response = await axios.post(`http://localhost:3000/api/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        data: {
-          newsid: id
+      const response = await axios.post(
+        `http://localhost:3000/api/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          data: {
+            newsid: id,
+          },
         }
-      });
-  
+      );
+
       // Handle the response here
       console.log(response.data); // Log the response data
-      alert('Images uploaded successfully'); // Show an alert to the user
+      alert("Images uploaded successfully"); // Show an alert to the user
     } catch (error) {
       console.error("Error uploading images: ", error);
-      alert('An error occurred while uploading images'); // Show an alert to the user in case of error
+      alert("An error occurred while uploading images"); // Show an alert to the user in case of error
     }
   };
 
   const nextSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide === images.length - 1 ? 0 : prevSlide + 1));
+    setCurrentSlide((prevSlide) =>
+      prevSlide === images.length - 1 ? 0 : prevSlide + 1
+    );
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prevSlide) => (prevSlide === 0 ? images.length - 1 :prevSlide - 1));
+    setCurrentSlide((prevSlide) =>
+      prevSlide === 0 ? images.length - 1 : prevSlide - 1
+    );
   };
-  
+
   if (!detailData) {
     return <div>Loading...</div>; // Hiển thị thông báo loading trong quá trình lấy dữ liệu
   }
@@ -114,44 +131,56 @@ function Detail() {
         <Back />
         <Slogan />
       </div>
-      <div className="container_form" style={{ height: "100%" }}>
+      <div
+        className="container_form"
+        style={{ height: "100%", backgroundColor: "white" }}
+      >
         <div class="container-posts" /*style={{ border: "1px solid red" }}*/>
           <div
             class="left-part left-part-detail"
             style={{
-              width: "100%",
+              width: "600px",
               justifyContent: "center",
               alignItems: "center",
+              display: "block",
             }}
           >
-            <div className = "slideshow-container">
+            <div className="slideshow-container">
               <div className="black-bar left-bar"></div>
               <div className="black-bar right-bar"></div>
               {images.map((image, index) => (
                 <div
-                  key = {index}
-                  className = {index === currentSlide ? "slide active" : "slide"}
-                  style = {{ display: index === currentSlide ? "block" : "none"}}
+                  key={index}
+                  className={index === currentSlide ? "slide active" : "slide"}
+                  style={{ display: index === currentSlide ? "block" : "none" }}
                 >
                   <img
-                    src = {`http://localhost:3000/uploads/${image}`}
-                    alt = {`Image ${index + 1}`}
-                    style = {{ width: "100%", height: "380px", marginBottom: "10px"}}
+                    src={`http://localhost:3000/uploads/${image}`}
+                    alt={`Image ${index + 1}`}
+                    style={{
+                      width: "600px",
+                      height: "450px",
+                      marginBottom: "10px",
+                      borderRadius: "10px",
+                      overflow: "auto",
+                    }}
                   />
                 </div>
               ))}
               {images.length > 1 && (
                 <>
-                  <a className="prev" onClick={prevSlide}>&#10094;</a>
-                  <a className="next" onClick={nextSlide}>&#10095;</a>
+                  <a className="prev" onClick={prevSlide}>
+                    &#10094;
+                  </a>
+                  <a className="next" onClick={nextSlide}>
+                    &#10095;
+                  </a>
                 </>
               )}
             </div>
-          
+
             <div className="detail-title">
-              <p className="detail-title-text"
-                style={{color: "#E13427"}}
-                >
+              <p className="detail-title-text" style={{ color: "#E13427" }}>
                 {detailData.title}
               </p>
             </div>
@@ -163,7 +192,11 @@ function Detail() {
                   fontWeight: "1000",
                 }}
               >
-                {"Địa chỉ: " + detailData.specificaddress + ", " + detailData.district + ", TP.HCM"}
+                {"Địa chỉ: " +
+                  detailData.specificaddress +
+                  ", " +
+                  detailData.district +
+                  ", TP.HCM"}
               </span>
             </div>
             <div
@@ -184,7 +217,10 @@ function Detail() {
                   textAlign: "center",
                 }}
               >
-                <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: "10px" }} />
+                <FontAwesomeIcon
+                  icon={faMoneyBill1}
+                  style={{ marginRight: "10px" }}
+                />
                 {formatMoney(detailData.price)}/tháng
               </p>
               <p
@@ -198,7 +234,10 @@ function Detail() {
                   textAlign: "center",
                 }}
               >
-                <FontAwesomeIcon icon={faRulerCombined} style={{ marginRight: "3px", fontSize: "15px" }} />
+                <FontAwesomeIcon
+                  icon={faRulerCombined}
+                  style={{ marginRight: "3px", fontSize: "15px" }}
+                />
                 {detailData.acreage}m2
               </p>
               <p
@@ -212,43 +251,44 @@ function Detail() {
                   textAlign: "center",
                 }}
               >
-                <FontAwesomeIcon icon={faHashtag} style={{ marginRight: "1px", fontSize: "20px" }} />
+                <FontAwesomeIcon
+                  icon={faHashtag}
+                  style={{ marginRight: "1px", fontSize: "20px" }}
+                />
                 {detailData.newsid}
               </p>
             </div>
-            
-            
+
             <div>
               <p
                 style={{
-                fontSize: "25px",
-                fontWeight: "900",
-                margin: "5px",
-                padding: "5px",
-                // margin: "10px 0",
-                // borderRight: "2px solid red",
-              }}
-            >
+                  fontSize: "25px",
+                  fontWeight: "900",
+                  margin: "5px",
+                  padding: "5px",
+                  // margin: "10px 0",
+                  // borderRight: "2px solid red",
+                }}
+              >
                 Thông tin mô tả
               </p>
               <div
                 style={{
-                backgroundColor: "white",
-                textAlign: "left",
-                marginLeft: "18px",
-                display: "block",
-                alignItems: "center",
-                fontSize: "18px",
-                justifyContent: "flex-start",
-                margin: "10px 0",
-                whiteSpace: "pre-wrap",
+                  backgroundColor: "white",
+                  textAlign: "left",
+                  marginLeft: "18px",
+                  display: "block",
+                  alignItems: "center",
+                  fontSize: "18px",
+                  justifyContent: "flex-start",
+                  margin: "10px 0",
+                  whiteSpace: "pre-wrap",
                 }}
               >
                 <p style={{ fontWeight: "initial" }}>{detailData.describe}</p>
               </div>
             </div>
 
-            
             <div>
               <p
                 style={{
@@ -270,8 +310,7 @@ function Detail() {
                   justifyContent: "flex-start",
                   margin: "10px 0",
                 }}
-              > 
-              </div>
+              ></div>
               <div
                 style={{
                   backgroundColor: "white",
@@ -284,7 +323,7 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <span style={{ marginRight: "55px"}}>Mã tin : </span>
+                <span style={{ marginRight: "55px" }}>Mã tin : </span>
                 <p style={{ fontWeight: "initial" }}>{detailData.newsid}</p>
               </div>
 
@@ -300,8 +339,10 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <span style={{ marginRight: "25px"}}>Ngày đăng : </span>
-                <p style={{ fontWeight: "initial" }}>{formatDate(detailData.timestart)}</p>
+                <span style={{ marginRight: "25px" }}>Ngày đăng : </span>
+                <p style={{ fontWeight: "initial" }}>
+                  {formatDate(detailData.timestart)}
+                </p>
               </div>
               <div
                 style={{
@@ -315,8 +356,10 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <span style={{ marginRight: "7px"}}>Ngày hết hạn : </span>
-                <p style={{ fontWeight: "initial" }}>{formatDate(detailData.timeend)}</p>
+                <span style={{ marginRight: "7px" }}>Ngày hết hạn : </span>
+                <p style={{ fontWeight: "initial" }}>
+                  {formatDate(detailData.timeend)}
+                </p>
               </div>
             </div>
             <div>
@@ -336,7 +379,7 @@ function Detail() {
                 style={{
                   backgroundColor: "white",
                   textAlign: "left",
-                  marginLeft: "18px", 
+                  marginLeft: "18px",
                   display: "flex",
                   alignItems: "center",
                   fontSize: "18px",
@@ -344,7 +387,7 @@ function Detail() {
                   margin: "10px 0",
                 }}
               >
-                <span style={{ marginRight: "50px"}}>Liên lệ : </span>
+                <span style={{ marginRight: "50px" }}>Liên lệ : </span>
                 <p style={{ fontWeight: "initial" }}>{detailData.name}</p>
               </div>
               <div
@@ -363,11 +406,11 @@ function Detail() {
               </div>
             </div>
           </div>
-          <div class="right-part right-part-detail ">
+          <div style={{ height: "00px" }} class="right-part right-part-detail ">
             <div className="des">
               <img
-                style={{ with: "80px", height: "80px", marginTop: "50px" }}
-                src="https://tse4.mm.bing.net/th?id=OIP.XtlXmrujgxcWTyVw8iThMgHaE7&pid=Api&P=0&h=220"
+                style={{ width: "100px", height: "100px" }}
+                src="https://t4.ftcdn.net/jpg/03/49/49/79/360_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg"
               />
               <p
                 style={{
@@ -376,10 +419,8 @@ function Detail() {
                   fontWeight: 900,
                 }}
               ></p>
-              <button>
-                {detailData.name}
-              </button>
-              <button>
+              <button style={{ fontSize: "23px" }}>{detailData.name}</button>
+              <button style={{ fontSize: "25px" }}>
                 <FontAwesomeIcon
                   icon={faPhone}
                   style={{ marginRight: "10px" }}
