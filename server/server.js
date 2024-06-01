@@ -450,6 +450,23 @@ app.get("/api/get-posts", (req, res) => {
   });
 });
 
+
+// API Lấy các bài viết của người dùng từ USERID
+app.get("/api/get-posts-byUserid/:userid", (req, res) => {
+  const { userid } = req.params;
+  const sql = `SELECT * FROM NEWSLIST WHERE USERID = ?`;
+
+  connection.query(sql, [userid], (err, result) => {
+    if (err) {
+      console.error("Error fetching user posts:", err);
+      res.status(500).json({ error: "Error fetching user posts" });
+      return;
+    }
+
+    res.status(200).json(result);
+  });
+});
+
 // API lọc bài đăng theo Quận
 app.get("/api/search-posts-location", (req, res) => {
   const selectedDistrict = req.query.district;
@@ -806,35 +823,30 @@ app.get("/api/admin-info/:email", (req, res) => {
   });
 });
 
-// API cập nhật thông tin quản trị viên
-app.put("/api/admin-info/:id", (req, res) => {
-  const adminId = req.params.id;
-  const { name, sex, dob, phone, email, address } = req.body;
+// API lấy thông tin quản trị viên bằng id
+app.get("/api/get-adminInfo-byId/:adminId", (req, res) => {
+  const adminId = req.params.adminId; // Đổi từ req.params.id thành req.params.adminId để lấy đúng adminId
+  const query = "SELECT * FROM admininfo WHERE ADMINID = ?";
 
-  const query = `
-    UPDATE admininfo SET
-      name = ?,
-      sex = ?,
-      dob = ?,
-      phone = ?,
-      email = ?,
-      address = ?
-    WHERE id = ?
-  `;
-
-  connection.query(
-    query,
-    [name, sex, dob, phone, email, address, adminId],
-    (err, results) => {
-      if (err) {
-        console.error("Error updating admin data:", err);
-        res.status(500).json({ message: "Internal server error" });
-        return;
-      }
-      res.status(200).json({ message: "User updated successfully" });
+  connection.query(query, [adminId], (err, results) => {
+    if (err) {
+      console.error("Error fetching admin data:", err);
+      res.status(500).json({ message: "Internal server error" });
+      return;
     }
-  );
+
+    if (results.length === 0) {
+      res.status(404).json({ message: "Admin not found" });
+      return;
+    }
+
+    const adminInfo = results[0]; // Lấy thông tin của admin đầu tiên (do adminId là duy nhất)
+
+    // Gửi thông tin của admin về client
+    res.status(200).json(adminInfo);
+  });
 });
+
 
 // API lấy danh sách userID
 app.get("/api/get-list-userID", (req, res) => {
@@ -1160,6 +1172,22 @@ app.get("/api/payment/:paymentId", (req, res) => {
 });
 const util = require("util");
 const query = util.promisify(connection.query).bind(connection);
+
+// API lấy thông tin thanh toán dựa trên NEWSID
+app.get("/api/get-payment-byNewsid/:newsid", (req, res) => {
+  const { newsid } = req.params;
+  const sql = `SELECT * FROM payment WHERE NEWSID = ?`;
+
+  connection.query(sql, [newsid], (err, result) => {
+    if (err) {
+      console.error("Error fetching payment info:", err);
+      res.status(500).json({ error: "Error fetching payment info" });
+      return;
+    }
+
+    res.status(200).json(result);
+  });
+});
 
 // API PUT để cập nhật trạng thái và ADMINID trong bảng payment
 app.put("/api/update-paymentState/:PAYID", async (req, res) => {

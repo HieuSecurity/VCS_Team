@@ -54,8 +54,8 @@ const PostTable = () => {
         );
       case "Thành công":
         return <FontAwesomeIcon icon={faCheck} title="Đã duyệt" style={{ color: "green" }} />;
-      case "Đã hủy":
-        return <FontAwesomeIcon icon={faTimes} title="Đã hủy" style={{ color: "red" }} />;
+      case "Không thành công":
+        return <FontAwesomeIcon icon={faTimes} title="Không thành công" style={{ color: "red" }} />;
       default:
         return null;
     }
@@ -124,7 +124,7 @@ const PostTable = () => {
     try {
       // Update payment state
       await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
-        state: "Đã hủy",
+        state: "Không thành công",
         ADMINEMAIL: adminEmail,
       });
 

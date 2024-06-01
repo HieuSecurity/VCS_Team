@@ -159,7 +159,7 @@ function Main() {
               />
             </div>
             <div className="form-group">
-              <label>Ngày Sinh (yyyy/mm/dd):</label>
+              <label>Ngày Sinh (mm/dd/yyyy):</label>
               <input
                 type="date"
                 name="DOB"
