@@ -12,13 +12,15 @@ const { format, parseISO } = require('date-fns-tz'); // Import format và parseI
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
+
+  
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 
@@ -46,10 +48,6 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-// // API to upload an image
-// app.post("/upload",upload.single("image"), (req, res) => {
-//   res.json({ message: "Image uploaded successfully" });
-// });
 
 // API to get an image
 app.get("/image/:filename", (req, res) => {
@@ -58,27 +56,172 @@ app.get("/image/:filename", (req, res) => {
   res.sendFile(imagePath);
 });
 
-// route to handle multiple image upload
-app.post("/api/upload", upload.array("images", 5), (req, res) => {
-  const images = req.files;
 
+app.post("/api/create-post", upload.array("images", 5), (req, res) => {
+  const { title, timestart, describe, price, acreage, address, district, postDuration } = req.body;
+  const images = req.files; // Get the list of uploaded images from req.files
+  const USERID_temp = 4;
+  const state = 'Chờ duyệt';
+
+  connection.beginTransaction((err) => {
+    if (err) {
+      console.error("Error starting transaction", err);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    // lấy IDDISTRICT từ database tương ứng với option người dùng chọn
+    const getDistrictQuery = 'SELECT IDDISTRICT FROM hcmdistrict WHERE DISTRICT = ?';
+    connection.query(getDistrictQuery, [district], (error, districtResults) => {
+      if (error) {
+        console.error("Error querying district:", error);
+        return connection.rollback(() => {
+          res.status(500).json({ message: "Internal server error" });
+        });
+      }
+
+      if (districtResults.length === 0) {
+        return connection.rollback(() => {
+          res.status(400).json({ message: "District not found" });
+        });
+      }
+
+      const IDDISTRICT = districtResults[0].IDDISTRICT;
+
+      // Insert post details into newslist table
+      const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)';
+      connection.query(insertNewslistQuery, [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration], (error, newslistResults) => {
+        if (error) {
+          return connection.rollback(() => {
+            console.error("Error executing INSERT into newslist", error);
+            res.status(500).json({ message: "Internal server error" });
+          });
+        }
+
+        const newslistId = newslistResults.insertId;
+
+        // Insert post details into newsdetail table
+        const insertNewsdetailQuery = 'INSERT INTO newsdetail (newsid, specificaddress, `describe` ) VALUES (?, ?, ?)';
+        connection.query(insertNewsdetailQuery, [newslistId ,address, describe], (error, newsdetailResults) => {
+          if (error) {
+            return connection.rollback(() => {
+              console.error("Error executing INSERT into newsdetail", error);
+              res.status(500).json({ message: "Internal server error" });
+            });
+          }
+
+          if (!images || images.length === 0) {
+            // No images uploaded
+            connection.commit((err) => {
+              if (err) {
+                return connection.rollback(() => {
+                  console.error("Error committing transaction", err);
+                  res.status(500).json({ message: "Internal server error" });
+                });
+              }
+
+              res.status(200).json({
+                message: "Post created successfully",
+                postId: newslistId,
+              });
+            });
+          } else {
+            // Images uploaded, insert them into the database
+            const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
+            const promises = images.map((image) => {
+              const imageUrl = image.filename;
+              return new Promise((resolve, reject) => {
+                connection.query(insertImageQuery, [newslistId, imageUrl], (error, imageResults) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve();
+                  }
+                });
+              });
+            });
+
+            Promise.all(promises)
+              .then(() => {
+                connection.commit((err) => {
+                  if (err) {
+                    return connection.rollback(() => {
+                      console.error("Error committing transaction", err);
+                      res.status(500).json({ message: "Internal server error" });
+                    });
+                  }
+
+                  res.status(200).json({
+                    message: "Post created successfully",
+                    postId: newslistId,
+                  });
+                });
+              })
+              .catch((error) => {
+                return connection.rollback(() => {
+                  console.error("Error executing INSERT into image", error);
+                  res.status(500).json({ message: "Internal server error" });
+                });
+              });
+          }
+        });
+      });
+    });
+  });
+});
+
+app.get('/api/images/:newsid', (req, res) => {
+  const newsid = req.params.newsid;
+  const query = "SELECT IMAGE FROM image WHERE NEWSID = ?";
+
+  connection.query(query, [newsid], (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: 'Error fetching images', error });
+    }
+
+    const imagePaths = results.map(row => row.IMAGE);
+    res.status(200).json({ images: imagePaths });
+  });
+});
+
+app.post("/api/upload", upload.array("images", 10), async (req, res) => {
+  const images = req.files;
   // Check if any file is uploaded
   if (!images || images.length === 0) {
     return res.status(400).json({ message: "No images uploaded" });
   }
 
-  // Multer to Insert each image into the database
-  images.forEach((image) => {
-    const insertQuery = "INSERT INTO image (NEWID, IMAGE) VALUES (?, ?)";
-    connection.query(insertQuery, [req.body.newsid, image.filename], (error, results) => {
-      if (error) {
-        console.error("Error inserting image:", error);
-        return res.status(500).json({ message: "Internal server error" });
-      }
+  try {
+    // Use a promise-based approach to handle database insertions
+    const insertPromises = images.map((image) => {
+      const insertQuery = "INSERT INTO image (NEWID, IMAGE) VALUES (?, ?)";
+      return new Promise((resolve, reject) => {
+        connection.query(insertQuery, [req.body.newsid, image.filename], (error, results) => {
+          if (error) {
+            console.error("Error inserting image:", error);
+            reject(error);
+          } else {
+            resolve(results);
+          }
+        });
+      });
     });
-  });
 
-  res.status(200).json({ message: "Images uploaded successfully" });
+    // Wait for all insertions to complete
+    await Promise.all(insertPromises);
+
+    const fileInfos = images.map(image => ({
+      filename: image.filename,
+      path: image.path
+    }));
+
+    // Send response after all insertions are successful
+    res.status(200).json({
+      message: 'Images uploaded and inserted successfully.',
+      files: fileInfos
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred during the upload and insert.', error });
+  }
 });
 
 
@@ -122,108 +265,6 @@ app.get("/api/get-pricelist", (req, res) => {
   });
 });
 
-
-app.post("/api/create-post", upload.array("images", 5), (req, res) => {
-  const { title, timestart, describe, price, acreage, address, district, postDuration } = req.body;
-  //const imageUrl = req.file ? req.file.filename : null;
-  const images = req.files; // lấy danh sách các hình ảnh từ req.files
-
-  const USERID_temp = 4;
-  const state = 'Chờ duyệt';
-
-  connection.beginTransaction((err) => {
-    if (err) {
-      console.error("Error starting transaction", err);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-
-    // Truy vấn để lấy IDDISTRICT từ cơ sở dữ liệu
-    const getDistrictQuery = 'SELECT IDDISTRICT FROM hcmdistrict WHERE DISTRICT = ?';
-    connection.query(getDistrictQuery, [district], (error, districtResults) => {
-      if (error) {
-        console.error("Error querying district:", error);
-        return connection.rollback(() => {
-          res.status(500).json({ message: "Internal server error" });
-        });
-      }
-
-      if (districtResults.length === 0) {
-        return connection.rollback(() => {
-          res.status(400).json({ message: "District not found" });
-        });
-      }
-
-      const IDDISTRICT = districtResults[0].IDDISTRICT;
-
-      const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)';
-      connection.query(insertNewslistQuery, [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration], (error, newslistResults) => {
-        if (error) {
-          return connection.rollback(() => {
-            console.error("Error executing INSERT into newslist", error);
-            res.status(500).json({ message: "Internal server error" });
-          });
-        }
-
-        const newslistId = newslistResults.insertId;
-
-        const insertNewsdetailQuery = 'INSERT INTO newsdetail (newsid, specificaddress, `describe` ) VALUES (?, ?, ?)';
-        connection.query(insertNewsdetailQuery, [newslistId ,address, describe], (error, newsdetailResults) => {
-          if (error) {
-            return connection.rollback(() => {
-              console.error("Error executing INSERT into newsdetail", error);
-              res.status(500).json({ message: "Internal server error" });
-            });
-          }
-
-
-          if (images && images.length > 0) {
-            images.forEach((image) => {
-              const imageUrl = image.filename;
-              const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
-              connection.query(insertImageQuery, [newslistId, imageUrl], (error, imageResults) => {
-              if (error) {
-                return connection.rollback(() => {
-                  console.error("Error executing INSERT into image", error);
-                  res.status(500).json({ message: "Internal server error" });
-                });
-              }
-
-              connection.commit((err) => {
-                if (err) {
-                  return connection.rollback(() => {
-                    console.error("Error committing transaction", err);
-                    res.status(500).json({ message: "Internal server error" });
-                  });
-                }
-
-                res.status(200).json({
-                  message: "Post created successfully",
-                  postId: newslistId,
-                });
-              });
-            });
-            })
-          } else {
-            connection.commit((err) => {
-              if (err) {
-                return connection.rollback(() => {
-                  console.error("Error committing transaction", err);
-                  res.status(500).json({ message: "Internal server error" });
-                });
-              }
-
-              res.status(200).json({
-                message: "Post created successfully",
-                postId: newslistId,
-              });
-            });
-          }
-        });
-      });
-    });
-  });
-});
-
 // API cập nhật trạng thái bài viết
 app.post('/api/update-newsState', (req, res) => {
   const { newsid, state } = req.body;
@@ -255,40 +296,13 @@ app.get('/api/hcmdistrict', (req, res) => {
   });
 });
 
-app.get("/api/posts", (req, res) => {
-  // Thực hiện truy vấn SELECT để lấy tất cả bài đăng kèm thông tin người dùng từ bảng userinfo
-  const selectQuery = `
-  SELECT 
-      newslist.userid,
-      newslist.newsid,
-      newslist.title,
-      newsdetail.describe,
-      newslist.price,
-      newslist.state,
-      newslist.acreage,
-      newslist.address,
-      newslist.postduration,
-      hcmdistrict.district,
-      image.image,
-      newsdetail.timestart,
-      newsdetail.timeend,
-      userinfo.phone,
-      userinfo.name,
-      userinfo.avatar
-    FROM 
-      newslist
-    LEFT JOIN 
-      newsdetail ON newslist.newsid = newsdetail.newsid
-    LEFT JOIN 
-      userinfo ON newslist.userid = userinfo.userid
-    LEFT JOIN 
-      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
-    LEFT JOIN 
-      image ON newslist.newsid = image.newsid
-  `;
+// API lấy thông tin bài viết
+app.get("/api/get-posts", (req, res) => {
+  // Thực hiện truy vấn SELECT để lấy tất cả bài đăng từ bảng NEWSLIST
+  const selectNewslistQuery = "SELECT * FROM NEWSLIST";
 
   // Thực hiện truy vấn COUNT để tính tổng số bài đăng
-  const countQuery = `SELECT COUNT(*) AS total FROM newslist`;
+  const countQuery = `SELECT COUNT(*) AS total FROM NEWSLIST`;
 
   // Thực hiện truy vấn để lấy số lượng kết quả
   connection.query(countQuery, (error, countResult) => {
@@ -300,65 +314,180 @@ app.get("/api/posts", (req, res) => {
     const total = countResult[0].total; // Lấy tổng số kết quả từ kết quả truy vấn COUNT
 
     // Thực hiện truy vấn SELECT để lấy danh sách bài đăng
-    connection.query(selectQuery, (error, results) => {
+    connection.query(selectNewslistQuery, async (error, newslistResults) => {
       if (error) {
-        console.error("Error executing SELECT query 158", error);
+        console.error("Error executing SELECT query", error);
         return res.status(500).json({ message: "Internal server error" });
       }
 
-      // Trả về dữ liệu và số lượng bài đăng
-      res.status(200).json({ results, total });
+      try {
+        // Duyệt qua từng bài đăng để thực hiện các truy vấn phụ
+        const posts = await Promise.all(
+          newslistResults.map(async (news) => {
+            const newsid = news.NEWSID;
+            const userId = news.USERID;
+            const districtId = news.ADDRESS;
+
+            // Truy vấn chi tiết bài đăng từ NEWSDETAIL
+            const newsDetail = await new Promise((resolve, reject) => {
+              connection.query("SELECT * FROM NEWSDETAIL WHERE NEWSID = ?", [newsid], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
+              });
+            });
+
+            // Truy vấn tên quận từ HCMDISTRICT
+            const district = await new Promise((resolve, reject) => {
+              connection.query("SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?", [districtId], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0].DISTRICT);
+                }
+              });
+            });
+
+            // Truy vấn thông tin người dùng từ USERINFO
+            const userInfo = await new Promise((resolve, reject) => {
+              connection.query("SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?", [userId], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
+              });
+            });
+
+            // Truy vấn hình ảnh từ bảng IMAGE
+            const image = await new Promise((resolve, reject) => {
+              connection.query("SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1", [newsid], (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0] ? results[0].IMAGE : null);
+                }
+              });
+            });
+
+            // Kết hợp các thông tin lại thành một đối tượng
+            return {
+              ...news,
+              ...newsDetail,
+              district,
+              ...userInfo,
+              image, // Thêm đường dẫn hình ảnh
+            };
+          })
+        );
+
+        // Trả về dữ liệu và số lượng bài đăng
+        res.status(200).json({ results: posts, total });
+      } catch (error) {
+        console.error("Error executing subqueries", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
     });
   });
 });
-app.get("/api/search-by-location", (req, res) => {
+
+// API lọc bài đăng theo Quận
+app.get("/api/search-posts-location", (req, res) => {
   const selectedDistrict = req.query.district;
 
-  // Thực hiện truy vấn SELECT từ cơ sở dữ liệu với điều kiện là selectedDistrict
-  const selectQuery = `
-    SELECT 
-      newslist.userid,
-      newslist.newsid,
-      newslist.title,
-      newsdetail.describe,
-      newslist.price,
-      newslist.acreage,
-      newslist.address,
-      hcmdistrict.district,
-      image.image,
-      newsdetail.timestart,
-      newsdetail.timeend,
-      userinfo.phone,
-      userinfo.name,
-      userinfo.avatar
+  // Truy vấn SELECT từ NEWSLIST với điều kiện Quận
+  const selectNewslistQuery = `
+    SELECT NEWSID, USERID, TITLE, PRICE, ACREAGE, ADDRESS
     FROM 
-      newslist
-    LEFT JOIN 
-      newsdetail ON newslist.newsid = newsdetail.newsid
-    LEFT JOIN 
-      userinfo ON newslist.userid = userinfo.userid
-    LEFT JOIN 
-      hcmdistrict ON newslist.address = hcmdistrict.iddistrict
-    LEFT JOIN 
-      image ON newslist.newsid = image.newsid
-    WHERE
-      hcmdistrict.district LIKE '%${selectedDistrict}%'
+      NEWSLIST
+    WHERE 
+      ADDRESS IN (SELECT IDDISTRICT FROM HCMDISTRICT WHERE DISTRICT LIKE '%${selectedDistrict}%')
   `;
 
-  // Thực hiện truy vấn SELECT để lấy dữ liệu dựa trên giá trị Quận
-  connection.query(selectQuery, (error, results) => {
+  // Thực hiện truy vấn SELECT để lấy danh sách bài đăng với điều kiện Quận
+  connection.query(selectNewslistQuery, async (error, newslistResults) => {
     if (error) {
       console.error("Error executing SELECT query", error);
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // Lấy số lượng kết quả
-    const totalResults = results.length;
+    try {
+      // Duyệt qua từng bài đăng để thực hiện các truy vấn phụ
+      const posts = await Promise.all(
+        newslistResults.map(async (news) => {
+          const newsid = news.NEWSID;
+          const userId = news.USERID;
+          const districtId = news.ADDRESS;
 
-    // Trả về dữ liệu và số lượng kết quả
-    res.status(200).json({ results, total: totalResults });
+          // Truy vấn chi tiết bài đăng từ NEWSDETAIL
+          const newsDetail = await new Promise((resolve, reject) => {
+            connection.query("SELECT * FROM NEWSDETAIL WHERE NEWSID = ?", [newsid], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0]);
+              }
+            });
+          });
+
+          // Truy vấn tên quận từ HCMDISTRICT
+          const district = await new Promise((resolve, reject) => {
+            connection.query("SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?", [districtId], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0].DISTRICT);
+              }
+            });
+          });
+
+          // Truy vấn thông tin người dùng từ USERINFO
+          const userInfo = await new Promise((resolve, reject) => {
+            connection.query("SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?", [userId], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0]);
+              }
+            });
+          });
+
+          // Truy vấn hình ảnh từ bảng IMAGE
+          const image = await new Promise((resolve, reject) => {
+            connection.query("SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1", [newsid], (error, results) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(results[0] ? results[0].IMAGE : null);
+              }
+            });
+          });
+
+          // Kết hợp các thông tin lại thành một đối tượng
+          return {
+            ...news,
+            ...newsDetail,
+            district,
+            ...userInfo,
+            image, // Thêm đường dẫn hình ảnh
+          };
+        })
+      );
+
+      // Lấy số lượng bài đăng
+      const total = posts.length;
+
+      // Trả về dữ liệu và số lượng bài đăng
+      res.status(200).json({ results: posts, total });
+    } catch (error) {
+      console.error("Error executing subqueries", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 });
+
 
 // API /api/latest-posts
 app.get("/api/latest-posts", (req, res) => {

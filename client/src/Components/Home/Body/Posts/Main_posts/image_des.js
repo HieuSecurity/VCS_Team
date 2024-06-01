@@ -21,9 +21,7 @@ function Image_des() {
     // Hàm gọi API khi component được render
     fetchData();
   }, []);
-  // useEffect(() => {
-  //   fetchData(selectedDistrict); // Khởi tạo dữ liệu với giá trị Quận mặc định
-  // }, [selectedDistrict]); // Sử dụng selectedDistrict trong dependency array để fetchData được gọi lại khi giá trị thay đổi
+
   // Hàm để gọi API
   const handleSortByChange = (type) => {
     setSortBy(type);
@@ -35,12 +33,14 @@ function Image_des() {
       fetchLatestPosts();
     }
   };
+
   const formatDate = (dateString) => {
     return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
   };
+
   const fetchData = () => {
     axios
-      .get("http://localhost:3000/api/posts")
+      .get("http://localhost:3000/api/get-posts")
       .then((response) => {
         // Lưu trữ dữ liệu vào state
         setData({ results: response.data.results, total: response.data.total });
@@ -49,6 +49,7 @@ function Image_des() {
         console.error("Error fetching data:", error);
       });
   };
+
   const [showScrollButton, setShowScrollButton] = useState(false);
   useEffect(() => {
     const handleScrollTop = () => {
@@ -65,6 +66,7 @@ function Image_des() {
       window.removeEventListener("scroll", handleScrollTop);
     };
   }, []);
+
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -96,12 +98,13 @@ function Image_des() {
       return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Định dạng lại số tiền với dấu phẩy ngăn cách hàng nghìn
     }
   };
+
   const handleSearch = (selectedDistrict) => {
     setSelectedDistrict(selectedDistrict);
-    if (selectedDistrict == "all") {
+    if (selectedDistrict === "all") {
       axios
         .get(
-          `http://localhost:3000/api/posts`
+          `http://localhost:3000/api/get-posts`
         )
         .then((response) => {
           setData(response.data);
@@ -113,7 +116,7 @@ function Image_des() {
     } else if (selectedDistrict) {
       axios
         .get(
-          `http://localhost:3000/api/search-by-location?district=${selectedDistrict}`
+          `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
         )
         .then((response) => {
           setData(response.data);
@@ -126,6 +129,7 @@ function Image_des() {
       
     }
   };
+
   return (
     <div className="container_form" style={{ height: "100%" }}>
       <Search onSearch={handleSearch} />
@@ -168,15 +172,15 @@ function Image_des() {
 
       {data.results.map((item) => (
         <Link
-          key={item.newsid}
+          key={item.NEWSID}
           style={{ textDecoration: "none", color: "black" }}
           to={{
-            pathname: `/detail/${item.newsid}`,
+            pathname: `/detail/${item.NEWSID}`,
             state: { selectedItem: item }, // Truyền dữ liệu của thẻ qua trang chi tiết
           }}
         >
           <div
-            class="container-posts"
+            className="container-posts"
             style={{
               border: "5px solid #ccc",
               margin: "30px 0",
@@ -184,7 +188,7 @@ function Image_des() {
             }}
           >
             <div
-              class="left-part"
+              className="left-part"
               style={{
                 flex: 2,
                 width: "100%",
@@ -198,12 +202,12 @@ function Image_des() {
                   width: "100%",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: "380px",
+                  height: "600px",
                 }}
               />
             </div>
             <div
-              class="right-part "
+              className="right-part"
               style={{
                 textAlign: "left",
                 flex: 3,
@@ -212,7 +216,7 @@ function Image_des() {
             >
               <div style={{ padding: "5px", margin: "5px" }}>
                 <p style={{ color: "#E13427", fontSize: "28px" }}>
-                  {item.title}
+                  {item.TITLE}
                 </p>
 
                 <div
@@ -226,11 +230,11 @@ function Image_des() {
                   }}
                 >
                   <li className="price" style={{ color: "#16c784" }}>
-                    {formatMoney(item.price)} đồng/tháng
+                    {formatMoney(item.PRICE)} đồng/tháng
                     {/* Chuyển đổi số tiền thành dạng tiền tệ Việt Nam */}
                   </li>
-                  <li className="area">{item.acreage} m2</li>
-                  <li className="location">{item.district} </li>
+                  <li className="acreage">{item.ACREAGE} m2</li>
+                  <li className="district">{item.district}</li>
                 </div>
                 <span
                   style={{
@@ -276,7 +280,7 @@ function Image_des() {
                       color: "#f83859",
                     }}
                   >
-                    {item.name}
+                    {item.NAME}
                   </span>
                   <span
                     style={{
@@ -286,7 +290,7 @@ function Image_des() {
                       marginLeft: "50px",
                     }}
                   >
-                    {formatDate(item.timestart)}
+                    {formatDate(item.TIMESTART)}
                   </span>
                 </div>
               </div>
@@ -295,19 +299,6 @@ function Image_des() {
         </Link>
       ))}
 
-      {/* <div className="page">
-        <span className="separator"></span>
-        <ul className="pagination">
-          <li>Trang trước</li>
-
-          <li>1</li>
-          <li>2</li>
-          <li>3</li>
-          <li>...</li>
-          <li>Trang sau</li>
-        </ul>
-        <span className="separator"></span>
-      </div> */}
       {showScrollButton && (
         <button id="scroll-top-btn" onClick={handleScrollTop}>
           <FontAwesomeIcon icon={faArrowAltCircleUp} />

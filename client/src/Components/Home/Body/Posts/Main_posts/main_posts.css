@@ -21,8 +21,8 @@ span {
 /* CSS */
 
 .price,
-.area,
-.location {
+.acreage,
+.district {
   position: relative; /* Tạo ngữ cảnh cho pseudo-element */
   padding: 0 10px; /* Tùy chỉnh khoảng cách giữa các phần tử */
 }
@@ -117,7 +117,7 @@ p {
 }
 /* CSS */
 .price,
-.area {
+.acreage {
   border-right: 2px solid red; /* Thêm border bên phải */
   padding-right: 10px; /* Tăng khoảng cách giữa nội dung và border */
 }
