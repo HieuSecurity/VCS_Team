@@ -6,9 +6,13 @@ import { StateContext } from "../MyProvider"; // Import context từ MyProvider
 function Main() {
   const [showModal, setShowModal] = useState(false);
   const { state, setState } = useContext(StateContext); // Sử dụng context từ MyProvider
+
   const handleLogout = () => {
+    // Xóa dữ liệu từ localStorage khi đăng xuất
+    localStorage.removeItem("loggedIn");
     setState(false);
   };
+
   const showUserForm = () => {
     setShowModal(true);
     document.body.classList.add("modal-active"); // Thêm class để ngăn cuộn trang khi modal hiển thị

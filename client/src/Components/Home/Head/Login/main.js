@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import "./login.css"; // Import CSS file for styling
 import Back from "../../../Back/back";
@@ -16,6 +16,14 @@ const Main = () => {
   });
 
   const [error, setError] = useState(""); // State để lưu trạng thái thông báo lỗi
+
+  useEffect(() => {
+    // Kiểm tra xem người dùng đã đăng nhập trước đó chưa
+    const loggedIn = JSON.parse(localStorage.getItem("loggedIn"));
+    if (loggedIn) {
+      setState(true); // Nếu đã đăng nhập, set state thành true
+    }
+  }, []);
 
   // Xử lý sự kiện khi người dùng thay đổi giá trị trong các trường input
   const handleChange = (e) => {
@@ -43,12 +51,13 @@ const Main = () => {
 
         // Lưu thông tin người dùng vào localStorage
         localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("loggedIn", JSON.stringify(true)); // Lưu trạng thái đăng nhập
 
         if (ROLE === 1) {
           history("/admin/info");
           alert("Xin chào Admin!!!");
         } else {
-          setState(true);
+          setState(true); // Set state thành true
           alert("Đăng nhập thành công!!!");
           history("/");
         }
