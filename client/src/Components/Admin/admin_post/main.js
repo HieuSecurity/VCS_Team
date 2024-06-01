@@ -128,7 +128,6 @@ const PostTable = () => {
         alert("Đã xảy ra lỗi. Vui lòng thử lại.");
       });
   };
-  
 
   return (
     <div className="table-container">
@@ -193,7 +192,7 @@ const PostTable = () => {
           {posts.allPosts.map((post) => (
             <tr key={post.NEWSID}>
               <td>{post.NEWSID}</td>
-              <td>{post.district  }</td>
+              <td>{post.district}</td>
               <td>{post.TITLE}</td>
               <td>{post.NAME}</td>
               <td>{post.POSTDURATION} ngày</td>
@@ -202,12 +201,14 @@ const PostTable = () => {
                 <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>
                   Chi tiết
                 </Link>
-                <FontAwesomeIcon
-                  icon={faTrashAlt}
-                  className="action-icon delete-icon"
-                  title="Xóa"
-                  onClick={() => handleDelete(post.NEWSID)}
-                />
+                {post.STATE === "Hoạt động" && (
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                  />
+                )}
               </td>
             </tr>
           ))}
