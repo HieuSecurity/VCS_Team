@@ -110,7 +110,9 @@ const Main = () => {
             />
           </div>
           <div className="button-group">
-            <button type="submit">Đăng nhập</button>
+            <button style={{ fontSize: "18px" }} type="submit">
+              Đăng nhập
+            </button>
             <div className="login-links" style={{ marginTop: "30px" }}>
               <Link to="/signup">Đăng ký</Link>
               <span> | </span>
