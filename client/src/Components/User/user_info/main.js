@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, isBefore, subYears } from "date-fns";
 import "./info.css";
 
 function Main() {
@@ -65,6 +65,12 @@ function Main() {
       return;
     }
 
+    // Kiểm tra ngày sinh có đủ 16 tuổi chưa
+    if (!isOldEnough(editedUser.DOB)) {
+      alert("Trang web dành cho người từ đủ 16 tuổi. Vui lòng quay lại sau!");
+      return;
+    }
+
     // Gửi dữ liệu chỉnh sửa lên server
     axios
       .put(
@@ -94,6 +100,12 @@ function Main() {
     // Ví dụ đơn giản: Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0
     const phonePattern = /^0\d{9}$/;
     return phonePattern.test(phoneNumber);
+  };
+
+  const isOldEnough = (dob) => {
+    const birthDate = parseISO(dob);
+    const sixteenYearsAgo = subYears(new Date(), 16);
+    return isBefore(birthDate, sixteenYearsAgo);
   };
 
   const formatDate = (dateString) => {
@@ -159,7 +171,7 @@ function Main() {
               />
             </div>
             <div className="form-group">
-              <label>Ngày Sinh (mm/dd/yyyy):</label>
+              <label>Ngày Sinh:</label>
               <input
                 type="date"
                 name="DOB"
@@ -169,12 +181,15 @@ function Main() {
             </div>
             <div className="form-group">
               <label>Giới Tính:</label>
-              <input
-                type="text"
+              <select className="select-gender"
                 name="SEX"
                 value={editingUser.SEX}
                 onChange={handleChange}
-              />
+              >
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+              </select>
             </div>
             <div className="form-group">
               <label>Số Điện Thoại:</label>
