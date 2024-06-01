@@ -14,8 +14,6 @@ function Image_des() {
   const [selectedDistrict, setSelectedDistrict] = useState(""); // Thêm state để lưu trữ giá trị Quận được chọn
 
   // Trạng thái của loại sắp xếp
-  console.log(selectedDistrict);
-  console.log(data);
 
   useEffect(() => {
     // Hàm gọi API khi component được render
@@ -35,7 +33,7 @@ function Image_des() {
   };
 
   const formatDate = (dateString) => {
-    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
+    return dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
   };
 
   const fetchData = () => {
@@ -103,9 +101,7 @@ function Image_des() {
     setSelectedDistrict(selectedDistrict);
     if (selectedDistrict === "all") {
       axios
-        .get(
-          `http://localhost:3000/api/get-posts`
-        )
+        .get(`http://localhost:3000/api/get-posts`)
         .then((response) => {
           setData(response.data);
           setSortBy("default");
@@ -126,7 +122,6 @@ function Image_des() {
           console.error("Error fetching data:", error);
         });
     } else {
-      
     }
   };
 

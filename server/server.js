@@ -1,29 +1,26 @@
 const express = require("express");
-const session = require('express-session')
+const session = require("express-session");
 const cors = require("cors");
 const mysql = require("mysql");
 const { check, validationResult } = require("express-validator");
 const multer = require("multer");
 const path = require("path");
 const { start } = require("repl");
-const app = express();  
+const app = express();
 const PORT = process.env.PORT || 3000;
-const { format, parseISO } = require('date-fns-tz'); // Import format và parseISO từ date-fns-tz
+const { format, parseISO } = require("date-fns-tz"); // Import format và parseISO từ date-fns-tz
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-  
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
-
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -35,7 +32,11 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype ==="image/jpg ") {
+  if (
+    file.mimetype === "image/jpeg" ||
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg "
+  ) {
     cb(null, true);
   } else {
     cb(new Error("Unsupported file"), false);
@@ -44,10 +45,9 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024  }, // 10 MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
   fileFilter: fileFilter,
 });
-
 
 // API to get an image
 app.get("/image/:filename", (req, res) => {
@@ -56,12 +56,20 @@ app.get("/image/:filename", (req, res) => {
   res.sendFile(imagePath);
 });
 
-
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
-  const { title, timestart, describe, price, acreage, address, district, postDuration } = req.body;
+  const {
+    title,
+    timestart,
+    describe,
+    price,
+    acreage,
+    address,
+    district,
+    postDuration,
+  } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const USERID_temp = 4;
-  const state = 'Chờ duyệt';
+  const state = "Chờ duyệt";
 
   connection.beginTransaction((err) => {
     if (err) {
@@ -70,7 +78,8 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
     }
 
     // lấy IDDISTRICT từ database tương ứng với option người dùng chọn
-    const getDistrictQuery = 'SELECT IDDISTRICT FROM hcmdistrict WHERE DISTRICT = ?';
+    const getDistrictQuery =
+      "SELECT IDDISTRICT FROM hcmdistrict WHERE DISTRICT = ?";
     connection.query(getDistrictQuery, [district], (error, districtResults) => {
       if (error) {
         console.error("Error querying district:", error);
@@ -88,65 +97,47 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
       const IDDISTRICT = districtResults[0].IDDISTRICT;
 
       // Insert post details into newslist table
-      const insertNewslistQuery = 'INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)';
-      connection.query(insertNewslistQuery, [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration], (error, newslistResults) => {
-        if (error) {
-          return connection.rollback(() => {
-            console.error("Error executing INSERT into newslist", error);
-            res.status(500).json({ message: "Internal server error" });
-          });
-        }
-
-        const newslistId = newslistResults.insertId;
-
-        // Insert post details into newsdetail table
-        const insertNewsdetailQuery = 'INSERT INTO newsdetail (newsid, specificaddress, `describe` ) VALUES (?, ?, ?)';
-        connection.query(insertNewsdetailQuery, [newslistId ,address, describe], (error, newsdetailResults) => {
+      const insertNewslistQuery =
+        "INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      connection.query(
+        insertNewslistQuery,
+        [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration],
+        (error, newslistResults) => {
           if (error) {
             return connection.rollback(() => {
-              console.error("Error executing INSERT into newsdetail", error);
+              console.error("Error executing INSERT into newslist", error);
               res.status(500).json({ message: "Internal server error" });
             });
           }
 
-          if (!images || images.length === 0) {
-            // No images uploaded
-            connection.commit((err) => {
-              if (err) {
+          const newslistId = newslistResults.insertId;
+
+          // Insert post details into newsdetail table
+          const insertNewsdetailQuery =
+            "INSERT INTO newsdetail (newsid, specificaddress, `describe` ) VALUES (?, ?, ?)";
+          connection.query(
+            insertNewsdetailQuery,
+            [newslistId, address, describe],
+            (error, newsdetailResults) => {
+              if (error) {
                 return connection.rollback(() => {
-                  console.error("Error committing transaction", err);
+                  console.error(
+                    "Error executing INSERT into newsdetail",
+                    error
+                  );
                   res.status(500).json({ message: "Internal server error" });
                 });
               }
 
-              res.status(200).json({
-                message: "Post created successfully",
-                postId: newslistId,
-              });
-            });
-          } else {
-            // Images uploaded, insert them into the database
-            const insertImageQuery = 'INSERT INTO image (newsid, image) VALUES (?, ?)';
-            const promises = images.map((image) => {
-              const imageUrl = image.filename;
-              return new Promise((resolve, reject) => {
-                connection.query(insertImageQuery, [newslistId, imageUrl], (error, imageResults) => {
-                  if (error) {
-                    reject(error);
-                  } else {
-                    resolve();
-                  }
-                });
-              });
-            });
-
-            Promise.all(promises)
-              .then(() => {
+              if (!images || images.length === 0) {
+                // No images uploaded
                 connection.commit((err) => {
                   if (err) {
                     return connection.rollback(() => {
                       console.error("Error committing transaction", err);
-                      res.status(500).json({ message: "Internal server error" });
+                      res
+                        .status(500)
+                        .json({ message: "Internal server error" });
                     });
                   }
 
@@ -155,30 +146,72 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
                     postId: newslistId,
                   });
                 });
-              })
-              .catch((error) => {
-                return connection.rollback(() => {
-                  console.error("Error executing INSERT into image", error);
-                  res.status(500).json({ message: "Internal server error" });
+              } else {
+                // Images uploaded, insert them into the database
+                const insertImageQuery =
+                  "INSERT INTO image (newsid, image) VALUES (?, ?)";
+                const promises = images.map((image) => {
+                  const imageUrl = image.filename;
+                  return new Promise((resolve, reject) => {
+                    connection.query(
+                      insertImageQuery,
+                      [newslistId, imageUrl],
+                      (error, imageResults) => {
+                        if (error) {
+                          reject(error);
+                        } else {
+                          resolve();
+                        }
+                      }
+                    );
+                  });
                 });
-              });
-          }
-        });
-      });
+
+                Promise.all(promises)
+                  .then(() => {
+                    connection.commit((err) => {
+                      if (err) {
+                        return connection.rollback(() => {
+                          console.error("Error committing transaction", err);
+                          res
+                            .status(500)
+                            .json({ message: "Internal server error" });
+                        });
+                      }
+
+                      res.status(200).json({
+                        message: "Post created successfully",
+                        postId: newslistId,
+                      });
+                    });
+                  })
+                  .catch((error) => {
+                    return connection.rollback(() => {
+                      console.error("Error executing INSERT into image", error);
+                      res
+                        .status(500)
+                        .json({ message: "Internal server error" });
+                    });
+                  });
+              }
+            }
+          );
+        }
+      );
     });
   });
 });
 
-app.get('/api/images/:newsid', (req, res) => {
+app.get("/api/images/:newsid", (req, res) => {
   const newsid = req.params.newsid;
   const query = "SELECT IMAGE FROM image WHERE NEWSID = ?";
 
   connection.query(query, [newsid], (error, results) => {
     if (error) {
-      return res.status(500).json({ message: 'Error fetching images', error });
+      return res.status(500).json({ message: "Error fetching images", error });
     }
 
-    const imagePaths = results.map(row => row.IMAGE);
+    const imagePaths = results.map((row) => row.IMAGE);
     res.status(200).json({ images: imagePaths });
   });
 });
@@ -195,35 +228,41 @@ app.post("/api/upload", upload.array("images", 10), async (req, res) => {
     const insertPromises = images.map((image) => {
       const insertQuery = "INSERT INTO image (NEWID, IMAGE) VALUES (?, ?)";
       return new Promise((resolve, reject) => {
-        connection.query(insertQuery, [req.body.newsid, image.filename], (error, results) => {
-          if (error) {
-            console.error("Error inserting image:", error);
-            reject(error);
-          } else {
-            resolve(results);
+        connection.query(
+          insertQuery,
+          [req.body.newsid, image.filename],
+          (error, results) => {
+            if (error) {
+              console.error("Error inserting image:", error);
+              reject(error);
+            } else {
+              resolve(results);
+            }
           }
-        });
+        );
       });
     });
 
     // Wait for all insertions to complete
     await Promise.all(insertPromises);
 
-    const fileInfos = images.map(image => ({
+    const fileInfos = images.map((image) => ({
       filename: image.filename,
-      path: image.path
+      path: image.path,
     }));
 
     // Send response after all insertions are successful
     res.status(200).json({
-      message: 'Images uploaded and inserted successfully.',
-      files: fileInfos
+      message: "Images uploaded and inserted successfully.",
+      files: fileInfos,
     });
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred during the upload and insert.', error });
+    res.status(500).json({
+      message: "An error occurred during the upload and insert.",
+      error,
+    });
   }
 });
-
 
 app.post("/api/login", (req, res) => {
   const { email, password } = req.body;
@@ -266,28 +305,30 @@ app.get("/api/get-pricelist", (req, res) => {
 });
 
 // API cập nhật trạng thái bài viết
-app.post('/api/update-newsState', (req, res) => {
+app.post("/api/update-newsState", (req, res) => {
   const { newsid, state } = req.body;
   try {
     // Update trạng thái của tin tức
-    const updateQuery = 'UPDATE NEWSLIST SET STATE = ? WHERE NEWSID = ?';
+    const updateQuery = "UPDATE NEWSLIST SET STATE = ? WHERE NEWSID = ?";
     connection.query(updateQuery, [state, newsid], (error, results) => {
       if (error) {
-        console.error('Lỗi khi cập nhật trạng thái tin tức:', error);
-        return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+        console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
+        return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
       }
       console.log(`Cập nhật trạng thái tin tức ${newsid} thành công`);
-      return res.status(200).json({ message: 'Cập nhật trạng thái tin tức thành công' });
+      return res
+        .status(200)
+        .json({ message: "Cập nhật trạng thái tin tức thành công" });
     });
   } catch (error) {
-    console.error('Lỗi khi cập nhật trạng thái tin tức:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
+    return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
 });
 
-// 
-app.get('/api/hcmdistrict', (req, res) => {
-  const sql = 'SELECT * FROM hcmdistrict';
+//
+app.get("/api/hcmdistrict", (req, res) => {
+  const sql = "SELECT * FROM hcmdistrict";
   connection.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -330,46 +371,62 @@ app.get("/api/get-posts", (req, res) => {
 
             // Truy vấn chi tiết bài đăng từ NEWSDETAIL
             const newsDetail = await new Promise((resolve, reject) => {
-              connection.query("SELECT * FROM NEWSDETAIL WHERE NEWSID = ?", [newsid], (error, results) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(results[0]);
+              connection.query(
+                "SELECT * FROM NEWSDETAIL WHERE NEWSID = ?",
+                [newsid],
+                (error, results) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(results[0]);
+                  }
                 }
-              });
+              );
             });
 
             // Truy vấn tên quận từ HCMDISTRICT
             const district = await new Promise((resolve, reject) => {
-              connection.query("SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?", [districtId], (error, results) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(results[0].DISTRICT);
+              connection.query(
+                "SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?",
+                [districtId],
+                (error, results) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(results[0].DISTRICT);
+                  }
                 }
-              });
+              );
             });
 
             // Truy vấn thông tin người dùng từ USERINFO
             const userInfo = await new Promise((resolve, reject) => {
-              connection.query("SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?", [userId], (error, results) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(results[0]);
+              connection.query(
+                "SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?",
+                [userId],
+                (error, results) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(results[0]);
+                  }
                 }
-              });
+              );
             });
 
             // Truy vấn hình ảnh từ bảng IMAGE
             const image = await new Promise((resolve, reject) => {
-              connection.query("SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1", [newsid], (error, results) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(results[0] ? results[0].IMAGE : null);
+              connection.query(
+                "SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1",
+                [newsid],
+                (error, results) => {
+                  if (error) {
+                    reject(error);
+                  } else {
+                    resolve(results[0] ? results[0].IMAGE : null);
+                  }
                 }
-              });
+              );
             });
 
             // Kết hợp các thông tin lại thành một đối tượng
@@ -423,46 +480,62 @@ app.get("/api/search-posts-location", (req, res) => {
 
           // Truy vấn chi tiết bài đăng từ NEWSDETAIL
           const newsDetail = await new Promise((resolve, reject) => {
-            connection.query("SELECT * FROM NEWSDETAIL WHERE NEWSID = ?", [newsid], (error, results) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(results[0]);
+            connection.query(
+              "SELECT * FROM NEWSDETAIL WHERE NEWSID = ?",
+              [newsid],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
               }
-            });
+            );
           });
 
           // Truy vấn tên quận từ HCMDISTRICT
           const district = await new Promise((resolve, reject) => {
-            connection.query("SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?", [districtId], (error, results) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(results[0].DISTRICT);
+            connection.query(
+              "SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?",
+              [districtId],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0].DISTRICT);
+                }
               }
-            });
+            );
           });
 
           // Truy vấn thông tin người dùng từ USERINFO
           const userInfo = await new Promise((resolve, reject) => {
-            connection.query("SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?", [userId], (error, results) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(results[0]);
+            connection.query(
+              "SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?",
+              [userId],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
               }
-            });
+            );
           });
 
           // Truy vấn hình ảnh từ bảng IMAGE
           const image = await new Promise((resolve, reject) => {
-            connection.query("SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1", [newsid], (error, results) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(results[0] ? results[0].IMAGE : null);
+            connection.query(
+              "SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1",
+              [newsid],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0] ? results[0].IMAGE : null);
+                }
               }
-            });
+            );
           });
 
           // Kết hợp các thông tin lại thành một đối tượng
@@ -487,7 +560,6 @@ app.get("/api/search-posts-location", (req, res) => {
     }
   });
 });
-
 
 // API /api/latest-posts
 app.get("/api/latest-posts", (req, res) => {
@@ -580,7 +652,9 @@ app.post("/api/signup", (req, res) => {
               (error, results) => {
                 if (error) {
                   console.error("Error inserting userinfo:", error);
-                  return res.status(500).json({ message: "Internal server error" });
+                  return res
+                    .status(500)
+                    .json({ message: "Internal server error" });
                 }
 
                 res.status(201).json({ message: "User created successfully" });
@@ -595,7 +669,6 @@ app.post("/api/signup", (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 // Định nghĩa endpoint API để xử lý yêu cầu thay đổi mật khẩu
 app.post("/api/forgot-password", async (req, res) => {
@@ -614,10 +687,10 @@ app.post("/api/forgot-password", async (req, res) => {
     }
 
     // Update mật khẩu mới trong cơ sở dữ liệu
-    await connection.query(
-      "UPDATE account SET password = ? WHERE email = ?",
-      [password, email]
-    );
+    await connection.query("UPDATE account SET password = ? WHERE email = ?", [
+      password,
+      email,
+    ]);
 
     // Trả về phản hồi thành công
     res.status(200).json({ message: "Password updated successfully" });
@@ -626,8 +699,6 @@ app.post("/api/forgot-password", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-
 
 app.get("/api/detail/:id", (req, res) => {
   const postId = req.params.id;
@@ -721,23 +792,22 @@ app.get("/api/search", (req, res) => {
 });
 
 // API lấy thông tin quản trị viên theo email
-app.get('/api/admin-info/:email', (req, res) => {
+app.get("/api/admin-info/:email", (req, res) => {
   const email = req.params.email;
-  const query = 'SELECT * FROM admininfo WHERE EMAIL = ?';
+  const query = "SELECT * FROM admininfo WHERE EMAIL = ?";
 
   connection.query(query, [email], (err, results) => {
     if (err) {
-      console.error('Error fetching admin data:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error fetching admin data:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
     res.status(200).json(results);
   });
 });
 
-
 // API cập nhật thông tin quản trị viên
-app.put('/api/admin-info/:id', (req, res) => {
+app.put("/api/admin-info/:id", (req, res) => {
   const adminId = req.params.id;
   const { name, sex, dob, phone, email, address } = req.body;
 
@@ -752,79 +822,81 @@ app.put('/api/admin-info/:id', (req, res) => {
     WHERE id = ?
   `;
 
-  connection.query(query, [name, sex, dob, phone, email, address, adminId], (err, results) => {
-    if (err) {
-      console.error('Error updating admin data:', err);
-      res.status(500).json({ message: 'Internal server error' });
-      return;
+  connection.query(
+    query,
+    [name, sex, dob, phone, email, address, adminId],
+    (err, results) => {
+      if (err) {
+        console.error("Error updating admin data:", err);
+        res.status(500).json({ message: "Internal server error" });
+        return;
+      }
+      res.status(200).json({ message: "User updated successfully" });
     }
-    res.status(200).json({ message: 'User updated successfully' });
-  });
+  );
 });
 
 // API lấy danh sách userID
-app.get('/api/get-list-userID', (req, res) => {
-  const userIdsQuery = 'SELECT USERID FROM userinfo';
-  
+app.get("/api/get-list-userID", (req, res) => {
+  const userIdsQuery = "SELECT USERID FROM userinfo";
+
   connection.query(userIdsQuery, (err, results) => {
     if (err) {
-      console.error('Error fetching user IDs:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error fetching user IDs:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
     res.status(200).json(results);
   });
 });
 
-
 // API lấy thông tin người dùng và tổng số bài đăng theo USERID
-app.get('/api/user-info/:userid', (req, res) => {
+app.get("/api/user-info/:userid", (req, res) => {
   const userId = req.params.userid;
 
   // Truy vấn đầu tiên để lấy thông tin người dùng
-  const userQuery = 'SELECT * FROM userinfo WHERE USERID = ?';
+  const userQuery = "SELECT * FROM userinfo WHERE USERID = ?";
 
   connection.query(userQuery, [userId], (err, userResults) => {
     if (err) {
-      console.error('Error fetching user data:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error fetching user data:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
-    
 
     if (userResults.length === 0) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
       return;
     }
 
     const user = userResults[0];
 
     // Truy vấn thứ hai để đếm số lượng bài đăng của người dùng
-    const newsCountQuery = 'SELECT COUNT(*) AS NEWSCOUNT FROM newslist WHERE USERID = ?';
+    const newsCountQuery =
+      "SELECT COUNT(*) AS NEWSCOUNT FROM newslist WHERE USERID = ?";
 
     connection.query(newsCountQuery, [userId], (err, newsCountResults) => {
       if (err) {
-        console.error('Error fetching news count:', err);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error("Error fetching news count:", err);
+        res.status(500).json({ message: "Internal server error" });
         return;
       }
-      
 
       user.NEWSCOUNT = newsCountResults[0].NEWSCOUNT;
 
       // Truy vấn thứ ba để lấy trạng thái từ bảng account sử dụng email
       const email = user.EMAIL;
-      const statusQuery = 'SELECT state FROM account WHERE email = ?';
+      const statusQuery = "SELECT state FROM account WHERE email = ?";
 
       connection.query(statusQuery, [email], (err, statusResults) => {
         if (err) {
-          console.error('Error fetching user status:', err);
-          res.status(500).json({ message: 'Internal server error' });
+          console.error("Error fetching user status:", err);
+          res.status(500).json({ message: "Internal server error" });
           return;
         }
 
         if (statusResults.length === 0) {
-          res.status(404).json({ message: 'User status not found' });
+          res.status(404).json({ message: "User status not found" });
           return;
         }
 
@@ -836,79 +908,84 @@ app.get('/api/user-info/:userid', (req, res) => {
 });
 
 // API cập nhật trạng thái tài khoản người dùng bằng email
-app.put('/api/update-user-state', (req, res) => {
+app.put("/api/update-user-state", (req, res) => {
   const email = req.body.EMAIL;
   const newStatus = req.body.STATUS;
 
-  const updateQuery = 'UPDATE account SET state = ? WHERE email = ?';
+  const updateQuery = "UPDATE account SET state = ? WHERE email = ?";
 
   connection.query(updateQuery, [newStatus, email], (err, results) => {
     if (err) {
-      console.error('Error updating user state:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error updating user state:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
 
     if (results.affectedRows === 0) {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
       return;
     }
 
-    res.status(200).json({ message: 'User state updated successfully' });
+    res.status(200).json({ message: "User state updated successfully" });
   });
 });
 
-
 // API tạo phiếu thanh toán
-app.post('/api/create-payment', (req, res) => {
+app.post("/api/create-payment", (req, res) => {
   const { NEWSID, POSTDURATION, ADMINEMAIL } = req.body;
 
   try {
     // Lấy ADMINID từ ADMINEMAIL
-    const adminQuery = 'SELECT ADMINID FROM ADMININFO WHERE EMAIL = ?';
+    const adminQuery = "SELECT ADMINID FROM ADMININFO WHERE EMAIL = ?";
     connection.query(adminQuery, [ADMINEMAIL], (error, adminResults) => {
       if (adminResults.length === 0) {
-        return res.status(404).json({ error: 'Admin not found' });
+        return res.status(404).json({ error: "Admin not found" });
       }
       if (error) {
-        console.error('Error querying admin:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error("Error querying admin:", error);
+        return res.status(500).json({ error: "Internal server error" });
       }
 
       const ADMINID = adminResults[0].ADMINID;
 
       // Lấy giá từ bảng giá
-      const priceQuery = 'SELECT PRICE FROM PRICELIST WHERE POSTDURATION = ?';
+      const priceQuery = "SELECT PRICE FROM PRICELIST WHERE POSTDURATION = ?";
       connection.query(priceQuery, [POSTDURATION], (error, priceResults) => {
         if (priceResults.length === 0) {
-          return res.status(404).json({ error: 'Price not found' });
+          return res.status(404).json({ error: "Price not found" });
         }
 
         if (error) {
-          console.error('Error querying price:', error);
-          return res.status(500).json({ error: 'Internal server error' });
+          console.error("Error querying price:", error);
+          return res.status(500).json({ error: "Internal server error" });
         }
 
         const PRICE = priceResults[0].PRICE;
 
         // Tạo phiếu thanh toán
-        const paymentQuery = 'INSERT INTO PAYMENT (NEWSID, PRICE, ADMINID, STATE) VALUES (?, ?, ?, ?)';
-        connection.query(paymentQuery, [NEWSID, PRICE, ADMINID, 'Chờ duyệt'], (error, results) => {
-          if (error) {
-            console.error('Error creating payment:', error);
-            return res.status(500).json({ error: 'Internal server error' });
+        const paymentQuery =
+          "INSERT INTO PAYMENT (NEWSID, PRICE, ADMINID, STATE) VALUES (?, ?, ?, ?)";
+        connection.query(
+          paymentQuery,
+          [NEWSID, PRICE, ADMINID, "Chờ duyệt"],
+          (error, results) => {
+            if (error) {
+              console.error("Error creating payment:", error);
+              return res.status(500).json({ error: "Internal server error" });
+            }
+            console.log("Payment created successfully");
+            return res
+              .status(201)
+              .json({ message: "Payment created successfully" });
           }
-          console.log('Payment created successfully');
-          return res.status(201).json({ message: 'Payment created successfully' });
-        });
+        );
       });
     });
   } catch (error) {
-    console.error('Error creating payment:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error creating payment:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 // API to fetch all payments with user and admin info
 app.get("/api/payment", async (req, res) => {
@@ -922,13 +999,19 @@ app.get("/api/payment", async (req, res) => {
       }
 
       // Collecting all unique adminIds
-      const adminIds = results.map((payment) => payment.ADMINID).filter((adminId) => adminId != null);
+      const adminIds = results
+        .map((payment) => payment.ADMINID)
+        .filter((adminId) => adminId != null);
 
       // Collecting all unique newsIds
-      const newsIds = results.map((payment) => payment.NEWSID).filter((newsId) => newsId != null);
+      const newsIds = results
+        .map((payment) => payment.NEWSID)
+        .filter((newsId) => newsId != null);
 
       // Fetching admin names from admininfo table
-      const adminInfoQuery = `SELECT ADMINID, NAME FROM admininfo WHERE ADMINID IN (${adminIds.join(",")})`;
+      const adminInfoQuery = `SELECT ADMINID, NAME FROM admininfo WHERE ADMINID IN (${adminIds.join(
+        ","
+      )})`;
       const admins = await new Promise((resolve, reject) => {
         connection.query(adminInfoQuery, (err, adminResults) => {
           if (err) {
@@ -941,7 +1024,9 @@ app.get("/api/payment", async (req, res) => {
       });
 
       // Fetching userIds from newslist table based on newsIds
-      const userIdQuery = `SELECT NEWSID, USERID FROM newslist WHERE NEWSID IN (${newsIds.join(",")})`;
+      const userIdQuery = `SELECT NEWSID, USERID FROM newslist WHERE NEWSID IN (${newsIds.join(
+        ","
+      )})`;
       const users = await new Promise((resolve, reject) => {
         connection.query(userIdQuery, (err, userResults) => {
           if (err) {
@@ -957,7 +1042,9 @@ app.get("/api/payment", async (req, res) => {
       const userIds = users.map((user) => user.USERID);
 
       // Fetching user names from userinfo table based on userIds
-      const userInfoQuery = `SELECT USERID, NAME FROM userinfo WHERE USERID IN (${userIds.join(",")})`;
+      const userInfoQuery = `SELECT USERID, NAME FROM userinfo WHERE USERID IN (${userIds.join(
+        ","
+      )})`;
       const userNames = await new Promise((resolve, reject) => {
         connection.query(userInfoQuery, (err, userNameResults) => {
           if (err) {
@@ -1007,8 +1094,6 @@ app.get("/api/payment", async (req, res) => {
   }
 });
 
-
-
 // API to fetch payment by paymentId
 app.get("/api/payment/:paymentId", (req, res) => {
   const paymentId = req.params.paymentId;
@@ -1026,14 +1111,14 @@ app.get("/api/payment/:paymentId", (req, res) => {
     res.status(200).json(results[0]);
   });
 });
-const util = require('util');
+const util = require("util");
 const query = util.promisify(connection.query).bind(connection);
 
 // API PUT để cập nhật trạng thái và ADMINID trong bảng payment
-app.put('/api/update-paymentState/:PAYID', async (req, res) => {
+app.put("/api/update-paymentState/:PAYID", async (req, res) => {
   const PAYID = req.params.PAYID;
   const { state, ADMINEMAIL } = req.body;
-  
+
   try {
     // Query to get ADMINID from admininfo table using ADMINEMAIL
     const adminIdQuery = `SELECT ADMINID FROM admininfo WHERE EMAIL = ?`;
@@ -1041,15 +1126,19 @@ app.put('/api/update-paymentState/:PAYID', async (req, res) => {
     const row = await query(adminIdQuery, [ADMINEMAIL]);
 
     if (!row || row.length === 0 || !row[0].ADMINID) {
-      return res.status(404).json({ error: 'Admin not found or ADMINID not available' });
+      return res
+        .status(404)
+        .json({ error: "Admin not found or ADMINID not available" });
     }
 
     const ADMINID = row[0].ADMINID;
 
     // Get current timestamp in Vietnam timezone to update TIME in payment table
     const currentTime = new Date();
-    const vietnamTimezone = 'Asia/Ho_Chi_Minh';
-    const formattedTime = format(currentTime, "yyyy-MM-dd HH:mm:ss", { timeZone: vietnamTimezone });
+    const vietnamTimezone = "Asia/Ho_Chi_Minh";
+    const formattedTime = format(currentTime, "yyyy-MM-dd HH:mm:ss", {
+      timeZone: vietnamTimezone,
+    });
 
     // Update payment table with STATE, ADMINID, and TIME
     const updateQuery = `
@@ -1058,58 +1147,65 @@ app.put('/api/update-paymentState/:PAYID', async (req, res) => {
       WHERE PAYID = ?
     `;
 
-    const result = await query(updateQuery, [state, ADMINID, formattedTime, PAYID]);
+    const result = await query(updateQuery, [
+      state,
+      ADMINID,
+      formattedTime,
+      PAYID,
+    ]);
 
     // Check if the update was successful
     if (result.affectedRows > 0) {
       console.log(`Payment with PAYID ${PAYID} updated successfully`);
-      res.status(200).json({ message: 'Payment updated successfully' });
+      res.status(200).json({ message: "Payment updated successfully" });
     } else {
       res.status(404).json({ error: `Payment with PAYID ${PAYID} not found` });
     }
   } catch (error) {
-    console.error('Error updating payment state:', error);
-    res.status(500).json({ error: 'Error updating payment state' });
+    console.error("Error updating payment state:", error);
+    res.status(500).json({ error: "Error updating payment state" });
   }
 });
 
 // API tạo thông báo
-app.post('/api/create-notification', (req, res) => {
+app.post("/api/create-notification", (req, res) => {
   const { newsid, content, reason } = req.body;
   try {
     // Lấy USERID từ NEWSLIST dựa trên NEWSID
-    const getUserIdQuery = 'SELECT USERID FROM NEWSLIST WHERE NEWSID = ?';
+    const getUserIdQuery = "SELECT USERID FROM NEWSLIST WHERE NEWSID = ?";
     connection.query(getUserIdQuery, [newsid], (error, userResults) => {
       if (error) {
-        console.error('Lỗi khi lấy USERID từ NEWSLIST:', error);
-        return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+        console.error("Lỗi khi lấy USERID từ NEWSLIST:", error);
+        return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
       }
 
       if (userResults.length === 0) {
-        return res.status(404).json({ error: 'Bài viết không tồn tại' });
+        return res.status(404).json({ error: "Bài viết không tồn tại" });
       }
 
       const userid = userResults[0].USERID;
 
       // Tạo thông báo
-      const createNotificationQuery = 'INSERT INTO NOTIFICATION (USERID, CONTENT, REASON) VALUES (?, ?, ?)';
-      connection.query(createNotificationQuery, [userid, content, reason], (error, results) => {
-        if (error) {
-          console.error('Lỗi khi tạo thông báo:', error);
-          return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+      const createNotificationQuery =
+        "INSERT INTO NOTIFICATION (USERID, CONTENT, REASON) VALUES (?, ?, ?)";
+      connection.query(
+        createNotificationQuery,
+        [userid, content, reason],
+        (error, results) => {
+          if (error) {
+            console.error("Lỗi khi tạo thông báo:", error);
+            return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+          }
+          console.log("Tạo thông báo thành công");
+          return res.status(200).json({ message: "Tạo thông báo thành công" });
         }
-        console.log('Tạo thông báo thành công');
-        return res.status(200).json({ message: 'Tạo thông báo thành công' });
-      });
+      );
     });
   } catch (error) {
-    console.error('Lỗi khi tạo thông báo:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ' });
+    console.error("Lỗi khi tạo thông báo:", error);
+    return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
 });
-
-
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

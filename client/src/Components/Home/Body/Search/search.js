@@ -14,10 +14,11 @@ function Search({ onSearch }) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Fetched districts:", data); // Log dữ liệu trả về từ API
 
         // Sort districts by 'IDDISTRICT' before setting state
-        const sortedDistricts = data.sort((a, b) => a.IDDISTRICT - b.IDDISTRICT);
+        const sortedDistricts = data.sort(
+          (a, b) => a.IDDISTRICT - b.IDDISTRICT
+        );
         setDistricts(sortedDistricts);
       } catch (error) {
         console.error("Error fetching districts:", error);
