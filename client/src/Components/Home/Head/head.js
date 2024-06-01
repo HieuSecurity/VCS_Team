@@ -1,23 +1,20 @@
-import CreatePost from "./CreatePost/createPost";
+import React, { useContext } from "react";
+import { StateContext } from "./MyProvider"; // Import context từ MyProvider
 import Login from "./Login/login";
 import User from "./User/main";
 import Title from "./Title/title";
+import CreatePost from "./CreatePost/createPost";
 import "../homeCSS/home.css";
-import { useEffect, useState } from "react";
+
 function Head() {
-  const [isLogined, SetIsLogined] = useState(true);
-  useEffect(() => {
-    console.log(isLogined);
-  });
-  const SendValue = (status) => {
-    SetIsLogined(status);
-  };
+  const { state, setState } = useContext(StateContext); // Sử dụng context từ MyProvider
+  console.log(state);
   return (
     <div className="Head">
       <div className="login_create">
-        <Login onSendValue={SendValue} className="Login" />
-        {isLogined && <CreatePost className="CreatePost" />}
-        <User />
+        {state ? <></> : <Login className="Login" />}
+        {state ? <CreatePost className="CreatePost" /> : <></>}
+        {state ? <User /> : <></>}
       </div>
       <Title />
     </div>

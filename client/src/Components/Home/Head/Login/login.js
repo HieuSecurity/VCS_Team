@@ -1,7 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
-function Login({ onSendValue }) {
+function Login({ onLogin }) {
+  const handleLoginState = () => {
+    onLogin(true);
+  };
+
   return (
     <div>
       <Link style={{ textDecoration: "none" }} to="/login">

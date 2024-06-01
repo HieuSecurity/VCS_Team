@@ -1,10 +1,15 @@
+<<<<<<< Updated upstream
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+=======
+import React, { useState, useContext } from "react";
+>>>>>>> Stashed changes
 import { Link } from "react-router-dom";
 import "../User/style.css";
-
+import { StateContext } from "../MyProvider"; // Import context từ MyProvider
 function Main() {
   const [showModal, setShowModal] = useState(false);
+<<<<<<< Updated upstream
   const [userName, setUserName] = useState("Người dùng");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -42,6 +47,9 @@ function Main() {
         console.error("Error fetching user info:", error);
       });
   };
+=======
+  const { state, setState } = useContext(StateContext); // Sử dụng context từ MyProvider
+>>>>>>> Stashed changes
 
   const showUserForm = () => {
     setShowModal(true);
@@ -97,7 +105,6 @@ function Main() {
         <div className="modal">
           <div
             style={{
-              height: "210px",
               alignItems: "center",
               textAlign: "center",
             }}
@@ -109,7 +116,11 @@ function Main() {
             <Link to="/changepassword" style={{ margin: "15px 0" }}>
               Thay đổi mật khẩu
             </Link>
+<<<<<<< Updated upstream
             <Link to="/" onClick={handleLogout} style={{ margin: "15px 0" }}>
+=======
+            <Link to="/login" style={{ margin: "15px 0" }}>
+>>>>>>> Stashed changes
               Đăng xuất
             </Link>
             <span
