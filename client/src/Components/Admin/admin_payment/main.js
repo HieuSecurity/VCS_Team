@@ -110,6 +110,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Thanh toán có mã số ${payment.PAYID} đã hoàn tất. Bài đăng ${payment.NEWSID} đã được hiển thị.`,
         reason: "", // Không có lý do khi đồng ý
+        category: "Thanh toán",
       });
 
       // Update local state or fetch payments again
@@ -139,6 +140,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Thanh toán có mã số ${payment.PAYID} đã bị từ chối.`,
         reason: reason, // Lý do từ chối
+        category: "Thanh toán"
       });
 
       // Create notification
@@ -146,6 +148,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Bài đăng ${payment.NEWSID} bị từ chối`,
         reason: `Thanh toán mã số ${payment.PAYID} không thành công`, // Lý do từ chối
+        category: "Thanh toán"
       });
 
       // Update local state or fetch payments again
@@ -163,6 +166,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Thanh toán có mã số ${payment.PAYID} bị lỗi: ${errorInput}`,
         reason: "", // Không có lý do khi thông báo lỗi
+        category: "Thanh toán"
       });
 
       // Update local state or fetch payments again

@@ -1244,7 +1244,7 @@ app.put("/api/update-paymentState/:PAYID", async (req, res) => {
 
 // API tạo thông báo
 app.post("/api/create-notification", (req, res) => {
-  const { newsid, content, reason } = req.body;
+  const { newsid, content, reason, category } = req.body;
   try {
     // Lấy USERID từ NEWSLIST dựa trên NEWSID
     const getUserIdQuery = "SELECT USERID FROM NEWSLIST WHERE NEWSID = ?";
@@ -1262,10 +1262,10 @@ app.post("/api/create-notification", (req, res) => {
 
       // Tạo thông báo
       const createNotificationQuery =
-        "INSERT INTO NOTIFICATION (USERID, CONTENT, REASON) VALUES (?, ?, ?)";
+        "INSERT INTO NOTIFICATION (USERID, CONTENT, REASON, CATEGORY) VALUES (?, ?, ?, ?)";
       connection.query(
         createNotificationQuery,
-        [userid, content, reason],
+        [userid, content, reason, category],
         (error, results) => {
           if (error) {
             console.error("Lỗi khi tạo thông báo:", error);
@@ -1280,6 +1280,20 @@ app.post("/api/create-notification", (req, res) => {
     console.error("Lỗi khi tạo thông báo:", error);
     return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
+});
+
+// API lấy thông tin tất cả thông báo của người dùng có USERID
+app.get("/api/get-notification-byUserID/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const query = "SELECT * FROM NOTIFICATION WHERE USERID = ?";
+
+  connection.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Error fetching notifications:", error);
+      return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+    }
+    res.status(200).json(results);
+  });
 });
 
 app.listen(PORT, () => {

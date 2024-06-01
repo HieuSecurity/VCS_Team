@@ -109,7 +109,8 @@ const PostTable = () => {
           const notificationData = {
             newsid: postId,
             content,
-            reason
+            reason,
+            category: "Bài viết"
           };
   
           axios.post('http://localhost:3000/api/create-notification', notificationData)
