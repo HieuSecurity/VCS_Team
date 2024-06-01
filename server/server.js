@@ -930,6 +930,30 @@ app.get("/api/user-info/:userid", (req, res) => {
   });
 });
 
+// API cập nhật thông tin người dùng
+app.put("/api/update-userinfo/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const { NAME, DOB, SEX, PHONE, ADDRESS } = req.body;
+
+  // Query SQL để cập nhật thông tin người dùng
+  let sql = `
+    UPDATE USERINFO
+    SET NAME = ?, DOB = ?, SEX = ?, PHONE = ?, ADDRESS = ?
+    WHERE USERID = ?
+  `;
+  let values = [NAME, DOB, SEX, PHONE, ADDRESS, userId];
+
+  connection.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error updating user: ", err);
+      res.status(500).json({ success: false, message: "Error updating user" });
+    } else {
+      console.log("User updated successfully");
+      res.status(200).json({ success: true, message: "User updated successfully" });
+    }
+  });
+});
+
 // API cập nhật trạng thái tài khoản người dùng bằng email
 app.put("/api/update-user-state", (req, res) => {
   const email = req.body.EMAIL;
