@@ -39,6 +39,7 @@
   color: #1266dd;
   padding: 2px;
 }
+
 .modal a:hover {
   font-size: 18px;
   text-decoration: none;
@@ -53,7 +54,6 @@
   background-color: red;
   margin-right: 10px;
   margin-top: 0px;
-
   border-radius: 50%;
   width: 30px;
   height: 30px; /* Đặt chiều cao để tránh tròn thành hình oval */
@@ -81,4 +81,22 @@
 
 .Main.modal-active .overlay {
   display: block; /* Hiển thị overlay khi modal active */
+}
+
+/* Thêm phong cách cho nút đăng nhập */
+.login-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 18px;
+  text-decoration: none; /* Bỏ gạch chân */
+  background-color: white; /* Màu nền */
+  color: black; /* Màu chữ */
+  border: 1px solid black;
+  border-radius: 5px; /* Bo góc */
+  text-align: center; /* Căn giữa chữ */
+  margin: 10px 0;
+}
+
+.login-button:hover {
+  background-color: #e0e0e0; /* Màu nền khi hover */
 }

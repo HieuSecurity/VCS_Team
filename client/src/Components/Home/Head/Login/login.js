@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 function Login({ onSendValue }) {
   return (
-    <div className="Login">
+    <div>
       <Link style={{ textDecoration: "none" }} to="/login">
-        Đăng nhập
+        
       </Link>
     </div>
   );

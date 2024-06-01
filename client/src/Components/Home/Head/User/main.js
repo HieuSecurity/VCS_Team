@@ -1,9 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import "../User/style.css";
 
 function Main() {
   const [showModal, setShowModal] = useState(false);
+  const [userName, setUserName] = useState("Người dùng");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    // Lấy dữ liệu từ localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.EMAIL) {
+      getUserIdByEmail(user.EMAIL, (userId) => {
+        getUserInfo(userId, (userInfo) => {
+          setUserName(userInfo.NAME); // Thông tin người dùng có thuộc tính 'name'
+          setIsLoggedIn(true);
+        });
+      });
+    }
+  }, []);
+
+  const getUserIdByEmail = (email, callback) => {
+    axios
+      .get(`http://localhost:3000/api/get-userid-byEmail/${email}`)
+      .then((response) => {
+        callback(response.data.USERID); // Giả sử phản hồi chứa USERID
+      })
+      .catch((error) => {
+        console.error("Error fetching USERID:", error);
+      });
+  };
+
+  const getUserInfo = (userId, callback) => {
+    axios
+      .get(`http://localhost:3000/api/user-info/${userId}`)
+      .then((response) => {
+        callback(response.data); // Giả sử phản hồi chứa thông tin người dùng
+      })
+      .catch((error) => {
+        console.error("Error fetching user info:", error);
+      });
+  };
 
   const showUserForm = () => {
     setShowModal(true);
@@ -21,24 +59,37 @@ function Main() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+    setUserName("Người dùng");
+    hideUserForm();
+  };
+
   return (
     <div className={`Main ${showModal ? "modal-active" : ""}`}>
-      <div onClick={showUserForm} className="user">
-        <img
-          style={{ height: "70px", borderRadius: "50%" }}
-          src="https://t4.ftcdn.net/jpg/03/49/49/79/360_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg"
-          alt="User Avatar"
-        />
-        <span
-          style={{
-            marginRight: "2px",
-            marginLeft: "10px",
-            fontWeight: "700",
-          }}
-        >
-          Nguyễn Minh Hiếu
-        </span>
-      </div>
+      {isLoggedIn ? (
+        <div onClick={showUserForm} className="user">
+          <img
+            style={{ height: "70px", borderRadius: "50%" }}
+            src="https://t4.ftcdn.net/jpg/03/49/49/79/360_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg"
+            alt="User Avatar"
+          />
+          <span
+            style={{
+              marginRight: "2px",
+              marginLeft: "10px",
+              fontWeight: "700",
+            }}
+          >
+            {userName}
+          </span>
+        </div>
+      ) : (
+        <Link to="/login" className="login-button">
+          Đăng nhập
+        </Link>
+      )}
       {showModal && (
         <div className="overlay" onClick={handleOverlayClick}></div>
       )}
@@ -53,12 +104,12 @@ function Main() {
             className="modal-content"
           >
             <Link to="/user/info" style={{ margin: "15px 0" }}>
-              Xem thông tin{" "}
+              Xem thông tin
             </Link>
             <Link to="/changepassword" style={{ margin: "15px 0" }}>
               Thay đổi mật khẩu
             </Link>
-            <Link to="/" style={{ margin: "15px 0" }}>
+            <Link to="/" onClick={handleLogout} style={{ margin: "15px 0" }}>
               Đăng xuất
             </Link>
             <span

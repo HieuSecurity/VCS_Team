@@ -19,7 +19,7 @@ const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
   password: "", // Thay password bằng mật khẩu của bạn
-  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -849,6 +849,29 @@ app.get("/api/get-list-userID", (req, res) => {
     res.status(200).json(results);
   });
 });
+
+// API lấy ID người dùng bằng email
+app.get('/api/get-userid-byEmail/:email', (req, res) => {
+  const email = req.params.email;
+
+  const query = 'SELECT USERID FROM USERINFO WHERE EMAIL = ?';
+  connection.query(query, [email], (error, results) => {
+    if (error) {
+      console.error('Error fetching USERID:', error);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).send('User not found');
+      return;
+    }
+
+    const userId = results[0].USERID;
+    res.json({ USERID: userId });
+  });
+});
+
 
 // API lấy thông tin người dùng và tổng số bài đăng theo USERID
 app.get("/api/user-info/:userid", (req, res) => {
