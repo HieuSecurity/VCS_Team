@@ -37,7 +37,7 @@ function PostForm() {
     // Lấy danh sách các quận từ cơ sở dữ liệu
     async function fetchDistricts() {
       try {
-        const response = await axios.get("http://localhost:3000/api/hcmdistrict"); // API endpoint
+        const response = await axios.get("http://localhost:3000/api/hcmdistrict"); // API lấy quận huyện
         setDistricts(response.data);
       } catch (error) {
         console.error("Error fetching districts:", error);
