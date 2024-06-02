@@ -18,8 +18,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -70,7 +70,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const images = req.files; // Get the list of uploaded images from req.files
   const USERID_temp = 4;
   const state = "Chờ duyệt";
-  
+
   console.log("Received form data:", req.body);
   console.log("Received images:", req.files);
 
@@ -208,15 +208,8 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 // API để cập nhật thông tin bài đăng
 app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
   const postId = req.params.postId;
-  const {
-    title,
-    timestart,
-    describe,
-    price,
-    acreage,
-    address,
-    district,
-  } = req.body;
+  const { title, timestart, describe, price, acreage, address, district } =
+    req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Hoạt động";
 
@@ -250,7 +243,7 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
         "UPDATE newslist SET title=?, acreage=?, price=?,address=?, state=? WHERE newsid=?";
       connection.query(
         updateNewslistQuery,
-        [title, acreage, price,IDDISTRICT, state, postId],
+        [title, acreage, price, IDDISTRICT, state, postId],
         (error, newslistResults) => {
           if (error) {
             return connection.rollback(() => {
@@ -346,7 +339,6 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
   });
 });
 
-
 app.get("/api/images/:newsid", (req, res) => {
   const newsid = req.params.newsid;
   const query = "SELECT IMAGE FROM image WHERE NEWSID = ?";
@@ -437,7 +429,7 @@ app.post("/api/login", (req, res) => {
 });
 
 // API đổi mật khẩu
-app.post('/api/update-password', async (req, res) => {
+app.post("/api/update-password", async (req, res) => {
   const { email, newPassword } = req.body;
 
   try {
@@ -614,7 +606,6 @@ app.get("/api/get-posts", (req, res) => {
   });
 });
 
-
 // API Lấy các bài viết của người dùng từ USERID
 app.get("/api/get-posts-byUserid/:userid", (req, res) => {
   const { userid } = req.params;
@@ -632,40 +623,40 @@ app.get("/api/get-posts-byUserid/:userid", (req, res) => {
 });
 
 // API Lấy các bài viết của người dùng từ email
-app.get('/api/get-posts-byEmail/:email', (req, res) => {
+app.get("/api/get-posts-byEmail/:email", (req, res) => {
   const email = req.params.email;
 
   // Câu query để lấy USERID từ bảng USERINFO dựa trên email
-  const queryUserId = 'SELECT USERID FROM USERINFO WHERE EMAIL = ?';
+  const queryUserId = "SELECT USERID FROM USERINFO WHERE EMAIL = ?";
 
   // Thực hiện câu query để lấy USERID
   connection.query(queryUserId, [email], (error, results) => {
-      if (error) {
-          console.error('Error fetching USERID:', error);
-          res.status(500).send('Internal Server Error');
-          return;
+    if (error) {
+      console.error("Error fetching USERID:", error);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).send("User not found");
+      return;
+    }
+
+    const userId = results[0].USERID;
+
+    // Câu query để lấy các bài viết từ bảng NEWSLIST dựa trên USERID
+    const queryPosts = "SELECT * FROM NEWSLIST WHERE USERID = ?";
+
+    // Thực hiện câu query để lấy các bài viết
+    connection.query(queryPosts, [userId], (err, posts) => {
+      if (err) {
+        console.error("Error fetching user posts:", err);
+        res.status(500).json({ error: "Error fetching user posts" });
+        return;
       }
 
-      if (results.length === 0) {
-          res.status(404).send('User not found');
-          return;
-      }
-
-      const userId = results[0].USERID;
-
-      // Câu query để lấy các bài viết từ bảng NEWSLIST dựa trên USERID
-      const queryPosts = 'SELECT * FROM NEWSLIST WHERE USERID = ?';
-
-      // Thực hiện câu query để lấy các bài viết
-      connection.query(queryPosts, [userId], (err, posts) => {
-          if (err) {
-              console.error('Error fetching user posts:', err);
-              res.status(500).json({ error: 'Error fetching user posts' });
-              return;
-          }
-
-          res.status(200).json(posts);
-      });
+      res.status(200).json(posts);
+    });
   });
 });
 
@@ -1049,7 +1040,6 @@ app.get("/api/get-adminInfo-byId/:adminId", (req, res) => {
   });
 });
 
-
 // API lấy danh sách userID
 app.get("/api/get-list-userID", (req, res) => {
   const userIdsQuery = "SELECT USERID FROM userinfo";
@@ -1065,27 +1055,26 @@ app.get("/api/get-list-userID", (req, res) => {
 });
 
 // API lấy ID người dùng bằng email
-  app.get('/api/get-userid-byEmail/:email', (req, res) => {
-    const email = req.params.email;
+app.get("/api/get-userid-byEmail/:email", (req, res) => {
+  const email = req.params.email;
 
-    const query = 'SELECT USERID FROM USERINFO WHERE EMAIL = ?';
-    connection.query(query, [email], (error, results) => {
-      if (error) {
-        console.error('Error fetching USERID:', error);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
+  const query = "SELECT USERID FROM USERINFO WHERE EMAIL = ?";
+  connection.query(query, [email], (error, results) => {
+    if (error) {
+      console.error("Error fetching USERID:", error);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
 
-      if (results.length === 0) {
-        res.status(404).send('User not found');
-        return;
-      }
+    if (results.length === 0) {
+      res.status(404).send("User not found");
+      return;
+    }
 
-      const userId = results[0].USERID;
-      res.json({ USERID: userId });
-    });
+    const userId = results[0].USERID;
+    res.json({ USERID: userId });
   });
-
+});
 
 // API lấy thông tin người dùng và tổng số bài đăng theo USERID
 app.get("/api/user-info/:userid", (req, res) => {
@@ -1163,7 +1152,9 @@ app.put("/api/update-userinfo/:userId", (req, res) => {
       res.status(500).json({ success: false, message: "Error updating user" });
     } else {
       console.log("User updated successfully");
-      res.status(200).json({ success: true, message: "User updated successfully" });
+      res
+        .status(200)
+        .json({ success: true, message: "User updated successfully" });
     }
   });
 });

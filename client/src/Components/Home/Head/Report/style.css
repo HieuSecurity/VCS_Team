@@ -1,55 +1,74 @@
-.report-form {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #f4f4f4;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .report-form h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
+.report-section {
+  margin-top: 20px;
 
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  .form-group input,
-  .form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-  
-  .form-group textarea {
-    resize: vertical;
-    height: 100px;
-  }
-  
-  button[type="submit"] {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #0056b3;
-  }
-  
+  height: 100vh; /* Đảm bảo nội dung căn giữa trên toàn màn hình */
+  padding-left: 20px; /* Tạo lề trái cho phần nội dung */
+}
+
+.report-section h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.report-section form {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.report-section form label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 17px;
+  margin: 20px 0;
+}
+
+.report-section form input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.report-section form button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.report-section form button:hover {
+  background-color: #45a049;
+}
+
+.radio-options {
+  margin-bottom: 10px;
+}
+
+.radio-options label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.custom-issue {
+  margin-top: 10px;
+}
+
+.custom-issue label {
+  font-weight: bold;
+}
+
+.custom-issue input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

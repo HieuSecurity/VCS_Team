@@ -6,6 +6,8 @@ import Slogan from "../Slogan/slogan";
 import MainInfo from "../Admin/admin_info/main";
 import MainUser from "../Admin/admin_user/main";
 import MainPost from "../Admin/admin_post/main";
+import MainReport from "../Admin/admin_report/main";
+
 import MainPayment from "../Admin/admin_payment/main";
 
 const ButtonRow = () => {
@@ -67,6 +69,14 @@ const ButtonRow = () => {
           Bài đăng
         </button>
         <button
+          className={`report-button ${
+            activeButton === "report" ? "active" : ""
+          }`}
+          onClick={() => handleButtonClick("report")}
+        >
+          Báo cáo
+        </button>
+        <button
           className={`payment-button ${
             activeButton === "payment" ? "active" : ""
           }`}
@@ -90,6 +100,12 @@ const ButtonRow = () => {
           <div className="post-tab-content">
             {" "}
             <MainPost />
+          </div>
+        )}
+        {activeButton === "report" && (
+          <div className="report-tab-content">
+            {" "}
+            <MainReport />
           </div>
         )}
         {activeButton === "payment" && (

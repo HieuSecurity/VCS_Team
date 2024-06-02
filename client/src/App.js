@@ -15,7 +15,6 @@ import DetailPostAdmin from "./Components/Admin/admin_post/detailPost";
 import Footer from "./Components/Home/Footer/footer";
 import ChangePassWord from "./Components/Home/Head/ChangePass/main";
 
-
 function App() {
   return (
     <div className="App">
@@ -42,6 +41,9 @@ function App() {
       </Routes>
       <Routes>
         <Route path="/admin/payment" element={<Admin />} />
+      </Routes>
+      <Routes>
+        <Route path="/admin/report" element={<Admin />} />
       </Routes>
       <Routes>
         <Route path="/user/info" element={<User />} />

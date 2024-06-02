@@ -1,60 +1,112 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./style.css"; // Import CSS for styling
-import Slogan from "../../../Slogan/slogan"
-import Back from "../../../Back/back"
+import Slogan from "../../../Slogan/slogan";
+import Back from "../../../Back/back";
 
 const Main = () => {
-  const [report, setReport] = useState({
-    title: "",
-    description: "",
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    console.log(name,value)
-    setReport({ ...report, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    alert("Đã gửi báo cáo")    
+  const [selectedIssue, setSelectedIssue] = useState(""); // State để lưu trữ vấn đề được chọn
+  const [customIssue, setCustomIssue] = useState(""); // State để lưu trữ nội dung của vấn đề tùy chỉnh
+  const handleReportSubmit = async () => {
+    // Xử lý khi người dùng gửi báo cáo
+    console.log("Vấn đề báo cáo:", selectedIssue);
+    if (selectedIssue === "Vấn đề khác") {
+      console.log("Nội dung vấn đề tùy chỉnh:", customIssue);
+    }
+    // Đặt logic để gửi dữ liệu báo cáo lên server ở đây
   };
 
   return (
     <div className="Main">
-      <Back style={{marginTop:"50px"}} className="back" />
+      <Back style={{ marginTop: "50px" }} className="back" />
       <Slogan className="slogan" style={{ marginTop: "-50px" }} />
-
-    <form className="report-form" onSubmit={handleSubmit}>
-      <h2>Báo cáo</h2>
-    
-      <div className="form-group">
-        <label htmlFor="title">Tiêu đề:</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          value={report.title}
-          onChange={handleChange}
-          required
-        />
+      <div style={{ marginBottom: "-200px" }} className="report-section">
+        <form onSubmit={handleReportSubmit}>
+          <h2
+            style={{
+              fontSize: "35px",
+              fontWeight: 900,
+              textAlign: "left",
+              color: "red",
+            }}
+          >
+            Báo cáo vấn đề
+          </h2>
+          <div className="radio-options">
+            <label>
+              <input
+                type="radio"
+                value="Ảnh không đúng"
+                checked={selectedIssue === "Ảnh không đúng"}
+                onChange={() => setSelectedIssue("Ảnh không đúng")}
+              />
+              Ảnh không đúng
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="Nội dung nhạy cảm"
+                checked={selectedIssue === "Nội dung nhạy cảm"}
+                onChange={() => setSelectedIssue("Nội dung nhạy cảm")}
+              />
+              Nội dung nhạy cảm
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="Khủng bố"
+                checked={selectedIssue === "Khủng bố"}
+                onChange={() => setSelectedIssue("Khủng bố")}
+              />
+              Khủng bố
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="Spam"
+                checked={selectedIssue === "Spam"}
+                onChange={() => setSelectedIssue("Spam")}
+              />
+              Spam
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="Bạo lực"
+                checked={selectedIssue === "Bạo lực"}
+                onChange={() => setSelectedIssue("Bạo lực")}
+              />
+              Bạo lực
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="Vấn đề khác"
+                checked={selectedIssue === "Vấn đề khác"}
+                onChange={() => setSelectedIssue("Vấn đề khác")}
+              />
+              Vấn đề khác
+            </label>
+          </div>
+          {selectedIssue === "Vấn đề khác" && (
+            <div className="custom-issue">
+              <label>Nội dung vấn đề:</label>
+              <input
+                type="text"
+                value={customIssue}
+                onChange={(e) => setCustomIssue(e.target.value)}
+              />
+            </div>
+          )}
+          <button
+            style={{ display: "inline-block", width: "150px" }}
+            type="submit"
+          >
+            Gửi báo cáo
+          </button>
+        </form>
       </div>
-      <div className="form-group">
-        <label htmlFor="description">Mô tả:</label>
-        <textarea
-          id="description"
-          name="description"
-          value={report.description}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <button type="submit">Gửi phiếu báo cáo</button>
-    </form>
     </div>
-   
   );
 };
 

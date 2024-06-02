@@ -24,7 +24,7 @@ function Head() {
   return (
     <div className="Head">
       <div className="login_create">
-        <Report/>
+        {/* <Report/> */}
         <CreatePost className="CreatePost" />
         {state ? <></> : <Login className="Login" />}
         {state ? <User /> : null}

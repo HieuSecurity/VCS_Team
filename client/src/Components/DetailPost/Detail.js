@@ -11,21 +11,41 @@ import {
 import { faPhone } from "@fortawesome/free-solid-svg-icons";
 import { faFacebook } from "@fortawesome/free-brands-svg-icons";
 import Back from "../Back/back";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { faFlag } from "@fortawesome/free-solid-svg-icons";
 
 function Detail() {
   const { id } = useParams();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [detailData, setDetailData] = useState(null); // State để lưu trữ dữ liệu chi tiết
   const [images, setImages] = useState([]);
+  const [selectedIssue, setSelectedIssue] = useState(""); // State để lưu trữ vấn đề được chọn
+  const [customIssue, setCustomIssue] = useState(""); // State để lưu trữ nội dung của vấn đề tùy chỉnh
+  const [reportFormVisible, setReportFormVisible] = useState(false);
 
   useEffect(() => {
     fetchData();
     fetchImages();
   }, [id]);
+  const handleReportSubmit = async () => {
+    // Xử lý khi người dùng gửi báo cáo
+    console.log("Vấn đề báo cáo:", selectedIssue);
+    if (selectedIssue === "Vấn đề khác") {
+      console.log("Nội dung vấn đề tùy chỉnh:", customIssue);
+    }
+    // Đặt logic để gửi dữ liệu báo cáo lên server ở đây
+    setReportFormVisible(false); // Ẩn form sau khi gửi
+  };
+  const handleReportButtonClick = () => {
+    // Hiển thị form báo cáo khi click vào nút báo cáo
+    setReportFormVisible(true);
+  };
+  const handleCancelReport = () => {
+    setReportFormVisible(false);
+  };
 
   function formatMoney(amount) {
     // Kiểm tra nếu amount không phải là một số
@@ -403,6 +423,43 @@ function Detail() {
               >
                 <span style={{ marginRight: "25px" }}>Điện thoại : </span>
                 <p style={{ fontWeight: "initial" }}>{detailData.phone}</p>
+              </div>
+              <div
+                style={{
+                  fontSize: "25px",
+                  color: "white",
+                  fontWeight: "800",
+                  textDecoration: "none",
+                  backgroundColor: "red",
+                  padding: "5px",
+                  width: "150px",
+                  borderRadius: "10px",
+                  textAlign: "center",
+                  display: "flex",
+                  margin: "0 auto",
+                }}
+              >
+                <Link
+                  className="report"
+                  style={{
+                    fontSize: "25px",
+                    color: "white",
+                    fontWeight: "800",
+                    textDecoration: "none",
+                    backgroundColor: "red",
+                    padding: "10px",
+                    display: "flex",
+                    margin: "0 auto",
+                    textAlign: "center",
+                  }}
+                  to="/report"
+                >
+                  Báo cáo
+                  <FontAwesomeIcon
+                    style={{ marginLeft: "15px", fontSize: "25px" }}
+                    icon={faFlag}
+                  />
+                </Link>
               </div>
             </div>
           </div>

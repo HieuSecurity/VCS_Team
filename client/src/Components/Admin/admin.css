@@ -8,6 +8,7 @@
 .admin-button,
 .user-button,
 .post-button,
+.report-button,
 .payment-button {
   padding: 10px 20px; /* Padding của button */
   font-size: 16px; /* Kích thước chữ */
@@ -38,6 +39,7 @@
 .admin-button:hover,
 .user-button:hover,
 .post-button:hover,
+.report-button:hover,
 .payment-button:hover {
   color: white;
   background-color: black;
