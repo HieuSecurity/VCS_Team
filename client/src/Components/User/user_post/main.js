@@ -13,13 +13,6 @@ const PostTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchPosts();
-    }, 5000); // Refresh data every 5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
   
   const handleEdit = (postId) => {
     setEditingPost(postId);
