@@ -39,7 +39,7 @@ function Main() {
     // Chuyển đổi ngày tháng sang định dạng ISO string trước khi hiển thị
     const formattedUser = {
       ...user,
-      DOB: format(parseISO(user.DOB), "yyyy-MM-dd"),
+      DOB: user.DOB ? format(parseISO(user.DOB), "yyyy-MM-dd") : "1970-01-01",
     };
     setEditingUser(formattedUser);
   };
