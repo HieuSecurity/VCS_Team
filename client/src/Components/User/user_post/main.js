@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import "./post.css"; // Import CSS file for styling
 import { format, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faTimes, faTrashAlt, faEdit } from "@fortawesome/free-solid-svg-icons";
+import EditPostForm from "./EditPostForm";
 
 const PostTable = () => {
   const [posts, setPosts] = useState({ newPosts: [], allPosts: [] });
-  const [reason, setReason] = useState(""); // Lý do từ chối hoặc xóa bài viết
+  const [editingPost, setEditingPost] = useState();
+  
+
+  const handleEdit = (postId) => {
+    setEditingPost(postId);
+  };
+
 
 
   useEffect(() => {
@@ -40,9 +47,9 @@ const PostTable = () => {
     }
   };
 
-  const handleAction = (postId, action, reason = "") => {
+  const handleAction = (postId, action) => {
     let url = "";
-    let data = { reason };  
+    let data = {};  
 
     switch (action) {
       case "hide":
@@ -69,10 +76,13 @@ const PostTable = () => {
           let content = "";
           if (action === "hide") {
             alert(`Bài viết có mã số ${postId} đã được ẩn`);
+            window.location.reload();
           } else if (action === "edit") {
             alert(`Bài viết có mã số ${postId} chỉnh sửa thành công`);
+            window.location.reload();
           } else if (action === "delete") {
             alert(`Bài viết có mã số ${postId} đã bị xóa `);
+            window.location.reload();
           }
         }
         window.location.reload(); // Tải lại trang để cập nhật thay đổi
@@ -87,7 +97,6 @@ const PostTable = () => {
     return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
   };
 
-    
 
   return (
     <div className="table-container">
@@ -119,6 +128,13 @@ const PostTable = () => {
                   title="Xóa"
                   onClick={() => handleDelete(post.NEWSID)}
                 />
+
+                <FontAwesomeIcon
+                icon={faEdit}
+                className="action-icon edit-icon"
+                title="Chỉnh sửa"
+                onClick={() => handleEdit(post.NEWSID)} // Handle edit click
+              />
               </td>
               {/* <td>
                 <Link
@@ -133,8 +149,10 @@ const PostTable = () => {
           ))}
         </tbody>
       </table>
+      {editingPost && <EditPostForm postId={editingPost} isOpen={true} onRequestClose={() => setEditingPost(null)} />}
     </div>
   );
 };
 
 export default PostTable;
+

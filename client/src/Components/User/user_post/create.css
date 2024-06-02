@@ -1,0 +1,136 @@
+.post-form-container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 50px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .post-form-container h2 {
+    margin-top: 0;
+  }
+  
+  .post-form-container form div {
+    margin-bottom: 10px;
+  }
+  
+  .post-form-container form label {
+    display: block;
+    font-weight: bold;
+    font-size: 20px;
+  }
+  
+  /* Box tiêu đề */
+  .post-form-container form input[type="text2"] {
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 17px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  /* Box select chọn khoảng thời gian đăng bài */
+  .post-form-container form select#post-duration {
+    margin-left: 10%;
+    width: calc(95% - 1px);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 17px;
+    margin-right: 1px;
+  }
+  .post-form-container form .select-label {
+    display: flex;
+    margin-left: 10%;
+    font-weight: bold;
+    font-size: 20px;
+  }
+  /* Box mô tả */
+  .post-form-container form textarea {
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 17px;
+  }
+  
+  /* Box giá và diện tích*/
+  .post-form-container form input[type="number"] {
+    width: 85%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 17px;
+  }
+  /* Box địa điểm */
+  .post-form-container form input[type="text"] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    width: 85%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 17px;
+  }
+  /* Select box quận*/
+  .post-form-container form select {
+    width: calc(100% - 1px);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 17px;
+    margin-right: 1px;
+  }
+  /* Box hình ảnh */
+  .post-form-container form input[type="file"] {
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 17px;
+  }
+  
+  .post-form-container form button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .post-form-container form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .post-form-container form .input-group {
+    display: flex;
+  }
+
+  .edit-post-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .edit-post-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+  }
+  
+  
