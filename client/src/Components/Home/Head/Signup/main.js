@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom"; // Import useHistory hook
 import axios from "axios";
 
 const RegistrationForm = () => {
-  const history = useNavigate();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -27,6 +27,11 @@ const RegistrationForm = () => {
     }));
   };
 
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -40,8 +45,8 @@ const RegistrationForm = () => {
     if (!validator.isMobilePhone(formData.phone, "vi-VN")) {
       newErrors.phone = "Số điện thoại không hợp lệ";
     }
-    if (!validator.isLength(formData.password, { min: 6 })) {
-      newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
+    if (!validatePassword(formData.password)) {
+      newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
     }
     // Nếu có lỗi, hiển thị thông báo lỗi
     if (Object.keys(newErrors).length > 0) {
@@ -63,6 +68,7 @@ const RegistrationForm = () => {
           });
           console.log(response.status);
           alert("Đã tạo tài khoản thành công !");
+          navigate("/login"); // Chuyển hướng đến trang đăng nhập
         }
       } catch (error) {
         if (error.response && error.response.status === 409) {

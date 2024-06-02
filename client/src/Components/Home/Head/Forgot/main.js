@@ -10,7 +10,6 @@ const Main = () => {
   const history = useNavigate(); // Sử dụng useHistory hook để điều hướng
   const [formData, setFormData] = useState({
     email: "",
-    password: "",
     newPassword: "",
     confirmNewPassword: "",
     otp: "",
@@ -27,6 +26,11 @@ const Main = () => {
     }));
   };
 
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
@@ -35,15 +39,16 @@ const Main = () => {
       if (!validator.isEmail(formData.email)) {
         newErrors.email = "Email không hợp lệ";
       }
-      if (!validator.isLength(formData.newPassword, { min: 6 })) {
-        newErrors.newPassword = "Mật khẩu mới phải có ít nhất 6 ký tự";
-      }
-      if (formData.newPassword !== formData.confirmNewPassword) {
+      else if (formData.newPassword !== formData.confirmNewPassword) {
         newErrors.confirmNewPassword = "Mật khẩu nhập lại không khớp";
+      }
+      else if (!validatePassword(formData.newPassword)) {
+        newErrors.newPassword =
+          "Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
       }
     } else if (step === 2) {
       if (!validator.isNumeric(formData.otp) || formData.otp !== "123456") {
-        newErrors.otp = "Mã OTP không hợp lệ";
+        newErrors.otp = "Mã OTP không đúng";
       }
     }
 
@@ -54,7 +59,8 @@ const Main = () => {
         if (step === 1) {
           // Kiểm tra tài khoản và mật khẩu mới
           const response = await axios.get(
-            `http://localhost:3000/api/get-userid-byEmail/${formData.email}`);
+            `http://localhost:3000/api/get-userid-byEmail/${formData.email}`
+          );
 
           if (response.data && response.data.USERID) {
             setStep(2); // Chuyển sang bước 2
