@@ -6,12 +6,15 @@ import MainLogin from "./Components/Home/Head/Login/main";
 import MainSignup from "./Components/Home/Head/Signup/main";
 import MainForgot from "./Components/Home/Head/Forgot/main";
 import CreatePost from "./Components/Home/Head/CreatePost/main";
+import Report from "./Components/Home/Head/Report/main";
+
 import Admin from "./Components/Admin/admin";
 import User from "./Components/User/user";
 import DetailPostUser from "./Components/User/user_post/detailPost";
 import DetailPostAdmin from "./Components/Admin/admin_post/detailPost";
 import Footer from "./Components/Home/Footer/footer";
 import ChangePassWord from "./Components/Home/Head/ChangePass/main";
+
 
 function App() {
   return (
@@ -70,6 +73,9 @@ function App() {
       </Routes>
       <Routes>
         <Route path="/login" element={<MainLogin />} />
+      </Routes>
+      <Routes>
+        <Route path="/report" element={<Report />} />
       </Routes>
       <Routes>
         <Route path="/signup" element={<MainSignup />} />

@@ -4,6 +4,8 @@ import Login from "./Login/login";
 import User from "./User/main";
 import Title from "./Title/title";
 import CreatePost from "./CreatePost/createPost";
+import Report from "./Report/report";
+
 import "../homeCSS/home.css";
 
 function Head() {
@@ -22,6 +24,7 @@ function Head() {
   return (
     <div className="Head">
       <div className="login_create">
+        <Report/>
         <CreatePost className="CreatePost" />
         {state ? <></> : <Login className="Login" />}
         {state ? <User /> : null}
