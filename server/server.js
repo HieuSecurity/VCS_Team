@@ -436,6 +436,25 @@ app.post("/api/login", (req, res) => {
   });
 });
 
+// API đổi mật khẩu
+app.post('/api/update-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    /// Update mật khẩu mới trong cơ sở dữ liệu
+    await connection.query("UPDATE account SET password = ? WHERE email = ?", [
+      newPassword,
+      email,
+    ]);
+
+    // Trả về phản hồi thành công
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // API lấy thông tin bảng giá
 app.get("/api/get-pricelist", (req, res) => {
   const sql = "SELECT * FROM pricelist";
