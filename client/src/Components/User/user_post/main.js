@@ -4,88 +4,125 @@ import "./post.css"; // Import CSS file for styling
 import { format, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes, faTrashAlt, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faTrashAlt, faEdit, faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons"; // Import icon ẩn
 import EditPostForm from "./EditPostForm";
 
 const PostTable = () => {
   const [posts, setPosts] = useState({ newPosts: [], allPosts: [] });
   const [editingPost, setEditingPost] = useState();
-  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchPosts();
+    }, 5000); // Refresh data every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+  
   const handleEdit = (postId) => {
     setEditingPost(postId);
   };
 
-
-
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/get-posts");
-        const allPosts = response.data.results;
-        const newPosts = allPosts.filter((post) => post.STATE !== "Đã xóa");
-        const filteredPosts = allPosts.filter((post) => post.STATE !== "Đã xóa" );
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.EMAIL) {
+      axios
+        .get(`http://localhost:3000/api/get-userid-byEmail/${user.EMAIL}`)
+        .then((response) => {
+          const userId = response.data.USERID;
+          fetchPosts(userId);
+        })
+        .catch((error) => {
+          console.error("Error fetching user ID:", error);
+          setError("Đã xảy ra lỗi khi lấy USERID");
+          setLoading(false);
+        });
+    } else {
+      setError("Không tìm thấy email trong localStorage");
+      setLoading(false);
+    }
+  }, []);
 
-        // Sắp xếp newPosts và allPosts theo mã bài đăng
+  const fetchPosts = (userId) => {
+    axios
+      .get(`http://localhost:3000/api/get-posts-byUserid/${userId}`)
+      .then((response) => {
+        const allPosts = response.data;
+        const newPosts = allPosts.filter((post) => post.STATE !== "Đã xóa");
+        const filteredPosts = allPosts.filter((post) => post.STATE !== "Đã xóa");
+
         newPosts.sort((a, b) => a.NEWSID - b.NEWSID);
         filteredPosts.sort((a, b) => a.NEWSID - b.NEWSID);
 
         setPosts({ newPosts, allPosts: filteredPosts });
-        
-      } catch (error) {
+        setLoading(false);
+      })
+      .catch((error) => {
         console.error("Error fetching posts:", error);
-      }
-    };
+        setError("Đã xảy ra lỗi khi lấy thông tin bài viết");
+        setLoading(false);
+      });
+  };
 
-    fetchPosts();
-  }, []);
-  
   const handleDelete = (postId) => {
     const confirmMessage = "Bạn có chắc chắn muốn xóa bài đăng này không?";
     if (window.confirm(confirmMessage)) {
-        handleAction(postId, "delete");
+      handleAction(postId, "delete");
+    }
+  };
+
+  const handleHide = (postId) => {
+    const confirmMessage = "Bạn có chắc chắn muốn ẩn bài đăng này không?";
+    if (window.confirm(confirmMessage)) {
+      handleAction(postId, "hide");
+    }
+  };
+
+  const handleUnhide = (postId) => {
+    const confirmMessage = "Bạn có chắc chắn muốn bỏ ẩn bài đăng này không?";
+    if (window.confirm(confirmMessage)) {
+      handleAction(postId, "unhide");
     }
   };
 
   const handleAction = (postId, action) => {
     let url = "";
-    let data = {};  
+    let data = {};
 
     switch (action) {
       case "hide":
         url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: action === "hide" ? "Đã ẩn" : ""};
+        data = { newsid: postId, state: "Đã ẩn" };
+        break;
+      case "unhide":
+        url = `http://localhost:3000/api/update-newsState`;
+        data = { newsid: postId, state: "Hoạt động" };
         break;
       case "edit":
         url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: action === "edit" ? "Đã chỉnh sửa" : ""};
+        data = { newsid: postId, state: "Đã chỉnh sửa" };
         break;
       case "delete":
         url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: "Đã xóa"};
+        data = { newsid: postId, state: "Đã xóa" };
         break;
       default:
         return;
     }
-  
+
     axios
       .post(url, data)
       .then((response) => {
-        // Tạo thông báo nếu là hành động hide hoặc edit hoặc delete
-        if (action === "hide" || action === "edit" || action === "delete") {
-          let content = "";
-          if (action === "hide") {
-            alert(`Bài viết có mã số ${postId} đã được ẩn`);
-            window.location.reload();
-          } else if (action === "edit") {
-            alert(`Bài viết có mã số ${postId} chỉnh sửa thành công`);
-            window.location.reload();
-          } else if (action === "delete") {
-            alert(`Bài viết có mã số ${postId} đã bị xóa `);
-            window.location.reload();
-          }
+        if (action === "hide") {
+          alert(`Bài viết có mã số ${postId} đã được ẩn`);
+        } else if (action === "edit") {
+          alert(`Bài viết có mã số ${postId} chỉnh sửa thành công`);
+        } else if (action === "delete") {
+          alert(`Bài viết có mã số ${postId} đã bị xóa`);
         }
-        window.location.reload(); // Tải lại trang để cập nhật thay đổi
+        window.location.reload();
       })
       .catch((error) => {
         console.error(`Lỗi khi thực hiện hành động ${action}:`, error);
@@ -97,6 +134,13 @@ const PostTable = () => {
     return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div className="table-container">
@@ -104,7 +148,7 @@ const PostTable = () => {
       <table className="user-table">
         <thead>
           <tr>
-            <th>Mã bài đăng </th>
+            <th>Mã bài đăng</th>
             <th>Tiêu đề bài đăng</th>
             <th>Ngày hết hạn</th>
             <th>Trạng thái</th>
@@ -113,7 +157,7 @@ const PostTable = () => {
         </thead>
         <tbody>
           {posts.allPosts.map((post) => (
-            <tr key={post.USERID}>
+            <tr key={post.NEWSID}>
               <td>{post.NEWSID}</td>
               <td>{post.TITLE}</td>
               <td>{formatDate(post.TIMESTART)}</td>
@@ -128,23 +172,29 @@ const PostTable = () => {
                   title="Xóa"
                   onClick={() => handleDelete(post.NEWSID)}
                 />
-
                 <FontAwesomeIcon
-                icon={faEdit}
-                className="action-icon edit-icon"
-                title="Chỉnh sửa"
-                onClick={() => handleEdit(post.NEWSID)} // Handle edit click
-              />
+                  icon={faEdit}
+                  className="action-icon edit-icon"
+                  title="Chỉnh sửa"
+                  onClick={() => handleEdit(post.NEWSID)}
+                />
+                {post.STATE === "Hoạt động" && (
+                  <FontAwesomeIcon
+                    icon={faEyeSlash}
+                    className="action-icon hide-icon"
+                    title="Ẩn"
+                    onClick={() => handleHide(post.NEWSID)}
+                  />
+                )}
+                {post.STATE === "Đã ẩn" && (
+                  <FontAwesomeIcon
+                    icon={faEye}
+                    className="action-icon unhide-icon"
+                    title="Bỏ ẩn"
+                    onClick={() => handleUnhide(post.NEWSID)}
+                  />
+                )}
               </td>
-              {/* <td>
-                <Link
-                  to={`/detail/${post.id}`}
-                  className="detail-link update-button"
-                >
-                  Chi tiết
-                </Link>
-              </td> */}
-              
             </tr>
           ))}
         </tbody>
@@ -155,4 +205,3 @@ const PostTable = () => {
 };
 
 export default PostTable;
-

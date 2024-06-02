@@ -18,8 +18,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt321", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -631,6 +631,44 @@ app.get("/api/get-posts-byUserid/:userid", (req, res) => {
   });
 });
 
+// API Lấy các bài viết của người dùng từ email
+app.get('/api/get-posts-byEmail/:email', (req, res) => {
+  const email = req.params.email;
+
+  // Câu query để lấy USERID từ bảng USERINFO dựa trên email
+  const queryUserId = 'SELECT USERID FROM USERINFO WHERE EMAIL = ?';
+
+  // Thực hiện câu query để lấy USERID
+  connection.query(queryUserId, [email], (error, results) => {
+      if (error) {
+          console.error('Error fetching USERID:', error);
+          res.status(500).send('Internal Server Error');
+          return;
+      }
+
+      if (results.length === 0) {
+          res.status(404).send('User not found');
+          return;
+      }
+
+      const userId = results[0].USERID;
+
+      // Câu query để lấy các bài viết từ bảng NEWSLIST dựa trên USERID
+      const queryPosts = 'SELECT * FROM NEWSLIST WHERE USERID = ?';
+
+      // Thực hiện câu query để lấy các bài viết
+      connection.query(queryPosts, [userId], (err, posts) => {
+          if (err) {
+              console.error('Error fetching user posts:', err);
+              res.status(500).json({ error: 'Error fetching user posts' });
+              return;
+          }
+
+          res.status(200).json(posts);
+      });
+  });
+});
+
 // API lọc bài đăng theo Quận
 app.get("/api/search-posts-location", (req, res) => {
   const selectedDistrict = req.query.district;
@@ -1027,26 +1065,26 @@ app.get("/api/get-list-userID", (req, res) => {
 });
 
 // API lấy ID người dùng bằng email
-app.get('/api/get-userid-byEmail/:email', (req, res) => {
-  const email = req.params.email;
+  app.get('/api/get-userid-byEmail/:email', (req, res) => {
+    const email = req.params.email;
 
-  const query = 'SELECT USERID FROM USERINFO WHERE EMAIL = ?';
-  connection.query(query, [email], (error, results) => {
-    if (error) {
-      console.error('Error fetching USERID:', error);
-      res.status(500).send('Internal Server Error');
-      return;
-    }
+    const query = 'SELECT USERID FROM USERINFO WHERE EMAIL = ?';
+    connection.query(query, [email], (error, results) => {
+      if (error) {
+        console.error('Error fetching USERID:', error);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
 
-    if (results.length === 0) {
-      res.status(404).send('User not found');
-      return;
-    }
+      if (results.length === 0) {
+        res.status(404).send('User not found');
+        return;
+      }
 
-    const userId = results[0].USERID;
-    res.json({ USERID: userId });
+      const userId = results[0].USERID;
+      res.json({ USERID: userId });
+    });
   });
-});
 
 
 // API lấy thông tin người dùng và tổng số bài đăng theo USERID

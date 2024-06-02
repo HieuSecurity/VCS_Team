@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../Main_posts/main_posts.css";
-import { Link, useFetcher } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
@@ -10,24 +10,25 @@ import { format, parseISO } from "date-fns";
 function Image_des() {
   const [data, setData] = useState({ results: [], total: 0 });
   const [sortBy, setSortBy] = useState("default");
-  const [totalResults, setTotalResults] = useState(0);
-  const [selectedDistrict, setSelectedDistrict] = useState(""); // Thêm state để lưu trữ giá trị Quận được chọn
-
-  // Trạng thái của loại sắp xếp
+  const [selectedDistrict, setSelectedDistrict] = useState(""); 
 
   useEffect(() => {
-    // Hàm gọi API khi component được render
     fetchData();
   }, []);
 
-  // Hàm để gọi API
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000); // Refresh data every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleSortByChange = (type) => {
     setSortBy(type);
     if (type === "default") {
-      // Call API for fetching all posts when "Tất cả" button is clicked
       fetchData();
     } else if (type === "newest") {
-      // Call API for fetching latest posts when "Mới nhất" button is clicked
       fetchLatestPosts();
     }
   };
@@ -40,8 +41,8 @@ function Image_des() {
     axios
       .get("http://localhost:3000/api/get-posts")
       .then((response) => {
-        // Lưu trữ dữ liệu vào state
-        setData({ results: response.data.results, total: response.data.total });
+        const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+        setData({ results: filteredData, total: filteredData.length });
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -73,7 +74,8 @@ function Image_des() {
     axios
       .get("http://localhost:3000/api/latest-posts")
       .then((response) => {
-        setData({ results: response.data.results, total: response.data.total });
+        const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+        setData({ results: filteredData, total: filteredData.length });
       })
       .catch((error) => {
         console.error("Error fetching latest posts:", error);
@@ -81,19 +83,14 @@ function Image_des() {
   };
 
   const formatMoney = (amount) => {
-    // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
       return (amount / 1000).toFixed(0) + " ngàn";
-    }
-    // Chia số tiền cho 1 tỷ để kiểm tra nếu nó lớn hơn 1 tỷ
-    else if (amount >= 1000000000) {
+    } else if (amount >= 1000000000) {
       return (amount / 1000000000).toFixed(1) + " tỷ";
-    }
-    // Chia số tiền cho 1 triệu để kiểm tra nếu nó lớn hơn 1 triệu
-    else if (amount >= 1000000) {
+    } else if (amount >= 1000000) {
       return (amount / 1000000).toFixed(1) + " triệu";
     } else {
-      return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Định dạng lại số tiền với dấu phẩy ngăn cách hàng nghìn
+      return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
   };
 
@@ -103,7 +100,8 @@ function Image_des() {
       axios
         .get(`http://localhost:3000/api/get-posts`)
         .then((response) => {
-          setData(response.data);
+          const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+          setData({ results: filteredData, total: filteredData.length });
           setSortBy("default");
         })
         .catch((error) => {
@@ -115,7 +113,8 @@ function Image_des() {
           `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
         )
         .then((response) => {
-          setData(response.data);
+          const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+          setData({ results: filteredData, total: filteredData.length });
           setSortBy("default");
         })
         .catch((error) => {
@@ -128,9 +127,8 @@ function Image_des() {
   return (
     <div className="container_form" style={{ height: "100%" }}>
       <Search onSearch={handleSearch} />
-      <div className="sort" style={{ fontSize: "25x" }}>
+      <div className="sort" style={{ fontSize: "25px" }}>
         <p style={{ fontSize: "22px", padding: "10px" }}>Sắp xếp : </p>
-        {/* Thêm className active cho nút mặc định */}
         <span
           className={sortBy === "default" ? "active" : ""}
           onClick={() => handleSortByChange("default")}
@@ -160,7 +158,6 @@ function Image_des() {
             alignItems: "center",
           }}
         >
-          {" "}
           {data.total}
         </h5>
       </span>
@@ -171,7 +168,7 @@ function Image_des() {
           style={{ textDecoration: "none", color: "black" }}
           to={{
             pathname: `/detail/${item.NEWSID}`,
-            state: { selectedItem: item }, // Truyền dữ liệu của thẻ qua trang chi tiết
+            state: { selectedItem: item },
           }}
         >
           <div
@@ -227,7 +224,6 @@ function Image_des() {
                 >
                   <li className="price" style={{ color: "#16c784" }}>
                     {formatMoney(item.PRICE)} đồng/tháng
-                    {/* Chuyển đổi số tiền thành dạng tiền tệ Việt Nam */}
                   </li>
                   <li className="acreage">{item.ACREAGE} m2</li>
                   <li className="district">{item.district}</li>
@@ -248,9 +244,7 @@ function Image_des() {
                     padding: "10px",
                     marginTop: "200px",
                   }}
-                >
-                  {/*Chỗ này trước là mô tả nhưng mô tả nên để trong chi tiết bài đăng*/}
-                </span>
+                ></span>
                 <div
                   className="img-name"
                   style={{
@@ -307,3 +301,4 @@ function Image_des() {
 }
 
 export default Image_des;
+

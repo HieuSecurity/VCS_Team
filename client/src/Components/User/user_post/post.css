@@ -21,12 +21,16 @@
 }
 
 .detail-link {
-  color: white; /* Màu chữ là xanh */
+  color: white; 
   text-decoration: none;
   font-weight: 700;
   text-align: center;
   font-size: 19px;
   margin: 0 auto;
+  padding: 5px 10px;
+  background-color: #007bff;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .user-table th {
@@ -57,4 +61,6 @@
 .chuc-Nang {
   display: inline-block;
   width: 250px;
+  justify-content: space-around;
+  width: 100%;
 }
