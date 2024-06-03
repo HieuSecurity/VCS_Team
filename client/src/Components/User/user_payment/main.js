@@ -2,28 +2,24 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./payment.css"; // Import CSS file for styling
 import { format, parseISO } from "date-fns";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const PostTable = () => {
   const [payments, setPayments] = useState([]);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [paymentSummary, setPaymentSummary] = useState({ total: 0, count: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Lấy đối tượng user từ localStorage
         const user = JSON.parse(localStorage.getItem("user"));
         if (user && user.EMAIL) {
-          // Lấy USERID từ EMAIL
           const userIdResponse = await axios.get(`http://localhost:3000/api/get-userid-byEmail/${user.EMAIL}`);
           const USERID = userIdResponse.data.USERID;
-
-          // Lấy các bài viết của người dùng từ USERID
           const postsResponse = await axios.get(`http://localhost:3000/api/get-posts-byUserid/${USERID}`);
 
-          // Duyệt qua từng bài viết để lấy thông tin thanh toán
           const promises = postsResponse.data.map(async (post) => {
             const paymentResponse = await axios.get(`http://localhost:3000/api/get-payment-byNewsid/${post.NEWSID}`);
-
             if (paymentResponse.data.length > 0) {
               const adminId = paymentResponse.data[0].ADMINID;
 
@@ -42,11 +38,20 @@ const PostTable = () => {
             return paymentResponse.data;
           });
 
-          // Chờ tất cả các yêu cầu hoàn thành
           const paymentResponses = await Promise.all(promises);
+          const flatPayments = paymentResponses.flat();
 
-          // Lấy danh sách thanh toán từ các phản hồi
-          setPayments(paymentResponses.flat()); // Định dạng mảng các mảng
+          // Sắp xếp các thanh toán theo thời gian từ gần nhất đến xa nhất
+          flatPayments.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
+
+          setPayments(flatPayments);
+
+          // Tính toán tổng số tiền và số lần thanh toán
+          const totalAmount = flatPayments.reduce((sum, payment) => sum + payment.PRICE, 0);
+          setPaymentSummary({ total: totalAmount, count: flatPayments.length });
+
+          // Đặt URL của ảnh QR code
+          setQrCodeUrl("http://localhost:3000/api/get-qrThanhToan");
         }
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
@@ -66,7 +71,20 @@ const PostTable = () => {
 
   return (
     <div className="table-container">
-      <h1>THÔNG TIN THANH TOÁN</h1>
+      <div className="payment-summary">
+        <div className="qr-code">
+          <img src={qrCodeUrl} alt="QR Code" />
+        </div>
+        <div className="info">
+          <h1>Thông tin thanh toán</h1>
+          <p>STK: 1047589631</p>
+          <p>Chủ tài khoản: NGUYEN QUANG HIEU</p>
+          <p>Ngân hàng: Vietcombank</p>
+          <p>Nội dung: Mã thanh toán</p>
+          <p style={{color:"red"}}>Lưu ý: Nội dung là mã thanh toán (không phải mã bài đăng) chính xác với thông tin thanh toán dưới đây.</p>
+          <p style={{color:"red"}}>Chúng tôi không chịu trách nhiệm với giao dịch không hợp lệ!</p>
+        </div>
+      </div>
       <table className="payment-table">
         <thead>
           <tr>

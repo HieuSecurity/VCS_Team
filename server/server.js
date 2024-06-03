@@ -12,7 +12,8 @@ const { format, parseISO } = require("date-fns-tz"); // Import format và parseI
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-
+// Middleware để phục vụ các tệp tĩnh từ thư mục "images"
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
@@ -55,6 +56,13 @@ app.get("/image/:filename", (req, res) => {
   const imagePath = path.resolve(__dirname, "./uploads", filename);
   res.sendFile(imagePath);
 });
+
+// API để lấy ảnh QR code
+app.get('/api/get-qrThanhToan', (req, res) => {
+  const qrCodePath = path.join(__dirname, 'images', 'QRThanhToan.jpg');
+  res.sendFile(qrCodePath);
+});
+
 
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const {

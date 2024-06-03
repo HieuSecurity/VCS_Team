@@ -1,11 +1,39 @@
-/* post.css */
-
 .table-container {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.payment-summary {
+  display: flex;
+  width: 80%;
+  margin-bottom: 20px;
+}
+
+.payment-summary .qr-code {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.payment-summary .qr-code img {
+  max-width: 100%;
+  height: auto;
+}
+
+.payment-summary .info {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .payment-table {
-  width: 100%;
+  width: 80%;
   border-collapse: collapse;
 }
 
@@ -22,4 +50,17 @@
 
 .payment-table tr:hover {
   background-color: #f2f2f2;
+}
+
+.detail-link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.detail-link:hover {
+  text-decoration: underline;
+}
+
+.update-button {
+  margin-left: 10px;
 }
