@@ -81,7 +81,7 @@ const PostTable = () => {
           <p>Chủ tài khoản: NGUYEN QUANG HIEU</p>
           <p>Ngân hàng: Vietcombank</p>
           <p>Nội dung: Mã thanh toán</p>
-          <p style={{color:"red"}}>Lưu ý: Nội dung là mã thanh toán (không phải mã bài đăng) chính xác với thông tin thanh toán dưới đây.</p>
+          <p style={{color:"red"}}>Lưu ý: Nội dung là MÃ THANH TOÁN (không phải mã bài đăng) chính xác với thông tin thanh toán dưới đây.</p>
           <p style={{color:"red"}}>Chúng tôi không chịu trách nhiệm với giao dịch không hợp lệ!</p>
         </div>
       </div>

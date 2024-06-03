@@ -104,6 +104,12 @@ const Main = () => {
           >
             Gửi báo cáo
           </button>
+          <button
+            style={{ display: "inline-block", width: "150px", marginLeft: "25px"}}
+            type="submit"
+          >
+            Hủy
+          </button>
         </form>
       </div>
     </div>
