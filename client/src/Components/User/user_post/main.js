@@ -4,7 +4,7 @@ import "./post.css"; // Import CSS file for styling
 import { format, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrashAlt, faEdit, faEyeSlash, faEye } from "@fortawesome/free-solid-svg-icons"; // Import icon ẩn
+import { faTrashAlt, faEdit, faEyeSlash, faEye, faSyncAlt } from "@fortawesome/free-solid-svg-icons"; // Import icon reset
 import EditPostForm from "./EditPostForm";
 
 const PostTable = () => {
@@ -12,11 +12,6 @@ const PostTable = () => {
   const [editingPost, setEditingPost] = useState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  
-  const handleEdit = (postId) => {
-    setEditingPost(postId);
-  };
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -66,6 +61,10 @@ const PostTable = () => {
     }
   };
 
+  const handleEdit = (postId) => {
+    setEditingPost(postId);
+  };
+
   const handleHide = (postId) => {
     const confirmMessage = "Bạn có chắc chắn muốn ẩn bài đăng này không?";
     if (window.confirm(confirmMessage)) {
@@ -80,7 +79,30 @@ const PostTable = () => {
     }
   };
 
-  const handleAction = (postId, action) => {
+  const handleReset = (postId) => {
+    const durationOptions = ["30", "60", "180", "365"];
+    const userInput = prompt("Thời gian gia hạn(30, 60, 180, 365):");
+  
+    if (userInput === null) {
+      // User clicked Cancel, do nothing
+      return;
+    }
+  
+    if (!durationOptions.includes(userInput)) {
+      alert("Vui lòng nhập một trong các khoảng thời gian sau: 30, 60, 180, 365");
+      handleReset(postId); // Ask the user to input again
+      return;
+    }
+  
+    const confirmMessage = "Bạn có chắc chắn muốn gia hạn thanh toán cho bài đăng này không?";
+    if (window.confirm(confirmMessage)) {
+      handleAction(postId, "reset", userInput);
+    }
+  };
+  
+  
+
+  const handleAction = (postId, action, postDuration) => {
     let url = "";
     let data = {};
 
@@ -101,6 +123,16 @@ const PostTable = () => {
         url = `http://localhost:3000/api/update-newsState`;
         data = { newsid: postId, state: "Đã xóa" };
         break;
+      case "reset":
+        url = `http://localhost:3000/api/create-payment`;
+        data = { 
+          newsid: postId, 
+          POSTDURATION: postDuration, 
+          ADMINEMAIL: "admin@gmail.com"
+        };
+        url = `http://localhost:3000/api/update-newsState`;
+        data = { newsid: postId, state: "Chờ thanh toán" };
+        break;
       default:
         return;
     }
@@ -114,6 +146,8 @@ const PostTable = () => {
           alert(`Bài viết có mã số ${postId} chỉnh sửa thành công`);
         } else if (action === "delete") {
           alert(`Bài viết có mã số ${postId} đã bị xóa`);
+        } else if (action === "reset") {
+          alert(`Hãy thanh toán cho yêu cầu gia hạn bài đăng có mã số ${postId}`);
         }
         window.location.reload();
       })
@@ -159,33 +193,103 @@ const PostTable = () => {
                 <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>
                   Chi tiết
                 </Link>
-                <FontAwesomeIcon
-                  icon={faTrashAlt}
-                  className="action-icon delete-icon"
-                  title="Xóa"
-                  onClick={() => handleDelete(post.NEWSID)}
-                />
-                <FontAwesomeIcon
-                  icon={faEdit}
-                  className="action-icon edit-icon"
-                  title="Chỉnh sửa"
-                  onClick={() => handleEdit(post.NEWSID)}
-                />
                 {post.STATE === "Hoạt động" && (
+                  <>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                  />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    className="action-icon edit-icon"
+                    title="Chỉnh sửa"
+                    onClick={() => handleEdit(post.NEWSID)}
+                  />
                   <FontAwesomeIcon
                     icon={faEyeSlash}
                     className="action-icon hide-icon"
                     title="Ẩn"
                     onClick={() => handleHide(post.NEWSID)}
                   />
+                  </>
+                )}
+                {post.STATE === "Chờ duyệt" && (
+                  <>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                  />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    className="action-icon edit-icon"
+                    title="Chỉnh sửa"
+                    onClick={() => handleEdit(post.NEWSID)}
+                  />
+                  </>
                 )}
                 {post.STATE === "Đã ẩn" && (
+                  <>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                  />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    className="action-icon edit-icon"
+                    title="Chỉnh sửa"
+                    onClick={() => handleEdit(post.NEWSID)}
+                  />
                   <FontAwesomeIcon
                     icon={faEye}
                     className="action-icon unhide-icon"
                     title="Bỏ ẩn"
                     onClick={() => handleUnhide(post.NEWSID)}
                   />
+                  </>
+                )}
+                {post.STATE === "Hết hạn" && (
+                  <>
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                  />
+                  <FontAwesomeIcon
+                    icon={faEdit}
+                    className="action-icon edit-icon"
+                    title="Chỉnh sửa"
+                    onClick={() => handleEdit(post.NEWSID)}
+                  />
+                  <FontAwesomeIcon
+                    icon={faSyncAlt}
+                    className="action-icon reset-icon"
+                    title="Gia hạn bài đăng"
+                    onClick={() => handleReset(post.NEWSID)}
+                  />
+                  </>
+                )}
+                {post.STATE === "Bị từ chối" && (
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                />
+                )}
+                {post.STATE === "Chờ thanh toán" && (
+                  <FontAwesomeIcon
+                    icon={faTrashAlt}
+                    className="action-icon delete-icon"
+                    title="Xóa"
+                    onClick={() => handleDelete(post.NEWSID)}
+                />
                 )}
               </td>
             </tr>

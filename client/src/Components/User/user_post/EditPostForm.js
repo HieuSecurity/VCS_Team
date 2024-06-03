@@ -44,24 +44,60 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
     fetchDistricts();
   }, [postId]);
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   if (!formData.agreeTerms) {
+  //       alert("Vui lòng đồng ý với điều khoản và dịch vụ");
+  //       return;
+  //   }
+
+  //   try {
+  //     const response = await axios.put(`http://localhost:3000/api/update-post/${postId}`, formData);
+  //     console.log(response.data);
+  //     alert("Đã chỉnh sửa bài đăng thành công");
+  //     window.location.reload();
+  //     onRequestClose(); // đóng cửa sổ chỉnh s
+  //   } catch (error) {
+  //     console.error("Error updating post:", error);
+  //     alert("Đã xảy ra lỗi khi chỉnh sửa bài đăng");
+  //   }
+  // };
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!formData.agreeTerms) {
         alert("Vui lòng đồng ý với điều khoản và dịch vụ");
         return;
     }
-
+  
     try {
+      // Gửi dữ liệu của các hình ảnh mới lên server và lưu chúng vào cơ sở dữ liệu
+      const imageFormData = new FormData();
+      formData.images.forEach((image) => {
+        imageFormData.append("image", image);
+      });
+      const imageResponse = await axios.post("http://localhost:3000/api/upload", imageFormData);
+      
+      // Lấy các đường dẫn của các hình ảnh đã được lưu từ server
+      const newImages = imageResponse.data.map(image => image.imageUrl);
+      
+      // Cập nhật dữ liệu của formData.images với các đường dẫn mới
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        images: newImages
+      }));
+  
+      // Gửi dữ liệu cập nhật của bài đăng lên server
       const response = await axios.put(`http://localhost:3000/api/update-post/${postId}`, formData);
       console.log(response.data);
       alert("Đã chỉnh sửa bài đăng thành công");
       window.location.reload();
-      onRequestClose(); // Close the modal after submission
+      onRequestClose(); // đóng cửa sổ chỉnh sửa sau khi thành công
     } catch (error) {
       console.error("Error updating post:", error);
       alert("Đã xảy ra lỗi khi chỉnh sửa bài đăng");
     }
   };
+  
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -86,19 +122,6 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
 
   const handleCancel = () => {
     onRequestClose(); // Close the modal on cancel
-  };
-
-  const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc muốn xóa bài đăng này?")) {
-      try {
-        await axios.delete(`http://localhost:3000/api/delete-post/${postId}`);
-        alert("Bài đăng đã được xóa thành công");
-        window.location.reload();
-      } catch (error) {
-        console.error("Error deleting post:", error);
-        alert("Đã xảy ra lỗi khi xóa bài đăng");
-      }
-    }
   };
 
   return (
