@@ -43,18 +43,16 @@ const Main = () => {
         "http://localhost:3000/api/login",
         formData
       );
-      console.log(response.data.user.role);
       // Nếu đăng nhập thành công, chuyển hướng đến trang admin hoặc user tùy thuộc vào vai trò của người dùng
       if (response.status === 200) {
-        const { ROLE, ...userData } = response.data.user;
-        console.log(ROLE === 1);
+        const userData = response.data.user;
 
         // Lưu thông tin người dùng vào localStorage
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("loggedIn", JSON.stringify(true)); // Lưu trạng thái đăng nhập
 
-        if (ROLE === 1) {
-          history("/admin/info");
+        if (userData.ROLE === 1) {
+          history("/");
           alert("Xin chào Admin!!!");
         } else {
           setState(true); // Set state thành true

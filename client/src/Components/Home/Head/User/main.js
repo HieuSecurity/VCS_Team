@@ -8,26 +8,47 @@ function Main() {
   const [showModal, setShowModal] = useState(false);
   const { state, setState } = useContext(StateContext); // Sử dụng context từ MyProvider
   const [userName, setUserName] = useState("");
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.EMAIL) {
-      axios
-        .get(`http://localhost:3000/api/get-userid-byEmail/${user.EMAIL}`)
-        .then((response) => {
-          const userId = response.data.USERID;
-          axios
-            .get(`http://localhost:3000/api/user-info/${userId}`)
-            .then((response) => {
-              setUserName(response.data.NAME);
-            })
-            .catch((error) => {
-              console.error("Error fetching user info:", error);
-            });
-        })
-        .catch((error) => {
-          console.error("Error fetching user ID:", error);
-        });
+      setRole(user.ROLE);
+      if (user.ROLE === 1) {
+        axios
+          .get(`http://localhost:3000/api/get-adminId-byEmail/${user.EMAIL}`)
+          .then((response) => {
+            const adminId = response.data.ADMINID;
+            axios
+              .get(`http://localhost:3000/api/get-adminInfo-byId/${adminId}`)
+              .then((response) => {
+                setUserName(response.data.NAME);
+              })
+              .catch((error) => {
+                console.error("Error fetching admin info:", error);
+              });
+          })
+          .catch((error) => {
+            console.error("Error fetching admin ID:", error);
+          });
+      } else {
+        axios
+          .get(`http://localhost:3000/api/get-userid-byEmail/${user.EMAIL}`)
+          .then((response) => {
+            const userId = response.data.USERID;
+            axios
+              .get(`http://localhost:3000/api/user-info/${userId}`)
+              .then((response) => {
+                setUserName(response.data.NAME);
+              })
+              .catch((error) => {
+                console.error("Error fetching user info:", error);
+              });
+          })
+          .catch((error) => {
+            console.error("Error fetching user ID:", error);
+          });
+      }
     }
   }, []);
 
@@ -53,6 +74,9 @@ function Main() {
       hideUserForm();
     }
   };
+
+  const infoLink = role === 1 ? "/admin/info" : "/user/info";
+  const infoLabel = role === 1 ? "Quản lý" : "Xem thông tin";
 
   return (
     <div className={`Main ${showModal ? "modal-active" : ""}`}>
@@ -82,8 +106,8 @@ function Main() {
             }}
             className="modal-content"
           >
-            <Link to="/user/info" style={{ margin: "15px 0" }}>
-              Xem thông tin{" "}
+            <Link to={infoLink} style={{ margin: "15px 0" }}>
+              {infoLabel}
             </Link>
             <Link to="/changepassword" style={{ margin: "15px 0" }}>
               Thay đổi mật khẩu

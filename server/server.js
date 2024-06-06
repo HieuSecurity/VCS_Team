@@ -19,8 +19,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -1008,6 +1008,27 @@ app.get("/api/search", (req, res) => {
     });
   });
 });
+
+// API để lấy ADMINID dựa trên email
+app.get('/api/get-adminId-byEmail/:email', (req, res) => {
+  const email = req.params.email;
+  
+  const query = 'SELECT ADMINID FROM ADMININFO WHERE EMAIL = ?';
+  connection.query(query, [email], (err, results) => {
+    if (err) {
+      console.error('Lỗi truy vấn:', err);
+      res.status(500).send('Lỗi máy chủ');
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ ADMINID: results[0].ADMINID });
+    } else {
+      res.status(404).send('Không tìm thấy ADMIN với email này');
+    }
+  });
+});
+
 
 // API lấy thông tin quản trị viên theo email
 app.get("/api/admin-info/:email", (req, res) => {
