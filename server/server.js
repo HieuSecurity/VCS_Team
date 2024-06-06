@@ -1509,6 +1509,24 @@ app.get("/api/get-notification-byUserID/:userId", (req, res) => {
   });
 });
 
+// API đánh dấu đã xem thông báo
+app.put("/api/update-notificationSeen/:notificationID", (req, res) => {
+  const notificationID = req.params.notificationID;
+  const query = "UPDATE NOTIFICATION SET SEEN = 1 WHERE ID = ?";
+
+  connection.query(query, [notificationID], (error, results) => {
+    if (error) {
+      console.error("Error updating notification seen state:", error);
+      return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: "Không tìm thấy thông báo" });
+    }
+    res.status(200).json({ message: "Cập nhật trạng thái đã xem thành công" });
+  });
+});
+
+
 // API để kiểm tra người dùng đã thực hiện báo cáo chưa
 app.get('/api/check-report-yet/:userId', (req, res) => {
   const userId = req.params.userId;

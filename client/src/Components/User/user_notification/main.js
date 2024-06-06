@@ -24,10 +24,10 @@ function Main() {
   }, []);
 
   useEffect(() => {
-    // Sort notifications by TIME in descending order
-    const sorted = [...notifications].sort((a, b) => {
-      return parseISO(b.TIME) - parseISO(a.TIME);
-    });
+    // Sort notifications by TIME in descending order and limit to 15
+    const sorted = [...notifications]
+      .sort((a, b) => parseISO(b.TIME) - parseISO(a.TIME))
+      .slice(0, 15);
     setSortedNotifications(sorted);
   }, [notifications]);
 
@@ -57,21 +57,51 @@ function Main() {
     return dateTimeString ? format(parseISO(dateTimeString), "yyyy/MM/dd HH:mm:ss") : "null";
   };
 
+  const handleNotificationClick = (notificationId) => {
+    axios
+      .put(`http://localhost:3000/api/update-notificationSeen/${notificationId}`)
+      .then((response) => {
+        // Update the SEEN status locally
+        const updatedNotifications = notifications.map((notification) => {
+          if (notification.ID === notificationId) {
+            return { ...notification, SEEN: 1 };
+          } else {
+            return notification;
+          }
+        });
+        setNotifications(updatedNotifications);
+      })
+      .catch((error) => {
+        console.error("Error updating notification seen status:", error);
+      });
+  };
+
   return (
     <div className="Main">
       {sortedNotifications.map((notification) => {
         const url = getLink(notification.CATEGORY, notification.NEWSID);
 
         return (
-          <div key={notification.NOTIFICATIONID} className="post">
+          <div
+            key={notification.NOTIFICATIONID}
+            className="post"
+            style={{
+              backgroundColor: notification.SEEN === 0 ? "#e0f2f1" : "white",
+            }}
+          >
             <Link
               to={`/user/${url}`}
               style={{ fontSize: "20px", fontWeight: "800" }}
               className="update-button"
+              onClick={() => handleNotificationClick(notification.ID)}
             >
               {notification.CATEGORY}
             </Link>
-            <span style={{ marginRight: "10px", fontWeight: "600", fontSize: "18px" }}>{formatDateTime(notification.TIME)}</span>
+            <span
+              style={{ marginRight: "10px", fontWeight: "600", fontSize: "18px" }}
+            >
+              {formatDateTime(notification.TIME)}
+            </span>
             <p>Nội dung: {notification.CONTENT}</p>
             {notification.REASON && (
               <p style={{ color: "red" }}>Lý do: {notification.REASON}</p>
