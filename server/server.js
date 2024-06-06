@@ -1518,10 +1518,10 @@ app.post("/api/create-notification", (req, res) => {
 
       // Tạo thông báo
       const createNotificationQuery =
-        "INSERT INTO NOTIFICATION (USERID, CONTENT, REASON, CATEGORY) VALUES (?, ?, ?, ?)";
+        "INSERT INTO NOTIFICATION (USERID, CONTENT, REASON, CATEGORY, SEEN) VALUES (?, ?, ?, ?, ?)";
       connection.query(
         createNotificationQuery,
-        [userid, content, reason, category],
+        [userid, content, reason, category, 0],
         (error, results) => {
           if (error) {
             console.error("Lỗi khi tạo thông báo:", error);
@@ -1593,8 +1593,8 @@ app.get('/api/check-report-yet/:userId', (req, res) => {
 app.post('/api/create-report', (req, res) => {
   const { USERID, NEWSID, ISSUE } = req.body;
   
-  const sql = 'INSERT INTO report (USERID, NEWSID, CONTENT) VALUES (?, ?, ?)';
-  const values = [USERID, NEWSID, ISSUE];
+  const sql = 'INSERT INTO report (USERID, NEWSID, CONTENT, SEEN) VALUES (?, ?, ?, ?)';
+  const values = [USERID, NEWSID, ISSUE, 0];
   
   connection.query(sql, values, (err, results) => {
     if (err) {
@@ -1605,6 +1605,22 @@ app.post('/api/create-report', (req, res) => {
     
     res.status(201).json({ message: 'Report created successfully' });
   });
+});
+
+// API đánh dấu báo cáo đã đọc
+app.put("/api/update-reportSeen/:reportId", async (req, res) => {
+  const reportId = req.params.reportId;
+
+  try {
+    // Update SEEN status in the database
+    const updateQuery = `UPDATE REPORT SET SEEN = 1 WHERE REPORTID = ?`;
+    await connection.query(updateQuery, [reportId]);
+
+    res.status(200).json({ message: "SEEN status updated successfully" });
+  } catch (error) {
+    console.error("Error updating SEEN status:", error);
+    res.status(500).json({ error: "Failed to update SEEN status" });
+  }
 });
 
 // API endpoint để lấy danh sách báo cáo
@@ -1657,7 +1673,8 @@ app.get("/api/get-reportList", (req, res) => {
             REPORTER: reporter ? reporter.NAME : "Unknown",
             POSTOWNER: postOwner ? postOwner.NAME : "Unknown",
             TIME: report.TIME,
-            CONTENT: report.CONTENT
+            CONTENT: report.CONTENT,
+            SEEN: report.SEEN
           };
         });
 

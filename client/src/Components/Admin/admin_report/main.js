@@ -37,6 +37,25 @@ function Main() {
     return dateTimeString ? format(parseISO(dateTimeString), "yyyy/MM/dd HH:mm:ss") : "null";
   };
 
+  const handleReportClick = (reportId) => {
+    axios
+      .put(`http://localhost:3000/api/update-reportSeen/${reportId}`)
+      .then((response) => {
+        // Update the SEEN status locally
+        const updatedReportList = sortedReportList.map((report) => {
+          if (report.REPORTID === reportId) {
+            return { ...report, SEEN: 1 };
+          } else {
+            return report;
+          }
+        });
+        setSortedReportList(updatedReportList);
+      })
+      .catch((error) => {
+        console.error("Error updating report seen status:", error);
+      });
+  };
+
   return (
     <div className="Main">
       <h1>Báo cáo</h1>
@@ -55,12 +74,16 @@ function Main() {
           </thead>
           <tbody>
             {sortedReportList.map((report) => (
-              <tr key={report.REPORTID}>
+              <tr key={report.REPORTID} style={{ backgroundColor: report.SEEN === 0 ? "#16c784" : "white"}}>
                 <td>{report.REPORTID}</td>
                 <td>
-                <Link className="detail-link update-button" to={`/detail/${report.NEWSID}`}>
-                  {report.NEWSID}
-                </Link>
+                  <Link
+                    className="detail-link update-button"
+                    to={`/detail/${report.NEWSID}`}
+                    onClick={() => handleReportClick(report.REPORTID)}
+                  >
+                    {report.NEWSID}
+                  </Link>
                 </td>
                 <td>{report.REPORTER}</td>
                 <td>{report.POSTOWNER}</td>
