@@ -615,6 +615,28 @@ app.get("/api/get-posts", (req, res) => {
   });
 });
 
+// API lấy bài viết bằng NEWSID
+app.get('/api/get-post-byNewsId/:newsId', (req, res) => {
+  const newsId = req.params.newsId;
+  
+  const sql = 'SELECT * FROM NEWSLIST WHERE NEWSID = ?';
+  const values = [newsId];
+  
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      console.error('Error getting post by news ID:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    
+    if (results.length === 0) {
+      res.status(404).json({ message: 'Post not found' });
+    } else {
+      res.json(results[0]);
+    }
+  });
+});
+
 // API Lấy các bài viết của người dùng từ USERID
 app.get("/api/get-posts-byUserid/:userid", (req, res) => {
   const { userid } = req.params;
@@ -1516,6 +1538,43 @@ app.get("/api/get-notification-byUserID/:userId", (req, res) => {
       return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
     }
     res.status(200).json(results);
+  });
+});
+
+// API để kiểm tra người dùng đã thực hiện báo cáo chưa
+app.get('/api/check-report-yet/:userId', (req, res) => {
+  const userId = req.params.userId;
+  
+  const sql = 'SELECT COUNT(*) AS count FROM report WHERE USERID = ?';
+  const values = [userId];
+  
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      console.error('Error checking report:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    
+    const reported = results[0].count > 0;
+    res.json({ reported });
+  });
+});
+
+// API tạo báo cáo mới
+app.post('/api/create-report', (req, res) => {
+  const { USERID, NEWSID, ISSUE } = req.body;
+  
+  const sql = 'INSERT INTO report (USERID, NEWSID, CONTENT) VALUES (?, ?, ?)';
+  const values = [USERID, NEWSID, ISSUE];
+  
+  connection.query(sql, values, (err, results) => {
+    if (err) {
+      console.error('Error creating report:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    
+    res.status(201).json({ message: 'Report created successfully' });
   });
 });
 
