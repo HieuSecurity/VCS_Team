@@ -826,62 +826,6 @@ app.get("/api/search-posts-location", (req, res) => {
   });
 });
 
-// API /api/latest-posts
-app.get("/api/latest-posts", (req, res) => {
-  // Thực hiện truy vấn SELECT để lấy danh sách 5 bài đăng mới nhất kèm thông tin người dùng từ bảng userinfo
-  const selectQuery = `
-    SELECT 
-      newslist.userid,
-      newslist.newsid,
-      newsdetail.describe,
-      newslist.price,
-      newslist.acreage,
-      newslist.address,
-      newslist.image,
-      newsdetail.timestart,
-      newsdetail.timeend,
-      userinfo.phone,
-      userinfo.name,
-      userinfo.avatar
-    FROM 
-      newslist
-    LEFT JOIN 
-      newsdetail ON newslist.newsid = newsdetail.newsid
-    LEFT JOIN 
-      userinfo ON newslist.userid = userinfo.userid
-    ORDER BY 
-      newsdetail.timestart DESC
-    LIMIT 5`; // Giới hạn số lượng kết quả trả về thành 5 bài đăng mới nhất
-
-  // Thực hiện truy vấn COUNT để đếm tổng số bài đăng mới nhất với cùng điều kiện WHERE
-  const countQuery = `
-    SELECT COUNT(*) AS total 
-    FROM newslist 
-    LEFT JOIN newsdetail ON newslist.newsid = newsdetail.newsid
-    WHERE newsdetail.timestart IS NOT NULL`;
-
-  // Thực hiện truy vấn để lấy số lượng kết quả
-  connection.query(countQuery, (error, countResult) => {
-    if (error) {
-      console.error("Error counting:", error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-
-    const total = countResult[0].total; // Lấy tổng số kết quả từ kết quả truy vấn COUNT
-
-    // Thực hiện truy vấn SELECT để lấy danh sách 5 bài đăng mới nhất
-    connection.query(selectQuery, (error, results) => {
-      if (error) {
-        console.error("Error executing SELECT query", error);
-        return res.status(500).json({ message: "Internal server error" });
-      }
-
-      // Trả về dữ liệu và số lượng kết quả
-      res.status(200).json({ results, total });
-    });
-  });
-});
-
 app.post("/api/signup", (req, res) => {
   const { username, email, phone, password } = req.body;
   try {
