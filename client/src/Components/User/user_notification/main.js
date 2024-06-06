@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./info.css";
 import { Link } from "react-router-dom";
+import { format, parseISO } from "date-fns";
 
 function Main() {
   const [notifications, setNotifications] = useState([]);
-  const [url, setUrl] = useState("");
+  const [sortedNotifications, setSortedNotifications] = useState([]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -21,6 +22,14 @@ function Main() {
         });
     }
   }, []);
+
+  useEffect(() => {
+    // Sort notifications by TIME in descending order
+    const sorted = [...notifications].sort((a, b) => {
+      return parseISO(b.TIME) - parseISO(a.TIME);
+    });
+    setSortedNotifications(sorted);
+  }, [notifications]);
 
   const fetchNotifications = (userId) => {
     axios
@@ -44,9 +53,13 @@ function Main() {
     }
   };
 
+  const formatDateTime = (dateTimeString) => {
+    return dateTimeString ? format(parseISO(dateTimeString), "yyyy/MM/dd HH:mm:ss") : "null";
+  };
+
   return (
     <div className="Main">
-      {notifications.map((notification) => {
+      {sortedNotifications.map((notification) => {
         const url = getLink(notification.CATEGORY, notification.NEWSID);
 
         return (
@@ -58,6 +71,7 @@ function Main() {
             >
               {notification.CATEGORY}
             </Link>
+            <span style={{ marginRight: "10px", fontWeight: "600", fontSize: "18px" }}>{formatDateTime(notification.TIME)}</span>
             <p>Nội dung: {notification.CONTENT}</p>
             {notification.REASON && (
               <p style={{ color: "red" }}>Lý do: {notification.REASON}</p>
