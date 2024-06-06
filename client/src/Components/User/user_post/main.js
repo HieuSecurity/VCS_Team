@@ -124,14 +124,7 @@ const PostTable = () => {
         data = { newsid: postId, state: "Đã xóa" };
         break;
       case "reset":
-        url = `http://localhost:3000/api/create-payment`;
-        console.log(postId);
-        data = { 
-          newsid: postId, 
-          POSTDURATION: userInput, 
-          ADMINEMAIL: "admin@gmail.com"
-        };
-        url = `http://localhost:3000/api/update-newsState`;
+        url = `http://localhost:3000/api/update-resetPost`;
         data = { newsid: postId, state: "Chờ duyệt", postduration: userInput };
         break;
       default:

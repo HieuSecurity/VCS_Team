@@ -34,6 +34,23 @@ function PostForm() {
       return;
     }
 
+    // Lấy địa chỉ email từ local storage
+    const email = user.email;
+
+    // Lấy USERID từ API sử dụng địa chỉ email
+    async function fetchUserId() {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/get-userid-byEmail/${email}`);
+        const userId = response.data.USERID;
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          userId: userId,
+        }));
+      } catch (error) {
+        console.error("Error fetching USERID:", error);
+      }
+    }
+
     // Lấy danh sách các quận từ cơ sở dữ liệu
     async function fetchDistricts() {
       try {
@@ -54,6 +71,7 @@ function PostForm() {
       }
     }
 
+    fetchUserId();
     fetchDistricts();
     fetchPriceList();
   }, [navigate]); // Thực hiện fetch một lần duy nhất khi component được render
@@ -65,8 +83,10 @@ function PostForm() {
       return;
     }
 
+
     try {
       const formDataToSend = new FormData();
+      formDataToSend.append("userId", formData.userId);
       formDataToSend.append("title", formData.title);
       formDataToSend.append("postDuration", formData.postDuration);
       formDataToSend.append("describe", formData.describe);

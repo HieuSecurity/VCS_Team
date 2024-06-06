@@ -19,8 +19,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -66,6 +66,7 @@ app.get('/api/get-qrThanhToan', (req, res) => {
 
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const {
+    userId,
     title,
     timestart,
     describe,
@@ -76,7 +77,6 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
     postDuration,
   } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
-  const USERID_temp = 4;
   const state = "Chờ duyệt";
 
   console.log("Received form data:", req.body);
@@ -112,7 +112,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
         "INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)";
       connection.query(
         insertNewslistQuery,
-        [title, acreage, price, IDDISTRICT, USERID_temp, state, postDuration],
+        [title, acreage, price, IDDISTRICT, userId, state, postDuration],
         (error, newslistResults) => {
           if (error) {
             return connection.rollback(() => {
@@ -469,6 +469,29 @@ app.get("/api/get-pricelist", (req, res) => {
 
 // API cập nhật trạng thái bài viết
 app.post("/api/update-newsState", (req, res) => {
+  const { newsid, state} = req.body;
+  try {
+    // Update trạng thái của tin tức
+    const updateState = "UPDATE NEWSLIST SET STATE = ? WHERE NEWSID = ?";
+    connection.query(updateState, [state, newsid], (error, results) => {
+      if (error) {
+        console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
+        return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+      }
+      console.log(`Cập nhật trạng thái tin tức ${newsid} thành công`);
+      return res
+        .status(200)
+        .json({ message: "Cập nhật trạng thái tin tức thành công" });
+    });
+
+  } catch (error) {
+    console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
+    return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+  }
+  
+});
+
+app.post("/api/update-resetPost", (req, res) => {
   const { newsid, state, postduration} = req.body;
   try {
     // Update trạng thái của tin tức
@@ -490,7 +513,6 @@ app.post("/api/update-newsState", (req, res) => {
   }
   
 });
-
 //
 app.get("/api/hcmdistrict", (req, res) => {
   const sql = "SELECT * FROM hcmdistrict";
