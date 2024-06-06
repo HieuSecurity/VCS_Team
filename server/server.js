@@ -19,8 +19,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -1601,6 +1601,70 @@ app.post('/api/create-report', (req, res) => {
     res.status(201).json({ message: 'Report created successfully' });
   });
 });
+
+// API endpoint để lấy danh sách báo cáo
+app.get("/api/get-reportList", (req, res) => {
+  // Bước 1: Lấy danh sách báo cáo từ bảng REPORT
+  const sqlReportList = "SELECT * FROM REPORT";
+
+  // Thực hiện truy vấn SQL để lấy danh sách báo cáo
+  connection.query(sqlReportList, (err, reports) => {
+    if (err) {
+      console.error("Error fetching report list:", err);
+      res.status(500).send("Internal server error");
+      return;
+    }
+
+    // Lấy mảng các USERID từ reports
+    const userIds = reports.map(report => report.USERID);
+    // Lấy mảng các NEWSID từ reports
+    const newsIds = reports.map(report => report.NEWSID);
+
+    // Bước 2: Lấy thông tin người báo cáo từ bảng USERINFO
+    const sqlReporterInfo = "SELECT USERID, NAME FROM USERINFO WHERE USERID IN (?)";
+
+    // Thực hiện truy vấn SQL để lấy thông tin người báo cáo
+    connection.query(sqlReporterInfo, [userIds], (err, reporters) => {
+      if (err) {
+        console.error("Error fetching reporter info:", err);
+        res.status(500).send("Internal server error");
+        return;
+      }
+
+      // Bước 3: Lấy thông tin chủ bài đăng từ bảng NEWSLIST và USERINFO
+      const sqlPostOwners = "SELECT NEWSLIST.NEWSID, USERINFO.NAME FROM NEWSLIST JOIN USERINFO ON NEWSLIST.USERID = USERINFO.USERID WHERE NEWSLIST.NEWSID IN (?)";
+
+      // Thực hiện truy vấn SQL để lấy thông tin chủ bài đăng
+      connection.query(sqlPostOwners, [newsIds], (err, postOwners) => {
+        if (err) {
+          console.error("Error fetching post owners:", err);
+          res.status(500).send("Internal server error");
+          return;
+        }
+
+        // Kết hợp dữ liệu từ các truy vấn thành một đối tượng duy nhất
+        const reportList = reports.map((report) => {
+          const reporter = reporters.find((r) => r.USERID === report.USERID);
+          const postOwner = postOwners.find((p) => p.NEWSID === report.NEWSID);
+          return {
+            REPORTID: report.REPORTID,
+            NEWSID: report.NEWSID,
+            REPORTER: reporter ? reporter.NAME : "Unknown",
+            POSTOWNER: postOwner ? postOwner.NAME : "Unknown",
+            TIME: report.TIME,
+            CONTENT: report.CONTENT
+          };
+        });
+
+        // Trả về kết quả là danh sách báo cáo đã kết hợp thông tin
+        res.json(reportList);
+      });
+    });
+  });
+});
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

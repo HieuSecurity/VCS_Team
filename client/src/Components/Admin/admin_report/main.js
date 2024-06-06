@@ -1,62 +1,40 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
+import { Link } from "react-router-dom";
 
 function Main() {
-  const [userData, setUserData] = useState([]);
-  const [editingUser, setEditingUser] = useState(null);
-  const [adminInfo, setAdminInfo] = useState(null);
+  const [reportList, setReportList] = useState([]);
+  const [sortedReportList, setSortedReportList] = useState([]);
 
   useEffect(() => {
-    const storedUserInfo = localStorage.getItem("user");
-    if (storedUserInfo) {
-      const parsedUserInfo = JSON.parse(storedUserInfo);
-      setAdminInfo(parsedUserInfo);
-      fetchAdminData(parsedUserInfo.EMAIL);
-    }
+    fetchReportList();
   }, []);
 
-  const fetchAdminData = (email) => {
+  useEffect(() => {
+    sortReportList();
+  }, [reportList]);
+
+  const fetchReportList = () => {
     axios
-      .get(`http://localhost:3000/api/admin-info/${email}`)
+      .get("http://localhost:3000/api/get-reportList")
       .then((response) => {
-        setUserData(response.data);
+        setReportList(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching report list:", error);
       });
   };
 
-  const handleEdit = (user) => {
-    setEditingUser(user);
+  const sortReportList = () => {
+    const sortedList = [...reportList].sort((a, b) => {
+      return new Date(b.TIME) - new Date(a.TIME);
+    });
+    setSortedReportList(sortedList);
   };
 
-  const cancelEdit = () => {
-    setEditingUser(null);
-  };
-
-  const saveEdit = () => {
-    alert(
-      "Nhân viên không có quyền chỉnh sửa thông tin. Vui lòng liên hệ với chủ sở hũu!"
-    );
-    // axios
-    //   .put(`http://localhost:3000/api/admin-info/${editingUser.ADMINID}`, editingUser)
-    //   .then(() => {
-    //     fetchAdminData(adminInfo.email);
-    //     cancelEdit();
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error updating user:", error);
-    //   });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditingUser({ ...editingUser, [name]: value });
-  };
-
-  const formatDate = (dateString) => {
-    return dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
+  const formatDateTime = (dateTimeString) => {
+    return dateTimeString ? format(parseISO(dateTimeString), "yyyy/MM/dd HH:mm:ss") : "null";
   };
 
   return (
@@ -68,26 +46,26 @@ function Main() {
           <thead>
             <tr>
               <th>Mã ID</th>
-              <th>Họ và Tên</th>
-              <th>Giới Tính</th>
-              <th>Ngày Sinh</th>
-              <th>Số Điện Thoại</th>
-              <th>Email</th>
-              <th>Địa Chỉ</th>
+              <th>Mã bài viết</th>
+              <th>Người báo cáo</th>
+              <th>Chủ bài đăng</th>
+              <th>Thời gian</th>
               <th className="function-cell">Nội dung</th>
             </tr>
           </thead>
           <tbody>
-            {userData.map((user) => (
-              <tr key={user.ADMINID}>
-                <td>{user.ADMINID}</td>
-                <td>{user.NAME}</td>
-                <td>{user.SEX}</td>
-                <td>{formatDate(user.DOB)}</td>
-                <td>{user.PHONE}</td>
-                <td>{user.EMAIL}</td>
-                <td>{user.ADDRESS}</td>
-                <td>Nội dung nhạy cảm</td>
+            {sortedReportList.map((report) => (
+              <tr key={report.REPORTID}>
+                <td>{report.REPORTID}</td>
+                <td>
+                <Link className="detail-link update-button" to={`/detail/${report.NEWSID}`}>
+                  {report.NEWSID}
+                </Link>
+                </td>
+                <td>{report.REPORTER}</td>
+                <td>{report.POSTOWNER}</td>
+                <td>{formatDateTime(report.TIME)}</td>
+                <td>{report.CONTENT}</td>
               </tr>
             ))}
           </tbody>

@@ -69,20 +69,20 @@ const ButtonRow = () => {
           Bài đăng
         </button>
         <button
-          className={`report-button ${
-            activeButton === "report" ? "active" : ""
-          }`}
-          onClick={() => handleButtonClick("report")}
-        >
-          Báo cáo
-        </button>
-        <button
           className={`payment-button ${
             activeButton === "payment" ? "active" : ""
           }`}
           onClick={() => handleButtonClick("payment")}
         >
           Thanh toán
+        </button>
+        <button
+          className={`report-button ${
+            activeButton === "report" ? "active" : ""
+          }`}
+          onClick={() => handleButtonClick("report")}
+        >
+          Báo cáo
         </button>
       </div>
       <div className="tab-content">
@@ -102,16 +102,16 @@ const ButtonRow = () => {
             <MainPost />
           </div>
         )}
-        {activeButton === "report" && (
-          <div className="report-tab-content">
-            {" "}
-            <MainReport />
-          </div>
-        )}
         {activeButton === "payment" && (
           <div className="payment-tab-content">
             {" "}
             <MainPayment />
+          </div>
+        )}
+        {activeButton === "report" && (
+          <div className="report-tab-content">
+            {" "}
+            <MainReport />
           </div>
         )}
       </div>
