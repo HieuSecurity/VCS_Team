@@ -16,8 +16,6 @@ function Image_des() {
     fetchData();
   }, []);
 
-
-
   const handleSortByChange = (type) => {
     setSortBy(type);
     if (type === "default") {
@@ -66,15 +64,24 @@ function Image_des() {
 
   const fetchLatestPosts = () => {
     axios
-      .get("http://localhost:3000/api/latest-posts")
+      .get("http://localhost:3000/api/get-posts")
       .then((response) => {
+        // Filter posts with STATE === "Hoạt động"
         const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
-        setData({ results: filteredData, total: filteredData.length });
+  
+        // Sort posts by TIME in descending order (most recent first)
+        filteredData.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
+  
+        // Select the 10 most recent posts
+        const latestPosts = filteredData.slice(0, 10);
+  
+        setData({ results: latestPosts, total: latestPosts.length });
       })
       .catch((error) => {
         console.error("Error fetching latest posts:", error);
       });
   };
+  
 
   const formatMoney = (amount) => {
     if (amount < 1000000) {
