@@ -98,11 +98,16 @@ const PostTable = () => {
         state: "Thành công",
         ADMINEMAIL: adminEmail,
       });
-
+  
       // Update news state
       await axios.post(`http://localhost:3000/api/update-newsState`, {
         newsid: payment.NEWSID,
         state: "Hoạt động",
+      });
+
+       // Update timestart timeend
+       await axios.post(`http://localhost:3000/api/update-news-detail`, {
+        newsid: payment.NEWSID,
       });
 
       // Create notification

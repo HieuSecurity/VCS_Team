@@ -9,6 +9,7 @@ const { start } = require("repl");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const { format, parseISO } = require("date-fns-tz"); // Import format và parseISO từ date-fns-tz
+const moment = require('moment');
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -19,8 +20,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -295,7 +296,7 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
               } else {
                 // Images uploaded, insert them into the database
                 const insertImageQuery =
-                  "INSERT INTO image (newsid, image) VALUES (?, ?)";
+                  "UPDATE image SET IMAGE = ? WHERE NEWSID = ?";
                 const promises = images.map((image) => {
                   const imageUrl = image.filename;
                   return new Promise((resolve, reject) => {
@@ -344,6 +345,48 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
           );
         }
       );
+    });
+  });
+});
+
+app.post('/api/update-news-detail/', (req, res) => {
+  const { newsid } = req.body;
+
+  // Query NEWSLIST to get POSTDURATION
+  const queryNewsList = `SELECT POSTDURATION FROM NEWSLIST WHERE NEWSID = ${newsid}`;
+  connection.query(queryNewsList, (error, results) => {
+    if (error) {
+      console.error('Error querying NEWSLIST:', error);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).send('NEWSID not found');
+      return;
+    }
+
+      const postDuration = results[0].POSTDURATION;
+      console.log("thời hạn:", postDuration);
+
+    // Calculate TIMESTART
+    const timeStart = moment();
+    console.log("Ngày hiện tại:", timeStart);
+
+    // Calculate TIMEEND
+    const timeEnd = timeStart.clone().add(postDuration, 'days');
+    console.log("Ngày hết hạn:", timeEnd)
+
+    // Update NEWSDETAIL
+    const queryUpdate = `UPDATE NEWSDETAIL SET TIMESTART = ?, TIMEEND = ? WHERE NEWSID = ?`;
+    connection.query(queryUpdate, [timeStart.format('YYYY-MM-DD HH:mm:ss'), timeEnd.format('YYYY-MM-DD HH:mm:ss'), newsid], (err, result) => {
+      if (err) {
+        console.error('Error updating NEWSDETAIL:', err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+      console.log('NEWSDETAIL updated successfully');
+      res.status(200).send('NEWSDETAIL updated successfully');
     });
   });
 });
