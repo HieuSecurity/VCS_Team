@@ -98,7 +98,7 @@ const PostTable = () => {
         </thead>
         <tbody>
           {payments.map((payment) => (
-            <tr key={payment.PAYID}>
+            <tr key={payment.PAYID} style={{ backgroundColor: payment.STATE === "Chờ duyệt" ? "#16c784" : "transparent" }}>
               <td>{payment.PAYID}</td>
               <td>
                 <Link className="detail-link update-button" to={`/detail/${payment.NEWSID}`}>

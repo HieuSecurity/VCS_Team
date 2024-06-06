@@ -130,7 +130,8 @@ function PostForm() {
       });
       document.getElementById("image-input").value = "";
 
-      alert("Đã đăng tin thành công");
+      alert("Gửi yêu cầu đăng bài thành công");
+      navigate("/");
     } catch (error) {
       console.error("Error:", error);
       alert("Đã xảy ra lỗi khi đăng tin");
