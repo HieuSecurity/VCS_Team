@@ -721,7 +721,7 @@ app.get("/api/search-posts-location", (req, res) => {
 
   // Truy vấn SELECT từ NEWSLIST với điều kiện Quận
   const selectNewslistQuery = `
-    SELECT NEWSID, USERID, TITLE, PRICE, ACREAGE, ADDRESS
+    SELECT NEWSID, USERID, TITLE, PRICE, ACREAGE, ADDRESS, STATE
     FROM 
       NEWSLIST
     WHERE 

@@ -16,13 +16,7 @@ function Image_des() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchData();
-    }, 5000); // Refresh data every 5 seconds
 
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSortByChange = (type) => {
     setSortBy(type);
@@ -107,7 +101,7 @@ function Image_des() {
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
-    } else if (selectedDistrict) {
+    } else if (selectedDistrict !== "all") {
       axios
         .get(
           `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
@@ -120,8 +114,7 @@ function Image_des() {
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
-    } else {
-    }
+    } 
   };
 
   return (
