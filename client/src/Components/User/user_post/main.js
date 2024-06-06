@@ -80,8 +80,8 @@ const PostTable = () => {
   };
 
   const handleReset = (postId) => {
-    const durationOptions = ["30", "60", "180", "365"];
-    const userInput = prompt("Thời gian gia hạn(30, 60, 180, 365):");
+    const durationOptions = ["30", "90", "180", "365"];
+    const userInput = prompt("Thời gian gia hạn(30, 90, 180, 365):");
   
     if (userInput === null) {
       // User clicked Cancel, do nothing
@@ -102,7 +102,7 @@ const PostTable = () => {
   
   
 
-  const handleAction = (postId, action, postDuration) => {
+  const handleAction = (postId, action, userInput) => {
     let url = "";
     let data = {};
 
@@ -125,13 +125,14 @@ const PostTable = () => {
         break;
       case "reset":
         url = `http://localhost:3000/api/create-payment`;
+        console.log(postId);
         data = { 
           newsid: postId, 
-          POSTDURATION: postDuration, 
+          POSTDURATION: userInput, 
           ADMINEMAIL: "admin@gmail.com"
         };
         url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: "Chờ thanh toán" };
+        data = { newsid: postId, state: "Chờ duyệt", postduration: userInput };
         break;
       default:
         return;

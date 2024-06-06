@@ -216,8 +216,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 // API để cập nhật thông tin bài đăng
 app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
   const postId = req.params.postId;
-  const { title, timestart, describe, price, acreage, address, district } =
-    req.body;
+  const { title, timestart, describe, price, acreage, address, district } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Hoạt động";
 
@@ -470,11 +469,11 @@ app.get("/api/get-pricelist", (req, res) => {
 
 // API cập nhật trạng thái bài viết
 app.post("/api/update-newsState", (req, res) => {
-  const { newsid, state } = req.body;
+  const { newsid, state, postduration} = req.body;
   try {
     // Update trạng thái của tin tức
-    const updateQuery = "UPDATE NEWSLIST SET STATE = ? WHERE NEWSID = ?";
-    connection.query(updateQuery, [state, newsid], (error, results) => {
+    const updateState = "UPDATE NEWSLIST SET STATE = ?, POSTDURATION = ? WHERE NEWSID = ?";
+    connection.query(updateState, [state, postduration, newsid], (error, results) => {
       if (error) {
         console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
         return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
@@ -484,10 +483,12 @@ app.post("/api/update-newsState", (req, res) => {
         .status(200)
         .json({ message: "Cập nhật trạng thái tin tức thành công" });
     });
+
   } catch (error) {
     console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
     return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
+  
 });
 
 //
@@ -786,7 +787,7 @@ app.get("/api/latest-posts", (req, res) => {
     SELECT 
       newslist.userid,
       newslist.newsid,
-      newslist.describe,
+      newsdetail.describe,
       newslist.price,
       newslist.acreage,
       newslist.address,
