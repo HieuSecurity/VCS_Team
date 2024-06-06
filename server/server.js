@@ -66,7 +66,7 @@ app.get('/api/get-qrThanhToan', (req, res) => {
 
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const {
-    userId,
+    userid,
     title,
     timestart,
     describe,
@@ -75,6 +75,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
     address,
     district,
     postDuration,
+   // Get userid from the request body
   } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Chờ duyệt";
@@ -88,7 +89,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
       return res.status(500).json({ message: "Internal server error" });
     }
 
-    // lấy IDDISTRICT từ database tương ứng với option người dùng chọn
+    // Lấy IDDISTRICT từ database tương ứng với option người dùng chọn
     const getDistrictQuery =
       "SELECT IDDISTRICT FROM hcmdistrict WHERE DISTRICT = ?";
     connection.query(getDistrictQuery, [district], (error, districtResults) => {
@@ -109,10 +110,10 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 
       // Insert post details into newslist table
       const insertNewslistQuery =
-        "INSERT INTO newslist (title, acreage, price, address, userid, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        "INSERT INTO newslist (USERID, title, acreage, price, address, state, postduration) VALUES (?, ?, ?, ?, ?, ?, ?)";
       connection.query(
         insertNewslistQuery,
-        [title, acreage, price, IDDISTRICT, userId, state, postDuration],
+        [userid, title, acreage, price, IDDISTRICT, state, postDuration],
         (error, newslistResults) => {
           if (error) {
             return connection.rollback(() => {
@@ -212,6 +213,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
     });
   });
 });
+
 
 // API để cập nhật thông tin bài đăng
 app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {

@@ -18,50 +18,53 @@ function PostForm() {
     images: [],
     district: "",
     agreeTerms: false,
+    userId: "", // Add userId to the formData state
   });
 
-  // State để lưu danh sách các quận từ cơ sở dữ liệu
+  // State to store districts from the database
   const [districts, setDistricts] = useState([]);
 
-  // State để lưu danh sách thời hạn đăng bài và giá
+  // State to store post duration and price list
   const [priceList, setPriceList] = useState([]);
 
   useEffect(() => {
-    // Kiểm tra xem có đối tượng user trong localStorage hay không
+    // Get the user email from localStorage
     const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) {
+    if (!user || !user.EMAIL) {
       navigate("/login");
       return;
     }
+    
+    const email = user.EMAIL;
 
-    // Lấy địa chỉ email từ local storage
-    const email = user.email;
 
-    // Lấy USERID từ API sử dụng địa chỉ email
-    async function fetchUserId() {
+
+    // Fetch userId based on email
+    async function fetchUserIdByEmail(email) {
       try {
         const response = await axios.get(`http://localhost:3000/api/get-userid-byEmail/${email}`);
-        const userId = response.data.USERID;
+        console.log("here:", response); 
         setFormData((prevFormData) => ({
           ...prevFormData,
-          userId: userId,
+          userId: response.data.USERID,
         }));
+        console.log("here2:", response.data.userId);
       } catch (error) {
-        console.error("Error fetching USERID:", error);
+        console.error("Error fetching userId:", error);
       }
     }
 
-    // Lấy danh sách các quận từ cơ sở dữ liệu
+    // Fetch districts from the database
     async function fetchDistricts() {
       try {
-        const response = await axios.get("http://localhost:3000/api/hcmdistrict"); // API lấy quận huyện
+        const response = await axios.get("http://localhost:3000/api/hcmdistrict"); // API for districts
         setDistricts(response.data);
       } catch (error) {
         console.error("Error fetching districts:", error);
       }
     }
 
-    // Lấy danh sách thời hạn đăng bài từ API
+    // Fetch price list from API
     async function fetchPriceList() {
       try {
         const response = await axios.get("http://localhost:3000/api/get-pricelist"); // API endpoint
@@ -71,10 +74,10 @@ function PostForm() {
       }
     }
 
-    fetchUserId();
+    fetchUserIdByEmail(email);
     fetchDistricts();
     fetchPriceList();
-  }, [navigate]); // Thực hiện fetch một lần duy nhất khi component được render
+  }, [navigate]); // Fetch data once when the component is rendered
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -83,10 +86,9 @@ function PostForm() {
       return;
     }
 
-
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("userId", formData.userId);
+      formDataToSend.append("userid", formData.userId);
       formDataToSend.append("title", formData.title);
       formDataToSend.append("postDuration", formData.postDuration);
       formDataToSend.append("describe", formData.describe);
@@ -95,7 +97,7 @@ function PostForm() {
       formDataToSend.append("address", formData.address);
       formDataToSend.append("district", formData.district);
 
-      // Append từng hình ảnh vào formData
+      // Append each image to formData
       formData.images.forEach((image) => {
         formDataToSend.append("images", image);
       });
@@ -113,7 +115,7 @@ function PostForm() {
       const postId = response.data.postId;
       console.log("Post created with ID:", postId);
 
-      // Xóa tất cả các trường biểu mẫu sau khi đăng thành công
+      // Clear form fields after successful submission
       setFormData({
         title: "",
         postDuration: "",
@@ -124,6 +126,7 @@ function PostForm() {
         images: [],
         district: "",
         agreeTerms: false,
+        userId: formData.userId, // Preserve userId
       });
       document.getElementById("image-input").value = "";
 
@@ -144,14 +147,14 @@ function PostForm() {
   };
 
   const handleImageChange = (e) => {
-    const imageFiles = Array.from(e.target.files); // Get the selected file
+    const imageFiles = Array.from(e.target.files); // Get the selected files
     if (imageFiles.length > 5) {
       alert("Bạn chỉ được chọn tối đa 5 ảnh");
       return;
     }
     setFormData((prevFormData) => ({
       ...prevFormData,
-      images: imageFiles, // Set the image file in the form data
+      images: imageFiles, // Set the image files in the form data
     }));
   };
 
@@ -190,7 +193,7 @@ function PostForm() {
                 required
               >
                 <option value="">Chọn khoảng thời gian</option>
-                {/* Hiển thị danh sách thời hạn đăng bài và giá */}
+                {/* Display post duration and price list */}
                 {priceList.map((item) => (
                   <option key={item.postduration} value={item.postduration}>
                     {`${item.POSTDURATION} ngày - ${formatMoney(item.PRICE)} VND`}
@@ -255,7 +258,7 @@ function PostForm() {
                 required
               >
                 <option value="">Chọn Quận/Huyện</option>
-                {/* Dùng dữ liệu từ database để tạo các option */}
+                {/* Use database data to create options */}
                 {districts.map((district) => (
                   <option key={district.id} value={district.id}>
                     {district.DISTRICT}
@@ -270,7 +273,7 @@ function PostForm() {
               id="image-input"
               type="file"
               name="images"
-              multiple // cho phép chọn nhiều ảnh
+              multiple // Allow multiple image selection
               onChange={handleImageChange}
               required
             />
