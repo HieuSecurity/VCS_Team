@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format, parseISO } from "date-fns";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faTimes,
+  faExclamationTriangle,
+} from "@fortawesome/free-solid-svg-icons";
 import "./payment.css"; // Import CSS file for styling
 
 const PostTable = () => {
@@ -20,7 +24,10 @@ const PostTable = () => {
   };
 
   const formatMoney = (amount) => {
-    return amount.toLocaleString("en-US", { style: "currency", currency: "USD" }).replace(/\$/, "").replace(/\.00$/, "");
+    return amount
+      .toLocaleString("en-US", { style: "currency", currency: "USD" })
+      .replace(/\$/, "")
+      .replace(/\.00$/, "");
   };
 
   // Function to render icon based on payment state
@@ -28,34 +35,59 @@ const PostTable = () => {
     switch (state) {
       case "Chờ duyệt":
         return (
-          <>
+          <div className="icons" style={{ display: "flex" }}>
             <FontAwesomeIcon
               icon={faTimes}
               title="Từ chối"
               className="icon"
-              style={{ color: "red", cursor: "pointer", marginRight: "10px", backgroundColor: "white" }}
+              style={{
+                color: "red",
+                cursor: "pointer",
+                marginRight: "10px",
+                backgroundColor: "white",
+              }}
               onClick={() => confirmReject(payment)}
             />
             <FontAwesomeIcon
               icon={faCheck}
               title="Duyệt"
               className="icon"
-              style={{ color: "green", cursor: "pointer", backgroundColor: "white" }}
+              style={{
+                color: "green",
+                cursor: "pointer",
+                backgroundColor: "white",
+              }}
               onClick={() => confirmApprove(payment)}
             />
             <FontAwesomeIcon
               icon={faExclamationTriangle}
               title="Lỗi"
               className="icon"
-              style={{ color: "orange", cursor: "pointer", backgroundColor: "white" }}
+              style={{
+                color: "orange",
+                cursor: "pointer",
+                backgroundColor: "white",
+              }}
               onClick={() => confirmError(payment)}
             />
-          </>
+          </div>
         );
       case "Thành công":
-        return <FontAwesomeIcon icon={faCheck} title="Đã duyệt" style={{ color: "green" }} />;
+        return (
+          <FontAwesomeIcon
+            icon={faCheck}
+            title="Đã duyệt"
+            style={{ color: "green" }}
+          />
+        );
       case "Không thành công":
-        return <FontAwesomeIcon icon={faTimes} title="Không thành công" style={{ color: "red" }} />;
+        return (
+          <FontAwesomeIcon
+            icon={faTimes}
+            title="Không thành công"
+            style={{ color: "red" }}
+          />
+        );
       default:
         return null;
     }
@@ -81,7 +113,9 @@ const PostTable = () => {
 
   // Confirm error action
   const confirmError = (payment) => {
-    if (window.confirm("Bạn có chắc muốn thông báo giao dịch lỗi tới người dùng?")) {
+    if (
+      window.confirm("Bạn có chắc muốn thông báo giao dịch lỗi tới người dùng?")
+    ) {
       const errorInput = prompt("Nhập lỗi:");
       if (errorInput) {
         setReason(errorInput);
@@ -94,19 +128,22 @@ const PostTable = () => {
   const handleApprove = async (payment) => {
     try {
       // Update payment state
-      await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
-        state: "Thành công",
-        ADMINEMAIL: adminEmail,
-      });
-  
+      await axios.put(
+        `http://localhost:3000/api/update-paymentState/${payment.PAYID}`,
+        {
+          state: "Thành công",
+          ADMINEMAIL: adminEmail,
+        }
+      );
+
       // Update news state
       await axios.post(`http://localhost:3000/api/update-newsState`, {
         newsid: payment.NEWSID,
         state: "Hoạt động",
       });
 
-       // Update timestart timeend
-       await axios.post(`http://localhost:3000/api/update-news-detail`, {
+      // Update timestart timeend
+      await axios.post(`http://localhost:3000/api/update-news-detail`, {
         newsid: payment.NEWSID,
       });
 
@@ -129,10 +166,13 @@ const PostTable = () => {
   const handleReject = async (payment, reason) => {
     try {
       // Update payment state
-      await axios.put(`http://localhost:3000/api/update-paymentState/${payment.PAYID}`, {
-        state: "Không thành công",
-        ADMINEMAIL: adminEmail,
-      });
+      await axios.put(
+        `http://localhost:3000/api/update-paymentState/${payment.PAYID}`,
+        {
+          state: "Không thành công",
+          ADMINEMAIL: adminEmail,
+        }
+      );
 
       // Update news state
       await axios.post(`http://localhost:3000/api/update-newsState`, {
@@ -145,7 +185,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Thanh toán có mã số ${payment.PAYID} đã bị từ chối.`,
         reason: reason, // Lý do từ chối
-        category: "Thanh toán"
+        category: "Thanh toán",
       });
 
       // Create notification
@@ -153,7 +193,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Bài đăng ${payment.NEWSID} bị từ chối`,
         reason: `Thanh toán mã số ${payment.PAYID} không thành công`, // Lý do từ chối
-        category: "Thanh toán"
+        category: "Thanh toán",
       });
 
       // Update local state or fetch payments again
@@ -171,7 +211,7 @@ const PostTable = () => {
         newsid: payment.NEWSID,
         content: `Thanh toán có mã số ${payment.PAYID} bị lỗi: ${errorInput}`,
         reason: "", // Không có lý do khi thông báo lỗi
-        category: "Thanh toán"
+        category: "Thanh toán",
       });
 
       // Update local state or fetch payments again
@@ -179,7 +219,7 @@ const PostTable = () => {
     } catch (error) {
       console.error("Error notifying payment error:", error);
     }
-    alert("Gửi thông báo thành công.")
+    alert("Gửi thông báo thành công.");
   };
 
   // Fetch payments
@@ -226,7 +266,14 @@ const PostTable = () => {
         </thead>
         <tbody>
           {sortedPayments.map((payment) => (
-            <tr key={payment.PAYID} style={{ backgroundColor: payment.STATE === "Chờ duyệt" ? "#16c784" : "transparent" }}>
+            <tr
+              key={payment.PAYID}
+              style={{
+                backgroundColor:
+                  payment.STATE === "Chờ duyệt" ? "#16c784" : "transparent",
+                fontWeight: payment.STATE === "Chờ duyệt" ? "bold" : "",
+              }}
+            >
               <td>{payment.PAYID}</td>
               <td>{payment.NEWSID}</td>
               <td>{payment.USERNAME}</td>

@@ -1,6 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import "./style.css";
 
 function Main() {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handlePageClick = (page) => {
+    if (page === "previous" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (page === "next" && currentPage < 5) {
+      setCurrentPage(currentPage + 1);
+    } else if (typeof page === "number") {
+      setCurrentPage(page);
+    }
+  };
+
   return (
     <div
       className="Page"
@@ -24,15 +37,42 @@ function Main() {
         <ul
           style={{ display: "flex", textAlign: "center", alignItems: "center" }}
         >
-          <li style={{ fontSize: "18px" }}>Trang trước</li>
+          <li
+            style={{
+              fontSize: "21px",
+              cursor: "pointer",
+              color: currentPage === 1 ? "black" : "black",
+            }}
+            onClick={() => handlePageClick("previous")}
+          >
+            Trang trước
+          </li>
 
-          <li>1</li>
-          <li>2</li>
-          <li>3</li>
+          {[1, 2, 3, 4, 5].map((page) => (
+            <li
+              key={page}
+              style={{
+                fontSize: "21px",
+                cursor: "pointer",
+                color: currentPage === page ? "white" : "black",
+                backgroundColor: currentPage === page ? "#e13427" : "",
+              }}
+              onClick={() => handlePageClick(page)}
+            >
+              {page}
+            </li>
+          ))}
 
-          <li>4</li>
-          <li>5</li>
-          <li style={{ fontSize: "18px" }}>Trang sau</li>
+          <li
+            style={{
+              fontSize: "21px",
+              cursor: "pointer",
+              color: currentPage === 5 ? "black" : "black",
+            }}
+            onClick={() => handlePageClick("next")}
+          >
+            Trang sau
+          </li>
         </ul>
       </div>
     </div>

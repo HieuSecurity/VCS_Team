@@ -1,0 +1,18 @@
+.pagination li {
+  font-size: 22px;
+  cursor: pointer;
+  color: black;
+  padding: 5px 10px;
+}
+
+.pagination li:hover {
+  background-color: #888;
+}
+.pagination li.active {
+  background-color: red;
+  color: white;
+}
+li :hover {
+  background-color: black;
+  color: white;
+}

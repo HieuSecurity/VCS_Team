@@ -3,7 +3,11 @@ import axios from "axios";
 import "./post.css"; // Import file CSS cho kiểu dáng
 import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faTimes, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faTimes,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 const PostTable = () => {
   const [posts, setPosts] = useState({ newPosts: [], allPosts: [] });
@@ -16,7 +20,9 @@ const PostTable = () => {
         const response = await axios.get("http://localhost:3000/api/get-posts");
         const allPosts = response.data.results;
         const newPosts = allPosts.filter((post) => post.STATE === "Chờ duyệt");
-        const filteredPosts = allPosts.filter((post) => post.STATE !== "Chờ duyệt");  
+        const filteredPosts = allPosts.filter(
+          (post) => post.STATE !== "Chờ duyệt"
+        );
 
         // Sắp xếp newPosts và allPosts theo mã bài đăng
         newPosts.sort((a, b) => a.NEWSID - b.NEWSID);
@@ -55,7 +61,7 @@ const PostTable = () => {
 
   const handleApprove = (postId, postDuration) => {
     const confirmMessage = "Bạn có chắc chắn muốn duyệt bài đăng này không?";
-    const adminEmail = JSON.parse(localStorage.getItem('user')).EMAIL; // Lấy adminEmail từ localStorages
+    const adminEmail = JSON.parse(localStorage.getItem("user")).EMAIL; // Lấy adminEmail từ localStorages
     if (window.confirm(confirmMessage)) {
       axios
         .post("http://localhost:3000/api/create-payment", {
@@ -77,26 +83,33 @@ const PostTable = () => {
   const handleAction = (postId, action, reason = "") => {
     let url = "";
     let data = { reason };
-  
+
     switch (action) {
       case "reject":
       case "approve":
         url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: action === "approve" ? "Chờ thanh toán" : "Bị từ chối"};
+        data = {
+          newsid: postId,
+          state: action === "approve" ? "Chờ thanh toán" : "Bị từ chối",
+        };
         break;
       case "delete":
         url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: "Đã xóa"};
+        data = { newsid: postId, state: "Đã xóa" };
         break;
       default:
         return;
     }
-  
+
     axios
       .post(url, data)
       .then((response) => {
         // Tạo thông báo nếu là hành động approve hoặc reject hoặc delete
-        if (action === "approve" || action === "reject" || action === "delete") {
+        if (
+          action === "approve" ||
+          action === "reject" ||
+          action === "delete"
+        ) {
           let content = "";
           if (action === "approve") {
             content = `Bài viết có mã số ${postId} đã được phê duyệt`;
@@ -105,23 +118,27 @@ const PostTable = () => {
           } else if (action === "delete") {
             content = `Bài viết có mã số ${postId} đã bị xóa`;
           }
-          
+
           const notificationData = {
             newsid: postId,
             content,
             reason,
-            category: "Bài viết"
+            category: "Bài viết",
           };
-  
-          axios.post('http://localhost:3000/api/create-notification', notificationData)
+
+          axios
+            .post(
+              "http://localhost:3000/api/create-notification",
+              notificationData
+            )
             .then((response) => {
-              console.log('Tạo thông báo thành công');
+              console.log("Tạo thông báo thành công");
             })
             .catch((error) => {
-              console.error('Lỗi khi tạo thông báo:', error);
+              console.error("Lỗi khi tạo thông báo:", error);
             });
         }
-  
+
         window.location.reload(); // Tải lại trang để cập nhật thay đổi
       })
       .catch((error) => {
@@ -155,21 +172,38 @@ const PostTable = () => {
               <td>{post.POSTDURATION} ngày</td>
               <td>{post.STATE}</td>
               <td className="chuc-Nang">
-                <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>
+                <Link
+                  className="detail-link update-button"
+                  to={`/detail/${post.NEWSID}`}
+                >
                   Chi tiết
                 </Link>
-                <FontAwesomeIcon
-                  icon={faTimes}
-                  className="action-icon reject-icon"
-                  title="Từ chối"
-                  onClick={() => handleReject(post.NEWSID)}
-                />
-                <FontAwesomeIcon
-                  icon={faCheck}
-                  className="action-icon approve-icon"
-                  title="Duyệt"
-                  onClick={() => handleApprove(post.NEWSID, post.POSTDURATION)}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                  className="icons"
+                >
+                  <FontAwesomeIcon
+                    style={{ fontSize: "25px", backgroundColor: "#ccc" }}
+                    icon={faTimes}
+                    className="action-icon reject-icon"
+                    title="Từ chối"
+                    onClick={() => handleReject(post.NEWSID)}
+                  />
+                  <FontAwesomeIcon
+                    style={{ fontSize: "25px", backgroundColor: "#ccc" }}
+                    icon={faCheck}
+                    className="action-icon approve-icon"
+                    title="Duyệt"
+                    onClick={() =>
+                      handleApprove(post.NEWSID, post.POSTDURATION)
+                    }
+                  />
+                </div>
               </td>
             </tr>
           ))}
@@ -199,7 +233,10 @@ const PostTable = () => {
               <td>{post.POSTDURATION} ngày</td>
               <td>{post.STATE}</td>
               <td className="chuc-Nang">
-                <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>
+                <Link
+                  className="detail-link update-button"
+                  to={`/detail/${post.NEWSID}`}
+                >
                   Chi tiết
                 </Link>
                 {post.STATE === "Hoạt động" && (
