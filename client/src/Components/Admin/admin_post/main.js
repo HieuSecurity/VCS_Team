@@ -149,7 +149,9 @@ const PostTable = () => {
 
   return (
     <div className="table-container">
-      <h1 style={{ width: "700px" }}>Bài đăng mới !</h1>
+      <h1 style={{ width: "700px", fontWeight: "700", fontSize: "30px" }}>
+        Bài đăng mới !
+      </h1>
       <table className="user-table">
         <thead>
           <tr>
@@ -171,7 +173,7 @@ const PostTable = () => {
               <td>{post.NAME}</td>
               <td>{post.POSTDURATION} ngày</td>
               <td>{post.STATE}</td>
-              <td className="chuc-Nang">
+              <td className="chuc-Nang" style={{ textAlign: "center" }}>
                 <Link
                   className="detail-link update-button"
                   to={`/detail/${post.NEWSID}`}
@@ -210,7 +212,9 @@ const PostTable = () => {
         </tbody>
       </table>
 
-      <h1 style={{ width: "700px" }}>Thông tin tất cả bài đăng !</h1>
+      <h2 style={{ width: "700px", fontWeight: "700", fontSize: "33px" }}>
+        Thông tin tất cả bài đăng !
+      </h2>
       <table className="user-table">
         <thead>
           <tr>
@@ -232,7 +236,7 @@ const PostTable = () => {
               <td>{post.NAME}</td>
               <td>{post.POSTDURATION} ngày</td>
               <td>{post.STATE}</td>
-              <td className="chuc-Nang">
+              <td className="chuc-Nang ">
                 <Link
                   className="detail-link update-button"
                   to={`/detail/${post.NEWSID}`}
@@ -241,6 +245,7 @@ const PostTable = () => {
                 </Link>
                 {post.STATE === "Hoạt động" && (
                   <FontAwesomeIcon
+                    style={{ marginLeft: "-15px" }}
                     icon={faTrashAlt}
                     className="action-icon delete-icon"
                     title="Xóa"

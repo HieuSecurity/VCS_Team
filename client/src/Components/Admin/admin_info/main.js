@@ -37,7 +37,9 @@ function Main() {
   };
 
   const saveEdit = () => {
-    alert("Nhân viên không có quyền chỉnh sửa thông tin. Vui lòng liên hệ với chủ sở hũu!")
+    alert(
+      "Nhân viên không có quyền chỉnh sửa thông tin. Vui lòng liên hệ với chủ sở hũu!"
+    );
     // axios
     //   .put(`http://localhost:3000/api/admin-info/${editingUser.ADMINID}`, editingUser)
     //   .then(() => {
@@ -55,7 +57,7 @@ function Main() {
   };
 
   const formatDate = (dateString) => {
-    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
+    return dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
   };
 
   return (

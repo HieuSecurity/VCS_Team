@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../body.css";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 function Search({ onSearch }) {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [districts, setDistricts] = useState([]);
@@ -103,7 +104,15 @@ function Search({ onSearch }) {
         <option value={"Từ 70 - 90 "}>Từ 70 - 90 </option>
         <option value={"Trên 90 "}>Trên 90 </option>
       </select>
-      <button className="search-button" onClick={handleSearchButtonClick}>
+      <button
+        style={{ alignItems: "center", textAlign: "center" }}
+        className="search-button"
+        onClick={handleSearchButtonClick}
+      >
+        <FontAwesomeIcon
+          style={{ marginRight: "5px" }}
+          icon={faSearch}
+        ></FontAwesomeIcon>
         Tìm kiếm
       </button>
     </div>

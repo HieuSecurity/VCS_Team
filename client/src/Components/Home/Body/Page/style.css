@@ -6,9 +6,18 @@
 }
 
 .pagination li:hover {
-  background-color: #888;
+  background-color: #ccc;
 }
-.pagination li.active {
+/* .pagination li.active {
   background-color: red;
+  color: white;
+} */
+.pagination ul li {
+  color: white;
+}
+.Page {
+  cursor: default;
+}
+.Page li:hover {
   color: white;
 }

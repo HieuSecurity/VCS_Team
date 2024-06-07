@@ -35,7 +35,11 @@ function Main() {
         }}
       >
         <ul
-          style={{ display: "flex", textAlign: "center", alignItems: "center" }}
+          style={{
+            display: "flex",
+            textAlign: "center",
+            alignItems: "center",
+          }}
         >
           <li
             style={{

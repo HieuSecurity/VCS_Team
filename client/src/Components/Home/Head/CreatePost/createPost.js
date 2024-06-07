@@ -25,7 +25,12 @@ function CreatePost() {
       {/* Sử dụng onClick để kiểm tra đăng nhập trước khi điều hướng */}
       <div
         onClick={handleClick}
-        style={{ textDecoration: "none", color: "#fff", cursor: "pointer" }}
+        style={{
+          textDecoration: "none",
+          color: "#fff",
+          cursor: "pointer",
+          fontSize: "17px",
+        }}
       >
         Đăng tin
       </div>

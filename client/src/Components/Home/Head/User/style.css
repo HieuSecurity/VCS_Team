@@ -23,6 +23,7 @@
   height: auto;
   text-align: left;
   cursor: default;
+  border: 3px solid rgba(25, 210, 62, 1);
 }
 
 /* style.css */
@@ -97,4 +98,9 @@
 
 .login-button:hover {
   background-color: #e0e0e0; /* Màu nền khi hover */
+}
+.modal span:hover {
+  color: red;
+  background-color: black;
+  cursor: default;
 }

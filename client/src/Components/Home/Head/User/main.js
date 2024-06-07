@@ -129,7 +129,7 @@ function Main() {
               <FontAwesomeIcon
                 icon={faKey}
                 color="#febb02"
-                style={{ marginRight: "11px", marginLeft: "-2px" }}
+                style={{ marginRight: "11px", marginLeft: "-7px" }}
               />
               Thay đổi mật khẩu
             </Link>
