@@ -6,7 +6,8 @@ function Body() {
   return (
     <div className="Body">
       <Posts />
-      <Page />
+      
+      {/* <Page /> */}
     </div>
   );
 }

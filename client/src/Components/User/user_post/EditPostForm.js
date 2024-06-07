@@ -209,5 +209,3 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
 
 export default EditPostForm;
 
-
-

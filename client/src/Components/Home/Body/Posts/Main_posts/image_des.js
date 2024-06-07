@@ -310,7 +310,7 @@
 
 // export default Image_des;
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "../Main_posts/main_posts.css";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -318,100 +318,110 @@ import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import Search from "../../Search/search";
 import { format, parseISO } from "date-fns";
-import moment from "moment";
 
-function Image_des() {
+const ImageDes = () => {
   const [data, setData] = useState({ results: [], total: 0 });
   const [sortBy, setSortBy] = useState("default");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     fetchData();
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollButton(window.scrollY > 200);
-    };
-
+    const handleScroll = () => setShowScrollButton(window.scrollY > 200);
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const fetchData = async (sort = "default", district = "") => {
+  const fetchData = async () => {
     try {
-      let url = "http://localhost:3000/api/get-posts";
-      if (district && district !== "all") {
-        url = `http://localhost:3000/api/search-posts-location?district=${district}`;
-      }
-
-      const response = await axios.get(url);
-      let posts = response.data.results;
-
-      // Update post state if TIMEEND > current time
-      const currentTime = moment();
-      for (let post of posts) {
-        if (moment(post.TIMEEND).isBefore(currentTime) && post.STATE !== "Hết hạn") {
-          await axios.get(`http://localhost:3000/api/newState-Post/${post.NEWSID}`);
-        }
-      }
-
-      // Re-fetch posts after updating states
-      const updatedResponse = await axios.get(url);
-      let filteredData = updatedResponse.data.results.filter(
-        (post) => post.STATE === "Hoạt động"
+      const response = await axios.get("http://localhost:3000/api/get-posts");
+      const filteredData = response.data.results.filter(
+        post => post.STATE === "Hoạt động"
       );
-
-      if (sort === "newest") {
-        filteredData.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
-        filteredData = filteredData.slice(0, 10);
-      }
-
       setData({ results: filteredData, total: filteredData.length });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  const handleSortByChange = (type) => {
-    setSortBy(type);
-    fetchData(type, selectedDistrict);
-  };
-
-  const formatDate = (dateString) => {
-    return dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
-  };
-
-  const formatMoney = (amount) => {
-    if (amount < 1000000) {
-      return (amount / 1000).toFixed(0) + " ngàn";
-    } else if (amount >= 1000000000) {
-      return (amount / 1000000000).toFixed(1) + " tỷ";
-    } else if (amount >= 1000000) {
-      return (amount / 1000000).toFixed(1) + " triệu";
-    } else {
-      return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const fetchLatestPosts = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/api/get-posts");
+      const filteredData = response.data.results
+        .filter(post => post.STATE === "Hoạt động")
+        .sort((a, b) => new Date(b.TIME) - new Date(a.TIME))
+        .slice(0, 10);
+      setData({ results: filteredData, total: filteredData.length });
+    } catch (error) {
+      console.error("Error fetching latest posts:", error);
     }
   };
 
-  const handleSearch = (district) => {
-    setSelectedDistrict(district);
-    fetchData(sortBy, district);
+  const handleSortByChange = type => {
+    setSortBy(type);
+    type === "default" ? fetchData() : fetchLatestPosts();
+  };
+
+  const handleSearch = async selectedDistrict => {
+    setSelectedDistrict(selectedDistrict);
+    try {
+      const response = await axios.get(
+        selectedDistrict === "all"
+          ? `http://localhost:3000/api/get-posts`
+          : `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
+      );
+      const filteredData = response.data.results.filter(
+        post => post.STATE === "Hoạt động"
+      );
+      setData({ results: filteredData, total: filteredData.length });
+      setSortBy("default");
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const formatDate = dateString =>
+    dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
+
+  const formatMoney = amount => {
+    if (amount < 1000000) return (amount / 1000).toFixed(0) + " ngàn";
+    if (amount >= 1000000000) return (amount / 1000000000).toFixed(1) + " tỷ";
+    return (amount / 1000000).toFixed(1) + " triệu";
   };
 
   const handleScrollTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const memoizedData = useMemo(
+    () => data.results.map(item => ({ ...item, formattedDate: formatDate(item.TIMESTART), formattedPrice: formatMoney(item.PRICE) })),
+    [data.results]
+  );
+
+  const handlePageClick = (page) => {
+    if (page === "previous" && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    } else if (page === "next" && currentPage < Math.ceil(data.total / itemsPerPage)) {
+      setCurrentPage(currentPage + 1);
+    } else if (typeof page === "number") {
+      setCurrentPage(page);
+    }
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = memoizedData.slice(indexOfFirstItem, indexOfLastItem);
+
   return (
     <div className="container_form" style={{ height: "100%" }}>
       <Search onSearch={handleSearch} />
       <div className="sort" style={{ fontSize: "25px" }}>
-        <p style={{ fontSize: "22px", padding: "10px" }}>Sắp xếp :</p>
+        <p style={{ fontSize: "22px", padding: "10px" }}>Sắp xếp : </p>
         <span
           className={sortBy === "default" ? "active" : ""}
           onClick={() => handleSortByChange("default")}
@@ -445,21 +455,18 @@ function Image_des() {
         </h5>
       </span>
 
-      {data.results.map((item) => (
+      {currentItems.map(item => (
         <Link
           key={item.NEWSID}
           style={{ textDecoration: "none", color: "black" }}
-          to={{
-            pathname: `/detail/${item.NEWSID}`,
-            state: { selectedItem: item },
-          }}
+          to={`/detail/${item.NEWSID}`}
         >
           <div
             className="container-posts"
             style={{
               border: "5px solid #ccc",
               margin: "30px 0",
-              boder: "none",
+              border: "none",
             }}
           >
             <div
@@ -480,6 +487,7 @@ function Image_des() {
                   height: "450px",
                   borderRadius: "5px",
                 }}
+                alt={item.TITLE}
               />
             </div>
             <div
@@ -494,7 +502,6 @@ function Image_des() {
                 <p style={{ color: "#E13427", fontSize: "28px" }}>
                   {item.TITLE}
                 </p>
-
                 <div
                   className="item-separator"
                   style={{
@@ -506,28 +513,11 @@ function Image_des() {
                   }}
                 >
                   <li className="price" style={{ color: "#16c784" }}>
-                    {formatMoney(item.PRICE)} đồng/tháng
+                    {item.formattedPrice} đồng/tháng
                   </li>
                   <li className="acreage">{item.ACREAGE} m2</li>
                   <li className="district">{item.district}</li>
                 </div>
-                <span
-                  style={{
-                    fontWeight: "700",
-                    fontSize: "25px",
-                    margin: "5px",
-                    padding: "5px",
-                    display: "block",
-                  }}
-                ></span>
-                <span
-                  style={{
-                    fontWeight: "700",
-                    fontSize: "25px",
-                    padding: "10px",
-                    marginTop: "200px",
-                  }}
-                ></span>
                 <div
                   className="img-name"
                   style={{
@@ -547,6 +537,7 @@ function Image_des() {
                       height: "100px",
                       marginLeft: "-30px",
                     }}
+                    alt={item.NAME}
                   />
                   <span
                     style={{
@@ -565,7 +556,7 @@ function Image_des() {
                       marginLeft: "50px",
                     }}
                   >
-                    {formatDate(item.TIMESTART)}
+                    {item.formattedDate}
                   </span>
                 </div>
               </div>
@@ -574,14 +565,56 @@ function Image_des() {
         </Link>
       ))}
 
+      <div className="pagination" style={{ textAlign: "center", marginTop: "20px" }}>
+        <ul style={{ display: "flex", justifyContent: "center", padding: 0, listStyle: "none" }}>
+          <li
+            style={{
+              fontSize: "21px",
+              cursor: "pointer",
+              color: currentPage === 1 ? "grey" : "black",
+              margin: "0 10px",
+            }}
+            onClick={() => handlePageClick("previous")}
+          >
+            Trang trước
+          </li>
+          {[...Array(Math.ceil(data.total / itemsPerPage)).keys()].map(page => (
+            <li
+              key={page + 1}
+              style={{
+                fontSize: "21px",
+                cursor: "pointer",
+                color: currentPage === page + 1 ? "white" : "black",
+                backgroundColor: currentPage === page + 1 ? "#e13427" : "",
+                margin: "0 10px",
+                padding: "5px 10px",
+              }}
+              onClick={() => handlePageClick(page + 1)}
+            >
+              {page + 1}
+            </li>
+          ))}
+          <li
+            style={{
+              fontSize: "21px",
+              cursor: "pointer",
+              color: currentPage === Math.ceil(data.total / itemsPerPage) ? "grey" : "black",
+              margin: "0 10px",
+            }}
+            onClick={() => handlePageClick("next")}
+          >
+            Trang sau
+          </li>
+        </ul>
+      </div>
+
       {showScrollButton && (
-        <button id="scroll-top-btn" onClick={handleScrollTop}>
+        <button id="scroll-top-btn" onClick={handleScrollTop} style={{ position: "fixed", bottom: "20px", right: "20px" }}>
           <FontAwesomeIcon icon={faArrowAltCircleUp} />
         </button>
       )}
     </div>
   );
-}
+};
 
-export default Image_des;
-
+export default ImageDes;

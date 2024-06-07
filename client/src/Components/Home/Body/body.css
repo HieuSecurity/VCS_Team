@@ -27,3 +27,15 @@
 .search-button:hover {
   background-color: #0056b3;
 }
+
+.pagination-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination {
+  display: inline-block;
+  display: flex;
+  justify-content: center;
+}
