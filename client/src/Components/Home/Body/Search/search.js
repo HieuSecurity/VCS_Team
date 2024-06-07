@@ -46,7 +46,7 @@ function Search({ onSearch }) {
   };
 
   const handleSearchButtonClick = () => {
-    if (selectedDistrict) {
+    if (selectedDistrict && selectedPrice && setSelectedDientich) {
       onSearch(selectedDistrict);
     } else {
       alert("Vui lòng chọn để tìm kiếm!");

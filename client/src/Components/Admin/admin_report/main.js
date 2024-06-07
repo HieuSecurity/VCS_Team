@@ -34,7 +34,9 @@ function Main() {
   };
 
   const formatDateTime = (dateTimeString) => {
-    return dateTimeString ? format(parseISO(dateTimeString), "yyyy/MM/dd HH:mm:ss") : "null";
+    return dateTimeString
+      ? format(parseISO(dateTimeString), "yyyy/MM/dd HH:mm:ss")
+      : "null";
   };
 
   const handleReportClick = (reportId) => {
@@ -74,10 +76,16 @@ function Main() {
           </thead>
           <tbody>
             {sortedReportList.map((report) => (
-              <tr key={report.REPORTID} style={{ backgroundColor: report.SEEN === 0 ? "#16c784" : "white"}}>
+              <tr
+                key={report.REPORTID}
+                style={{
+                  backgroundColor: report.SEEN === 0 ? "#16c784" : "white",
+                }}
+              >
                 <td>{report.REPORTID}</td>
                 <td>
                   <Link
+                    style={{ fontSize: "20px" }}
                     className="detail-link update-button"
                     to={`/detail/${report.NEWSID}`}
                     onClick={() => handleReportClick(report.REPORTID)}

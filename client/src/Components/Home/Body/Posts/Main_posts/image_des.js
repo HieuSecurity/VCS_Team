@@ -10,7 +10,7 @@ import { format, parseISO } from "date-fns";
 function Image_des() {
   const [data, setData] = useState({ results: [], total: 0 });
   const [sortBy, setSortBy] = useState("default");
-  const [selectedDistrict, setSelectedDistrict] = useState(""); 
+  const [selectedDistrict, setSelectedDistrict] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -33,7 +33,9 @@ function Image_des() {
     axios
       .get("http://localhost:3000/api/get-posts")
       .then((response) => {
-        const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+        const filteredData = response.data.results.filter(
+          (post) => post.STATE === "Hoạt động"
+        );
         setData({ results: filteredData, total: filteredData.length });
       })
       .catch((error) => {
@@ -67,21 +69,22 @@ function Image_des() {
       .get("http://localhost:3000/api/get-posts")
       .then((response) => {
         // Filter posts with STATE === "Hoạt động"
-        const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
-  
+        const filteredData = response.data.results.filter(
+          (post) => post.STATE === "Hoạt động"
+        );
+
         // Sort posts by TIME in descending order (most recent first)
         filteredData.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
-  
+
         // Select the 10 most recent posts
         const latestPosts = filteredData.slice(0, 10);
-  
+
         setData({ results: latestPosts, total: latestPosts.length });
       })
       .catch((error) => {
         console.error("Error fetching latest posts:", error);
       });
   };
-  
 
   const formatMoney = (amount) => {
     if (amount < 1000000) {
@@ -101,7 +104,9 @@ function Image_des() {
       axios
         .get(`http://localhost:3000/api/get-posts`)
         .then((response) => {
-          const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+          const filteredData = response.data.results.filter(
+            (post) => post.STATE === "Hoạt động"
+          );
           setData({ results: filteredData, total: filteredData.length });
           setSortBy("default");
         })
@@ -114,14 +119,16 @@ function Image_des() {
           `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
         )
         .then((response) => {
-          const filteredData = response.data.results.filter(post => post.STATE === "Hoạt động");
+          const filteredData = response.data.results.filter(
+            (post) => post.STATE === "Hoạt động"
+          );
           setData({ results: filteredData, total: filteredData.length });
           setSortBy("default");
         })
         .catch((error) => {
           console.error("Error fetching data:", error);
         });
-    } 
+    }
   };
 
   return (
@@ -301,4 +308,3 @@ function Image_des() {
 }
 
 export default Image_des;
-

@@ -19,41 +19,43 @@
   border: none;
   outline: none;
   align-items: center;
-  text-align: center;
   border-radius: 10px;
   height: auto;
+  text-align: left;
+  cursor: default;
 }
 
+/* style.css */
 .modal-content {
   background-color: #fff;
   padding: 20px;
   border: 1px solid #888;
   display: flex; /* Sử dụng flexbox để căn giữa nội dung */
   flex-direction: column; /* Xếp theo chiều dọc */
-  margin: 0 auto; /* Canh giữa */
   weight: 200px;
+  text-align: left; /* Căn lề trái */
 }
 
 .modal a {
   font-size: 18px;
   text-decoration: none;
-  color: #1266dd;
   padding: 2px;
+  display: block; /* Hiển thị các liên kết dưới dạng khối */
 }
 
 .modal a:hover {
   font-size: 18px;
   text-decoration: none;
-  background: #ccc;
   width: 100%;
+  color: #1266dd;
+  cursor: default;
 }
 
 .close {
   color: white;
   font-size: 30px;
   font-weight: bold;
-  background-color: red;
-  margin-right: 10px;
+  margin-right: -150px;
   margin-top: 0px;
   border-radius: 50%;
   width: 30px;
@@ -61,12 +63,6 @@
   display: flex; /* Sử dụng flexbox để căn giữa */
   align-items: center; /* Căn giữa theo chiều ngang */
   justify-content: center; /* Căn giữa theo chiều dọc */
-}
-
-.close:hover,
-.close:focus {
-  text-decoration: none;
-  cursor: pointer;
 }
 
 .overlay {
@@ -82,6 +78,7 @@
 
 .Main.modal-active .overlay {
   display: block; /* Hiển thị overlay khi modal active */
+  cursor: default;
 }
 
 /* Thêm phong cách cho nút đăng nhập */

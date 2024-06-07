@@ -58,6 +58,14 @@ function Footer() {
                   Quy định đăng tin
                 </a>
               </li>
+              <li className="footer__item">
+                <a
+                  href="https://phongtro123.com/bang-gia-dich-vu"
+                  className="footer__item__link"
+                >
+                  Bảng giá dịch vụ
+                </a>
+              </li>
             </ul>
           </div>
           <div className="grid__column-3">

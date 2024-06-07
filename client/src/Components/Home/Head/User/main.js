@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import "../User/style.css";
 import axios from "axios";
 import { StateContext } from "../MyProvider"; // Import context từ MyProvider
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { faUserShield } from "@fortawesome/free-solid-svg-icons";
+import { faKey } from "@fortawesome/free-solid-svg-icons";
 
 function Main() {
   const [showModal, setShowModal] = useState(false);
@@ -96,7 +101,9 @@ function Main() {
           {userName}
         </span>
       </div>
-      {showModal && <div className="overlay" onClick={handleOverlayClick}></div>}
+      {showModal && (
+        <div className="overlay" onClick={handleOverlayClick}></div>
+      )}
       {showModal && (
         <div className="modal">
           <div
@@ -106,17 +113,40 @@ function Main() {
             }}
             className="modal-content"
           >
-            <Link to={infoLink} style={{ margin: "15px 0" }}>
+            <Link to={infoLink} style={{ margin: "8px 0" }}>
+              <FontAwesomeIcon
+                icon={faUserShield}
+                color="#febb02"
+                style={
+                  infoLabel === "Quản lý"
+                    ? { marginRight: "10px", marginLeft: "-100px" }
+                    : { marginRight: "10px", marginLeft: "-50px" }
+                }
+              />
               {infoLabel}
             </Link>
-            <Link to="/changepassword" style={{ margin: "15px 0" }}>
+            <Link to="/changepassword" style={{ margin: "8px 0" }}>
+              <FontAwesomeIcon
+                icon={faKey}
+                color="#febb02"
+                style={{ marginRight: "11px", marginLeft: "-2px" }}
+              />
               Thay đổi mật khẩu
             </Link>
-            <Link to="/" style={{ margin: "15px 0" }} onClick={handleLogout}>
+            <Link to="/" style={{ margin: "8px 0" }} onClick={handleLogout}>
+              <FontAwesomeIcon
+                color="#febb02"
+                icon={faSignOutAlt}
+                style={{ marginRight: "13px", marginLeft: "-75px" }}
+              />
               Đăng xuất
             </Link>
             <span
-              style={{ backgroundColor: "red", padding: "3px" }}
+              style={{
+                backgroundColor: "#888",
+                padding: "3px",
+                cursor: "pointer",
+              }}
               className="close"
               onClick={hideUserForm}
             >
