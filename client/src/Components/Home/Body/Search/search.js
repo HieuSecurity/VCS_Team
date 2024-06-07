@@ -32,17 +32,17 @@ function Search({ onSearch }) {
   }, []);
 
   const handleDistrictChange = (event) => {
-    console.log("Selected district:", event.target.value); // Log selected district value
+    console.log("Selected district:", event.target.value); // Log gtri quan duoc chon
     setSelectedDistrict(event.target.value);
   };
 
   const handlePriceChange = (event) => {
-    console.log("Selected price:", event.target.value); // Log selected price value
+    console.log("Selected price:", event.target.value); // Log gia duoc chon
     setSelectedPrice(event.target.value);
   };
 
   const handleDienTichChange = (event) => {
-    console.log("Selected area:", event.target.value); // Log selected area value
+    console.log("Selected area:", event.target.value); // Log gtri dien tich duoc chon
     setSelectedDientich(event.target.value);
   };
 

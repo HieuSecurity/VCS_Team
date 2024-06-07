@@ -1,7 +1,10 @@
+.MainReport {
+  min-height: 100vh; /* Đảm bảo phần tử rp chiếm toàn bộ chiều cao của viewport */
+  display: flex;
+  flex-direction: column;
+}
 .report-section {
   margin-top: 20px;
-
-  height: 100vh; /* Đảm bảo nội dung căn giữa trên toàn màn hình */
   padding-left: 20px; /* Tạo lề trái cho phần nội dung */
 }
 
