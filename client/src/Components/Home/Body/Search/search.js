@@ -4,6 +4,10 @@ import "../body.css";
 function Search({ onSearch }) {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [districts, setDistricts] = useState([]);
+  const [selectedPrice, setSelectedPrice] = useState("");
+  const [price, setPrice] = useState([]);
+  const [selectedDientich, setSelectedDientich] = useState("");
+  const [dientich, setDientich] = useState([]);
 
   useEffect(() => {
     // Fetch data from the API
@@ -32,6 +36,14 @@ function Search({ onSearch }) {
     console.log("Selected district:", event.target.value); // Log giá trị quận được chọn
     setSelectedDistrict(event.target.value);
   };
+  const handlePriceChange = (event) => {
+    console.log("Selected district:", event.target.value); // Log giá trị quận được chọn
+    setSelectedPrice(event.target.value);
+  };
+  const handleDienTichChange = (event) => {
+    console.log("Selected district:", event.target.value); // Log giá trị quận được chọn
+    setSelectedDientich(event.target.value);
+  };
 
   const handleSearchButtonClick = () => {
     if (selectedDistrict) {
@@ -48,14 +60,48 @@ function Search({ onSearch }) {
         value={selectedDistrict}
         onChange={handleDistrictChange}
       >
-        <option value="all" style={{ color: "black", fontSize: "25px" }}>
-          -- Tìm theo Quận --
+        <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
+          Quận
         </option>
         {districts.map((district) => (
           <option key={district.IDDISTRICT} value={district.DISTRICT}>
             {district.DISTRICT}
           </option>
         ))}
+      </select>
+      <select
+        className="select-district"
+        value={selectedPrice}
+        onChange={handlePriceChange}
+      >
+        <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
+          Giá
+        </option>
+
+        <option value={"Dưới 1 triệu"}>Dưới 1 triệu</option>
+        <option value={"Từ 1 - 2 triệu"}>Từ 1 - 2 triệu</option>
+        <option value={"Từ 2 - 3 triệu"}>Từ 2 - 3 triệu</option>
+        <option value={"Từ 3 - 5 triệu"}>Từ 3 - 5 triệu</option>
+        <option value={"Từ 5 - 7 triệu"}>Từ 5 - 7 triệu</option>
+        <option value={"Từ 7 - 10 triệu"}>Từ 7 - 10 triệu</option>
+        <option value={"Từ 10 - 15 triệu"}>Từ 10 đến 15 triệu</option>
+        <option value={"Trên 15 triệu"}>Trên 15 triệu</option>
+      </select>
+      <select
+        className="select-district"
+        value={selectedDientich}
+        onChange={handleDienTichChange}
+      >
+        <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
+          Diện Tích m2
+        </option>
+
+        <option value={"Dưới 20 "}>Dưới 20 </option>
+        <option value={"Từ 20 - 30 "}>Từ 20 - 30 </option>
+        <option value={"Từ 30 - 50 "}>Từ 30 - 50 </option>
+        <option value={"Từ 50 - 70 "}>Từ 50 - 70 </option>
+        <option value={"Từ 70 - 90 "}>Từ 70 - 90 </option>
+        <option value={"Trên 90 "}>Trên 90 </option>
       </select>
       <button className="search-button" onClick={handleSearchButtonClick}>
         Tìm kiếm

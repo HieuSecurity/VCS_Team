@@ -9,19 +9,19 @@ const { start } = require("repl");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const { format, parseISO } = require("date-fns-tz"); // Import format và parseISO từ date-fns-tz
-const moment = require('moment');
+const moment = require("moment");
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 // Middleware để phục vụ các tệp tĩnh từ thư mục "images"
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/uploads", express.static("uploads"));
 
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt123", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "dbpt", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -59,11 +59,10 @@ app.get("/image/:filename", (req, res) => {
 });
 
 // API để lấy ảnh QR code
-app.get('/api/get-qrThanhToan', (req, res) => {
-  const qrCodePath = path.join(__dirname, 'images', 'QRThanhToan.jpg');
+app.get("/api/get-qrThanhToan", (req, res) => {
+  const qrCodePath = path.join(__dirname, "images", "QRThanhToan.jpg");
   res.sendFile(qrCodePath);
 });
-
 
 app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   const {
@@ -76,7 +75,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
     address,
     district,
     postDuration,
-   // Get userid from the request body
+    // Get userid from the request body
   } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Chờ duyệt";
@@ -215,11 +214,11 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
   });
 });
 
-
 // API để cập nhật thông tin bài đăng
 app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
   const postId = req.params.postId;
-  const { title, timestart, describe, price, acreage, address, district } = req.body;
+  const { title, timestart, describe, price, acreage, address, district } =
+    req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Hoạt động";
 
@@ -349,45 +348,53 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
   });
 });
 
-app.post('/api/update-news-detail/', (req, res) => {
+app.post("/api/update-news-detail/", (req, res) => {
   const { newsid } = req.body;
 
   // Query NEWSLIST to get POSTDURATION
   const queryNewsList = `SELECT POSTDURATION FROM NEWSLIST WHERE NEWSID = ${newsid}`;
   connection.query(queryNewsList, (error, results) => {
     if (error) {
-      console.error('Error querying NEWSLIST:', error);
-      res.status(500).send('Internal Server Error');
+      console.error("Error querying NEWSLIST:", error);
+      res.status(500).send("Internal Server Error");
       return;
     }
 
     if (results.length === 0) {
-      res.status(404).send('NEWSID not found');
+      res.status(404).send("NEWSID not found");
       return;
     }
 
-      const postDuration = results[0].POSTDURATION;
-      console.log("thời hạn:", postDuration);
+    const postDuration = results[0].POSTDURATION;
+    console.log("thời hạn:", postDuration);
 
     // Calculate TIMESTART
     const timeStart = moment();
     console.log("Ngày hiện tại:", timeStart);
 
     // Calculate TIMEEND
-    const timeEnd = timeStart.clone().add(postDuration, 'days');
-    console.log("Ngày hết hạn:", timeEnd)
+    const timeEnd = timeStart.clone().add(postDuration, "days");
+    console.log("Ngày hết hạn:", timeEnd);
 
     // Update NEWSDETAIL
     const queryUpdate = `UPDATE NEWSDETAIL SET TIMESTART = ?, TIMEEND = ? WHERE NEWSID = ?`;
-    connection.query(queryUpdate, [timeStart.format('YYYY-MM-DD HH:mm:ss'), timeEnd.format('YYYY-MM-DD HH:mm:ss'), newsid], (err, result) => {
-      if (err) {
-        console.error('Error updating NEWSDETAIL:', err);
-        res.status(500).send('Internal Server Error');
-        return;
+    connection.query(
+      queryUpdate,
+      [
+        timeStart.format("YYYY-MM-DD HH:mm:ss"),
+        timeEnd.format("YYYY-MM-DD HH:mm:ss"),
+        newsid,
+      ],
+      (err, result) => {
+        if (err) {
+          console.error("Error updating NEWSDETAIL:", err);
+          res.status(500).send("Internal Server Error");
+          return;
+        }
+        console.log("NEWSDETAIL updated successfully");
+        res.status(200).send("NEWSDETAIL updated successfully");
       }
-      console.log('NEWSDETAIL updated successfully');
-      res.status(200).send('NEWSDETAIL updated successfully');
-    });
+    );
   });
 });
 
@@ -514,7 +521,7 @@ app.get("/api/get-pricelist", (req, res) => {
 
 // API cập nhật trạng thái bài viết
 app.post("/api/update-newsState", (req, res) => {
-  const { newsid, state} = req.body;
+  const { newsid, state } = req.body;
   try {
     // Update trạng thái của tin tức
     const updateState = "UPDATE NEWSLIST SET STATE = ? WHERE NEWSID = ?";
@@ -528,35 +535,36 @@ app.post("/api/update-newsState", (req, res) => {
         .status(200)
         .json({ message: "Cập nhật trạng thái tin tức thành công" });
     });
-
   } catch (error) {
     console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
     return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
-  
 });
 
 app.post("/api/update-resetPost", (req, res) => {
-  const { newsid, state, postduration} = req.body;
+  const { newsid, state, postduration } = req.body;
   try {
     // Update trạng thái của tin tức
-    const updateState = "UPDATE NEWSLIST SET STATE = ?, POSTDURATION = ? WHERE NEWSID = ?";
-    connection.query(updateState, [state, postduration, newsid], (error, results) => {
-      if (error) {
-        console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
-        return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+    const updateState =
+      "UPDATE NEWSLIST SET STATE = ?, POSTDURATION = ? WHERE NEWSID = ?";
+    connection.query(
+      updateState,
+      [state, postduration, newsid],
+      (error, results) => {
+        if (error) {
+          console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
+          return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+        }
+        console.log(`Cập nhật trạng thái tin tức ${newsid} thành công`);
+        return res
+          .status(200)
+          .json({ message: "Cập nhật trạng thái tin tức thành công" });
       }
-      console.log(`Cập nhật trạng thái tin tức ${newsid} thành công`);
-      return res
-        .status(200)
-        .json({ message: "Cập nhật trạng thái tin tức thành công" });
-    });
-
+    );
   } catch (error) {
     console.error("Lỗi khi cập nhật trạng thái tin tức:", error);
     return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
   }
-  
 });
 //
 app.get("/api/hcmdistrict", (req, res) => {
@@ -683,21 +691,21 @@ app.get("/api/get-posts", (req, res) => {
 });
 
 // API lấy bài viết bằng NEWSID
-app.get('/api/get-post-byNewsId/:newsId', (req, res) => {
+app.get("/api/get-post-byNewsId/:newsId", (req, res) => {
   const newsId = req.params.newsId;
-  
-  const sql = 'SELECT * FROM NEWSLIST WHERE NEWSID = ?';
+
+  const sql = "SELECT * FROM NEWSLIST WHERE NEWSID = ?";
   const values = [newsId];
-  
+
   connection.query(sql, values, (err, results) => {
     if (err) {
-      console.error('Error getting post by news ID:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error getting post by news ID:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
-    
+
     if (results.length === 0) {
-      res.status(404).json({ message: 'Post not found' });
+      res.status(404).json({ message: "Post not found" });
     } else {
       res.json(results[0]);
     }
@@ -1044,25 +1052,24 @@ app.get("/api/search", (req, res) => {
 });
 
 // API để lấy ADMINID dựa trên email
-app.get('/api/get-adminId-byEmail/:email', (req, res) => {
+app.get("/api/get-adminId-byEmail/:email", (req, res) => {
   const email = req.params.email;
-  
-  const query = 'SELECT ADMINID FROM ADMININFO WHERE EMAIL = ?';
+
+  const query = "SELECT ADMINID FROM ADMININFO WHERE EMAIL = ?";
   connection.query(query, [email], (err, results) => {
     if (err) {
-      console.error('Lỗi truy vấn:', err);
-      res.status(500).send('Lỗi máy chủ');
+      console.error("Lỗi truy vấn:", err);
+      res.status(500).send("Lỗi máy chủ");
       return;
     }
 
     if (results.length > 0) {
       res.json({ ADMINID: results[0].ADMINID });
     } else {
-      res.status(404).send('Không tìm thấy ADMIN với email này');
+      res.status(404).send("Không tìm thấy ADMIN với email này");
     }
   });
 });
-
 
 // API lấy thông tin quản trị viên theo email
 app.get("/api/admin-info/:email", (req, res) => {
@@ -1569,41 +1576,41 @@ app.put("/api/update-notificationSeen/:notificationID", (req, res) => {
   });
 });
 
-
 // API để kiểm tra người dùng đã thực hiện báo cáo chưa
-app.get('/api/check-report-yet/:userId', (req, res) => {
+app.get("/api/check-report-yet/:userId", (req, res) => {
   const userId = req.params.userId;
-  
-  const sql = 'SELECT COUNT(*) AS count FROM report WHERE USERID = ?';
+
+  const sql = "SELECT COUNT(*) AS count FROM report WHERE USERID = ?";
   const values = [userId];
-  
+
   connection.query(sql, values, (err, results) => {
     if (err) {
-      console.error('Error checking report:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error checking report:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
-    
+
     const reported = results[0].count > 0;
     res.json({ reported });
   });
 });
 
 // API tạo báo cáo mới
-app.post('/api/create-report', (req, res) => {
+app.post("/api/create-report", (req, res) => {
   const { USERID, NEWSID, ISSUE } = req.body;
-  
-  const sql = 'INSERT INTO report (USERID, NEWSID, CONTENT, SEEN) VALUES (?, ?, ?, ?)';
+
+  const sql =
+    "INSERT INTO report (USERID, NEWSID, CONTENT, SEEN) VALUES (?, ?, ?, ?)";
   const values = [USERID, NEWSID, ISSUE, 0];
-  
+
   connection.query(sql, values, (err, results) => {
     if (err) {
-      console.error('Error creating report:', err);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error("Error creating report:", err);
+      res.status(500).json({ message: "Internal server error" });
       return;
     }
-    
-    res.status(201).json({ message: 'Report created successfully' });
+
+    res.status(201).json({ message: "Report created successfully" });
   });
 });
 
@@ -1637,12 +1644,13 @@ app.get("/api/get-reportList", (req, res) => {
     }
 
     // Lấy mảng các USERID từ reports
-    const userIds = reports.map(report => report.USERID);
+    const userIds = reports.map((report) => report.USERID);
     // Lấy mảng các NEWSID từ reports
-    const newsIds = reports.map(report => report.NEWSID);
+    const newsIds = reports.map((report) => report.NEWSID);
 
     // Bước 2: Lấy thông tin người báo cáo từ bảng USERINFO
-    const sqlReporterInfo = "SELECT USERID, NAME FROM USERINFO WHERE USERID IN (?)";
+    const sqlReporterInfo =
+      "SELECT USERID, NAME FROM USERINFO WHERE USERID IN (?)";
 
     // Thực hiện truy vấn SQL để lấy thông tin người báo cáo
     connection.query(sqlReporterInfo, [userIds], (err, reporters) => {
@@ -1653,7 +1661,8 @@ app.get("/api/get-reportList", (req, res) => {
       }
 
       // Bước 3: Lấy thông tin chủ bài đăng từ bảng NEWSLIST và USERINFO
-      const sqlPostOwners = "SELECT NEWSLIST.NEWSID, USERINFO.NAME FROM NEWSLIST JOIN USERINFO ON NEWSLIST.USERID = USERINFO.USERID WHERE NEWSLIST.NEWSID IN (?)";
+      const sqlPostOwners =
+        "SELECT NEWSLIST.NEWSID, USERINFO.NAME FROM NEWSLIST JOIN USERINFO ON NEWSLIST.USERID = USERINFO.USERID WHERE NEWSLIST.NEWSID IN (?)";
 
       // Thực hiện truy vấn SQL để lấy thông tin chủ bài đăng
       connection.query(sqlPostOwners, [newsIds], (err, postOwners) => {
@@ -1674,7 +1683,7 @@ app.get("/api/get-reportList", (req, res) => {
             POSTOWNER: postOwner ? postOwner.NAME : "Unknown",
             TIME: report.TIME,
             CONTENT: report.CONTENT,
-            SEEN: report.SEEN
+            SEEN: report.SEEN,
           };
         });
 
@@ -1684,9 +1693,6 @@ app.get("/api/get-reportList", (req, res) => {
     });
   });
 });
-
-
-
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
