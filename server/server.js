@@ -618,7 +618,7 @@ app.get("/api/hcmdistrict", (req, res) => {
 });
 
 // API lấy thông tin bài viết
-app.get("/api/get-posts", (req, res) => {
+app.get("/api/get-posts",  (req, res) => {
   // Thực hiện truy vấn SELECT để lấy tất cả bài đăng từ bảng NEWSLIST
   const selectNewslistQuery = "SELECT * FROM NEWSLIST";
 

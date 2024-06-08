@@ -318,6 +318,7 @@ import { faArrowAltCircleUp } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import Search from "../../Search/search";
 import { format, parseISO } from "date-fns";
+import moment from "moment";
 
 const ImageDes = () => {
   const [data, setData] = useState({ results: [], total: 0 });
@@ -337,12 +338,41 @@ const ImageDes = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (sort = "default", district = "") => {
     try {
-      const response = await axios.get("http://localhost:3000/api/get-posts");
-      const filteredData = response.data.results.filter(
-        post => post.STATE === "Hoạt động"
+      let url = "http://localhost:3000/api/get-posts";
+      if (district && district !== "all") {
+        url = `http://localhost:3000/api/search-posts-location?district=${district}`;
+      }
+
+      const response = await axios.get(url);
+      let posts = response.data.results;
+
+
+
+
+
+
+
+      // Update post state if TIMEEND > current time
+      const currentTime = moment();
+      for (let post of posts) {
+        if (moment(post.TIMEEND).isBefore(currentTime) && post.STATE !== "Hết hạn") {
+          await axios.get(`http://localhost:3000/api/newState-Post/${post.NEWSID}`);
+        }
+      }
+
+      // Re-fetch posts after updating states
+      const updatedResponse = await axios.get(url);
+      let filteredData = updatedResponse.data.results.filter(
+        (post) => post.STATE === "Hoạt động"
       );
+
+      if (sort === "newest") {
+        filteredData.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
+        filteredData = filteredData.slice(0, 10);
+      }
+
       setData({ results: filteredData, total: filteredData.length });
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -367,21 +397,36 @@ const ImageDes = () => {
     type === "default" ? fetchData() : fetchLatestPosts();
   };
 
-  const handleSearch = async selectedDistrict => {
+  const handleSearch = (selectedDistrict) => {
     setSelectedDistrict(selectedDistrict);
-    try {
-      const response = await axios.get(
-        selectedDistrict === "all"
-          ? `http://localhost:3000/api/get-posts`
-          : `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
-      );
-      const filteredData = response.data.results.filter(
-        post => post.STATE === "Hoạt động"
-      );
-      setData({ results: filteredData, total: filteredData.length });
-      setSortBy("default");
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    if (selectedDistrict === "all") {
+      axios
+        .get(`http://localhost:3000/api/get-posts`)
+        .then((response) => {
+          const filteredData = response.data.results.filter(
+            (post) => post.STATE === "Hoạt động"
+          );
+          setData({ results: filteredData, total: filteredData.length });
+          setSortBy("default");
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+    } else if (selectedDistrict !== "all") {
+      axios
+        .get(
+          `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
+        )
+        .then((response) => {
+          const filteredData = response.data.results.filter(
+            (post) => post.STATE === "Hoạt động"
+          );
+          setData({ results: filteredData, total: filteredData.length });
+          setSortBy("default");
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+        });
     }
   };
 

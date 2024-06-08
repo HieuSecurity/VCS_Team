@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../body.css";
-<<<<<<< HEAD
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
-=======
-
-
->>>>>>> ef53d3c06e358350f759db3146fc0e60c8a35dd7
 function Search({ onSearch }) {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [districts, setDistricts] = useState([]);
