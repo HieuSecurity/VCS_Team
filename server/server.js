@@ -20,8 +20,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt1", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -988,6 +988,175 @@ app.get("/api/search-posts-location", (req, res) => {
   });
 });
 
+// API lọc bài đăng theo Quận, giá và diện tích
+app.get("/api/search-posts", (req, res) => {
+  const selectedDistrict = req.query.district;
+  const priceFilter = req.query.price;
+  const areaFilter = req.query.acreage;
+
+  // Xây dựng truy vấn SQL chứa các điều kiện lọc
+  let selectNewslistQuery = `
+    SELECT NEWSLIST.NEWSID, NEWSLIST.USERID, NEWSLIST.TITLE, NEWSLIST.PRICE, 
+          NEWSLIST.ACREAGE, NEWSLIST.ADDRESS, NEWSLIST.STATE, NEWSDETAIL.*
+    FROM NEWSLIST
+    INNER JOIN NEWSDETAIL ON NEWSLIST.NEWSID = NEWSDETAIL.NEWSID
+    INNER JOIN HCMDISTRICT ON NEWSLIST.ADDRESS = HCMDISTRICT.IDDISTRICT
+  `;
+
+  // Biến để kiểm tra xem có áp dụng điều kiện WHERE chưa
+  let whereClauseAdded = false;
+
+  // Áp dụng bộ lọc quận nếu có
+  if (selectedDistrict && selectedDistrict !== "all" && selectedDistrict !== "undefined") {
+    selectNewslistQuery += `
+      WHERE HCMDISTRICT.DISTRICT = '${selectedDistrict}'
+    `;
+    whereClauseAdded = true;
+  }
+
+  // Áp dụng bộ lọc giá nếu có
+  if (priceFilter && priceFilter !== "all" && priceFilter !== "undefined") {
+    selectNewslistQuery += `${whereClauseAdded ? " AND" : " WHERE"} `;
+    switch (priceFilter) {
+      case "1":
+        selectNewslistQuery += `NEWSLIST.PRICE < 1000000`;
+        break;
+      case "2":
+        selectNewslistQuery += `NEWSLIST.PRICE >= 1000000 AND NEWSLIST.PRICE < 2000000`;
+        break;
+      case "3":
+        selectNewslistQuery += `NEWSLIST.PRICE >= 2000000 AND NEWSLIST.PRICE < 3000000`;
+        break;
+      case "4":
+        selectNewslistQuery += `NEWSLIST.PRICE >= 3000000 AND NEWSLIST.PRICE < 5000000`;
+        break;
+      case "5":
+        selectNewslistQuery += `NEWSLIST.PRICE >= 5000000 AND NEWSLIST.PRICE < 7000000`;
+        break;
+      case "6":
+        selectNewslistQuery += `NEWSLIST.PRICE >= 7000000 AND NEWSLIST.PRICE < 10000000`;
+        break;
+      case "7":
+        selectNewslistQuery += `NEWSLIST.PRICE >= 10000000 AND NEWSLIST.PRICE <= 15000000`;
+        break;
+      case "8":
+        selectNewslistQuery += `NEWSLIST.PRICE > 15000000`;
+        break;
+      default:
+        break;
+    }
+    whereClauseAdded = true;
+  }
+
+  // Áp dụng bộ lọc diện tích nếu có
+  if (areaFilter && areaFilter !== "all" && areaFilter !== "undefined") {
+    selectNewslistQuery += `${whereClauseAdded ? " AND" : " WHERE"} `;
+    switch (areaFilter) {
+      case "1":
+        selectNewslistQuery += `NEWSLIST.ACREAGE < 20`;
+        break;
+      case "2":
+        selectNewslistQuery += `NEWSLIST.ACREAGE >= 20 AND NEWSLIST.ACREAGE < 30`;
+        break;
+      case "3":
+        selectNewslistQuery += `NEWSLIST.ACREAGE >= 30 AND NEWSLIST.ACREAGE < 50`;
+        break;
+      case "4":
+        selectNewslistQuery += `NEWSLIST.ACREAGE >= 50 AND NEWSLIST.ACREAGE < 70`;
+        break;
+      case "5":
+        selectNewslistQuery += `NEWSLIST.ACREAGE >= 70 AND NEWSLIST.ACREAGE < 90`;
+        break;
+      case "6":
+        selectNewslistQuery += `NEWSLIST.ACREAGE > 90`;
+        break;
+      default:
+        break;
+    }
+    whereClauseAdded = true;
+  }
+
+  // Thực hiện truy vấn SELECT để lấy danh sách bài đăng với các điều kiện lọc
+  connection.query(selectNewslistQuery, async (error, newslistResults) => {
+    if (error) {
+      console.error("Error executing SELECT query", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    try {
+      // Duyệt qua từng bài đăng để thực hiện các truy vấn phụ
+      const posts = await Promise.all(
+        newslistResults.map(async (news) => {
+          const newsid = news.NEWSID;
+          const userId = news.USERID;
+          const districtId = news.ADDRESS;
+
+          // Truy vấn tên quận từ HCMDISTRICT
+          const district = await new Promise((resolve, reject) => {
+            connection.query(
+              "SELECT DISTRICT FROM HCMDISTRICT WHERE IDDISTRICT = ?",
+              [districtId],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0].DISTRICT);
+                }
+              }
+            );
+          });
+
+          // Truy vấn thông tin người dùng từ USERINFO
+          const userInfo = await new Promise((resolve, reject) => {
+            connection.query(
+              "SELECT NAME, PHONE, AVATAR FROM USERINFO WHERE USERID = ?",
+              [userId],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0]);
+                }
+              }
+            );
+          });
+
+          // Truy vấn hình ảnh từ bảng IMAGE
+          const image = await new Promise((resolve, reject) => {
+            connection.query(
+              "SELECT IMAGE FROM IMAGE WHERE NEWSID = ? LIMIT 1",
+              [newsid],
+              (error, results) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve(results[0] ? results[0].IMAGE : null);
+                }
+              }
+            );
+          });
+
+          // Kết hợp các thông tin lại thành một đối tượng
+          return {
+            ...news,
+            district,
+            ...userInfo,
+            image, // Thêm đường dẫn hình ảnh
+          };
+        })
+      );
+
+      // Lấy số lượng bài đăng
+      const total = posts.length;
+
+      // Trả về dữ liệu và số lượng bài đăng
+      res.status(200).json({ results: posts, total });
+    } catch (error) {
+      console.error("Error executing subqueries", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+});
+
 app.post("/api/signup", (req, res) => {
   const { username, email, phone, password } = req.body;
   try {
@@ -1126,6 +1295,8 @@ app.get("/api/detail/:id", (req, res) => {
     res.status(200).json(responseData);
   });
 });
+
+// API GÌ ĐÂY ????
 app.get("/api/search", (req, res) => {
   const { district } = req.query; // Get district from query parameters
 

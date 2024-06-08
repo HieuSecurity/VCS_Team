@@ -51,8 +51,11 @@ function Search({ onSearch }) {
       onSearch({
         district: selectedDistrict,
         price: selectedPrice,
-        area: selectedDientich,
+        acreage: selectedDientich,
       });
+      // console.log(selectedDistrict)
+      // console.log(selectedPrice)
+      // console.log(selectedDientich)
     } else {
       alert("Vui lòng chọn ít nhất một tiêu chí để tìm kiếm!");
     }
@@ -65,7 +68,7 @@ function Search({ onSearch }) {
         value={selectedDistrict}
         onChange={handleDistrictChange}
       >
-        <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
+        <option value="all">
           Quận
         </option>
         {districts.map((district) => (
@@ -79,32 +82,32 @@ function Search({ onSearch }) {
         value={selectedPrice}
         onChange={handlePriceChange}
       >
-        <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
+        <option value="all">
           Giá
         </option>
-        <option value={"Dưới 1 triệu"}>Dưới 1 triệu</option>
-        <option value={"Từ 1 - 2 triệu"}>Từ 1 - 2 triệu</option>
-        <option value={"Từ 2 - 3 triệu"}>Từ 2 - 3 triệu</option>
-        <option value={"Từ 3 - 5 triệu"}>Từ 3 - 5 triệu</option>
-        <option value={"Từ 5 - 7 triệu"}>Từ 5 - 7 triệu</option>
-        <option value={"Từ 7 - 10 triệu"}>Từ 7 - 10 triệu</option>
-        <option value={"Từ 10 - 15 triệu"}>Từ 10 đến 15 triệu</option>
-        <option value={"Trên 15 triệu"}>Trên 15 triệu</option>
+        <option value={"1"}>Dưới 1 triệu</option>
+        <option value={"2"}>Từ 1 - 2 triệu</option>
+        <option value={"3"}>Từ 2 - 3 triệu</option>
+        <option value={"4"}>Từ 3 - 5 triệu</option>
+        <option value={"5"}>Từ 5 - 7 triệu</option>
+        <option value={"6"}>Từ 7 - 10 triệu</option>
+        <option value={"7"}>Từ 10 đến 15 triệu</option>
+        <option value={"8"}>Trên 15 triệu</option>
       </select>
       <select
         className="select"
         value={selectedDientich}
         onChange={handleDienTichChange}
       >
-        <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
+        <option value="all">
           Diện Tích
         </option>
-        <option value={"Dưới 20"}>Dưới 20 m2</option>
-        <option value={"Từ 20 - 30"}>Từ 20 - 30 m2</option>
-        <option value={"Từ 30 - 50"}>Từ 30 - 50 m2</option>
-        <option value={"Từ 50 - 70"}>Từ 50 - 70 m2</option>
-        <option value={"Từ 70 - 90"}>Từ 70 - 90 m2</option>
-        <option value={"Trên 90"}>Trên 90 m2</option>
+        <option value={"1"}>Dưới 20 m2</option>
+        <option value={"2"}>Từ 20 - 30 m2</option>
+        <option value={"3"}>Từ 30 - 50 m2</option>
+        <option value={"4"}>Từ 50 - 70 m2</option>
+        <option value={"5"}>Từ 70 - 90 m2</option>
+        <option value={"6"}>Trên 90 m2</option>
       </select>
       <button
         style={{ alignItems: "center", textAlign: "center" }}

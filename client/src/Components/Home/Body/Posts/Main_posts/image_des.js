@@ -324,13 +324,15 @@ const ImageDes = () => {
   const [data, setData] = useState({ results: [], total: 0 });
   const [sortBy, setSortBy] = useState("default");
   const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedPrice, setSelectedPrice] = useState("");
+  const [selectedAcreage, setSelectedAcreage] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [sortBy, selectedDistrict, selectedPrice, selectedAcreage]);
 
   useEffect(() => {
     const handleScroll = () => setShowScrollButton(window.scrollY > 200);
@@ -345,13 +347,25 @@ const ImageDes = () => {
     }
   };
 
-  const fetchData = async (sort = "default", district = "") => {
+  const fetchData = async () => {
     try {
       let url = "http://localhost:3000/api/get-posts";
-      if (district && district !== "all") {
-        url = `http://localhost:3000/api/search-posts-location?district=${district}`;
+      const params = {
+        district:
+          selectedDistrict && selectedDistrict !== "all" ? selectedDistrict : undefined,
+        price: selectedPrice && selectedPrice !== "all" ? selectedPrice : undefined,
+        acreage:
+          selectedAcreage && selectedAcreage !== "all" ? selectedAcreage : undefined,
+      };
+      
+      console.log(params.district);
+      console.log(params.price);
+      console.log(params.acreage);
+      // Construct URL based on selected filters
+      if (params.district || params.price || params.acreage) {
+        url = `http://localhost:3000/api/search-posts?district=${params.district}&price=${params.price}&acreage=${params.acreage}`;
       }
-
+      console.log(url)
       const response = await axios.get(url);
       let posts = response.data.results;
       // Update post state if TIMEEND > current time
@@ -361,81 +375,60 @@ const ImageDes = () => {
           await axios.get(`http://localhost:3000/api/newState-Post/${post.NEWSID}`);
         }
       }
-
+  
       // Re-fetch posts after updating states
       const updatedResponse = await axios.get(url);
       let filteredData = updatedResponse.data.results.filter(
         (post) => post.STATE === "Hoạt động"
       );
-
-      shuffleArray(filteredData); // Xáo trộn bài viết để hiển thị các bài khác nhau khi load page
-
-      if (sort === "newest") {
-        filteredData.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
+  
+      shuffleArray(filteredData); // Shuffle posts to show different posts on page load
+  
+      if (sortBy === "newest") {
+        filteredData.sort((a, b) => new Date(b.TIMESTART) - new Date(a.TIMESTART));
         filteredData = filteredData.slice(0, 10);
       }
-
+  
       setData({ results: filteredData, total: filteredData.length });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  const fetchLatestPosts = async () => {
-    try {
-      const response = await axios.get("http://localhost:3000/api/get-posts");
-      const filteredData = response.data.results
-        .filter(post => post.STATE === "Hoạt động")
-        .sort((a, b) => new Date(b.TIMESTART) - new Date(a.TIMESTART))
-        .slice(0, 10);
-      setData({ results: filteredData, total: filteredData.length });
-    } catch (error) {
-      console.error("Error fetching latest posts:", error);
-    }
-  };
-
-  const handleSortByChange = type => {
+  const handleSortByChange = (type) => {
     setSortBy(type);
-    type === "default" ? fetchData() : fetchLatestPosts();
-  };
-
-  const handleSearch = (selectedDistrict) => {
-    setSelectedDistrict(selectedDistrict);
-    if (selectedDistrict === "all") {
-      axios
-        .get(`http://localhost:3000/api/get-posts`)
-        .then((response) => {
-          const filteredData = response.data.results.filter(
-            (post) => post.STATE === "Hoạt động"
-          );
-          setData({ results: filteredData, total: filteredData.length });
-          setSortBy("default");
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
-    } else if (selectedDistrict !== "all") {
-      axios
-        .get(
-          `http://localhost:3000/api/search-posts-location?district=${selectedDistrict}`
-        )
-        .then((response) => {
-          const filteredData = response.data.results.filter(
-            (post) => post.STATE === "Hoạt động"
-          );
-          setData({ results: filteredData, total: filteredData.length });
-          setSortBy("default");
-        })
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-        });
+    if (type === "default") {
+      setSelectedDistrict("all"); // Clear selected district
+      setSelectedPrice("all"); // Clear selected price
+      setSelectedAcreage("all"); // Clear selected acreage
+      fetchData(); // Fetch data with default parameters
+    } else if (type === "newest") {
+      setSortBy(type);
+      setSelectedDistrict("all"); // Clear selected district
+      setSelectedPrice("all"); // Clear selected price
+      setSelectedAcreage("all"); // Clear selected acreage
+      //fetchLatestPosts(); // Fetch latest posts
     }
   };
 
-  const formatDate = dateString =>
+  const handleSearch = ({ district, price, acreage}) => {
+    setSelectedDistrict(district);
+    setSelectedPrice(price);
+    setSelectedAcreage(acreage);
+  };
+
+  const handlePriceFilterChange = (price) => {
+    setSelectedPrice(price);
+  };
+
+  const handleAreaFilterChange = (acreage) => {
+    setSelectedAcreage(acreage);
+  };
+
+  const formatDate = (dateString) =>
     dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
 
-  const formatMoney = amount => {
+  const formatMoney = (amount) => {
     if (amount < 1000000) return (amount / 1000).toFixed(0) + " ngàn";
     if (amount >= 1000000000) return (amount / 1000000000).toFixed(1) + " tỷ";
     return (amount / 1000000).toFixed(1) + " triệu";
@@ -446,7 +439,12 @@ const ImageDes = () => {
   };
 
   const memoizedData = useMemo(
-    () => data.results.map(item => ({ ...item, formattedDate: formatDate(item.TIMESTART), formattedPrice: formatMoney(item.PRICE) })),
+    () =>
+      data.results.map((item) => ({
+        ...item,
+        formattedDate: formatDate(item.TIMESTART),
+        formattedPrice: formatMoney(item.PRICE),
+      })),
     [data.results]
   );
 
@@ -502,7 +500,7 @@ const ImageDes = () => {
         </h5>
       </span>
 
-      {currentItems.map(item => (
+      {currentItems.map((item) => (
         <Link
           key={item.NEWSID}
           style={{ textDecoration: "none", color: "black" }}
@@ -625,7 +623,7 @@ const ImageDes = () => {
           >
             Trang trước
           </li>
-          {[...Array(Math.ceil(data.total / itemsPerPage)).keys()].map(page => (
+          {[...Array(Math.ceil(data.total / itemsPerPage)).keys()].map((page) => (
             <li
               key={page + 1}
               style={{
