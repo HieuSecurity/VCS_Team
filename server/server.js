@@ -9,7 +9,7 @@ const { start } = require("repl");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const { format, parseISO } = require("date-fns-tz"); // Import format và parseISO từ date-fns-tz
-const moment = require('moment');
+const moment = require('moment-timezone');
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -384,15 +384,15 @@ app.post('/api/update-news-detail', (req, res) => {
     console.log("Thời hạn:", postDuration);
 
     // Tính toán TIMESTART và TIMEEND
-    const timeStart = moment();
-    console.log("Ngày hiện tại:", timeStart.format('YYYY-MM-DD HH:mm:ss'));
+    const timeStart = moment().tz('Asia/Ho_Chi_Minh');
+    console.log("Ngày hiện tại:", timeStart.format('yyyy/MM/dd'));
 
     const timeEnd = timeStart.clone().add(postDuration, 'days');
-    console.log("Ngày hết hạn:", timeEnd.format('YYYY-MM-DD HH:mm:ss'));
+    console.log("Ngày hết hạn:", timeEnd.format('yyyy/MM/dd'));
 
     // Update NEWSDETAIL
     const queryUpdate = `UPDATE NEWSDETAIL SET TIMESTART = ?, TIMEEND = ? WHERE NEWSID = ?`;
-    connection.query(queryUpdate, [timeStart.format('YYYY-MM-DD HH:mm:ss'), timeEnd.format('YYYY-MM-DD HH:mm:ss'), newsid], (err, result) => {
+    connection.query(queryUpdate, [timeStart.format('yyyy/MM/dd'), timeEnd.format('yyyy/MM/dd'), newsid], (err, result) => {
       if (err) {
         console.error('Error updating NEWSDETAIL:', err);
         res.status(500).send('Internal Server Error');

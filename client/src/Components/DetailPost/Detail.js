@@ -15,6 +15,7 @@ import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { faFlag } from '@fortawesome/free-solid-svg-icons';
+import { format, parseISO } from "date-fns";
 
 function Detail() {
   const { id } = useParams();
@@ -116,12 +117,7 @@ function Detail() {
   }
 
   const formatDate = (dateString) => {
-    if (!dateString) return ''; // Kiểm tra nếu dateString không tồn tại
-
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return ''; // Kiểm tra nếu date không hợp lệ
-
-    return date.toISOString().slice(0, 10);
+    return format(parseISO(dateString), "yyyy-MM-dd");
   };
 
   const fetchData = async () => {

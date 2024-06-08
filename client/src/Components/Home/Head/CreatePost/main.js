@@ -4,7 +4,7 @@ import Back from "../../../Back/back";
 import Slogan from "../../../Slogan/slogan";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 function PostForm() {
   const navigate = useNavigate();
@@ -26,6 +26,10 @@ function PostForm() {
 
   // State to store post duration and price list
   const [priceList, setPriceList] = useState([]);
+
+  const formatDate = (dateString) => {
+    return format(parseISO(dateString), "yyyy/MM/dd");
+  };
 
   useEffect(() => {
     // Get the user email from localStorage
