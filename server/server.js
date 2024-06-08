@@ -222,6 +222,9 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
   const { title, timestart, describe, price, acreage, address, district } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Hoạt động";
+  console.log("Received form data:", req.body);
+  console.log("Received images:", req.files);
+
 
   connection.beginTransaction((err) => {
     if (err) {
@@ -247,6 +250,16 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
       }
 
       const IDDISTRICT = districtResults[0].IDDISTRICT;
+
+      const deleteImageQuery = "DELETE FROM image WHERE NEWSID = ?";
+      connection.query(deleteImageQuery, [postId], (error, results) => {
+        if (error) {
+          console.error("Error deleting image:", error);
+          return connection.rollback(() => {
+          res.status(500).json({ message: "Internal server error" });
+        });
+      }
+
 
       // Update post details in newslist table
       const updateNewslistQuery =
@@ -296,7 +309,7 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
               } else {
                 // Images uploaded, insert them into the database
                 const insertImageQuery =
-                  "UPDATE image SET IMAGE = ? WHERE NEWSID = ?";
+                  "INSERT INTO image (newsid, image) VALUES (?, ?)";
                 const promises = images.map((image) => {
                   const imageUrl = image.filename;
                   return new Promise((resolve, reject) => {
@@ -345,6 +358,7 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
           );
         }
       );
+      });
     });
   });
 });

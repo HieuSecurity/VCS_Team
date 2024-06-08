@@ -354,13 +354,6 @@ const ImageDes = () => {
 
       const response = await axios.get(url);
       let posts = response.data.results;
-
-
-
-
-
-
-
       // Update post state if TIMEEND > current time
       const currentTime = moment();
       for (let post of posts) {

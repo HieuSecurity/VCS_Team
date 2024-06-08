@@ -52,7 +52,28 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3000/api/update-post/${postId}`, formData);
+      const formDataToSend = new FormData();
+      formDataToSend.append("title", formData.title);
+      formDataToSend.append("postDuration", formData.postDuration);
+      formDataToSend.append("describe", formData.describe);
+      formDataToSend.append("price", formData.price);
+      formDataToSend.append("acreage", formData.acreage);
+      formDataToSend.append("address", formData.address);
+      formDataToSend.append("district", formData.district);
+
+      // Append each image to formData
+      formData.images.forEach((image) => {
+        formDataToSend.append("images", image);
+      });
+
+      const response = await axios.put(`http://localhost:3000/api/update-post/${postId}`, 
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log(response.data);
       alert("Đã chỉnh sửa bài đăng thành công");
       window.location.reload();
