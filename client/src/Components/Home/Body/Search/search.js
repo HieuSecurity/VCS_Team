@@ -97,14 +97,14 @@ function Search({ onSearch }) {
         onChange={handleDienTichChange}
       >
         <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
-          Diện Tích m2
+          Diện Tích
         </option>
-        <option value={"Dưới 20"}>Dưới 20</option>
-        <option value={"Từ 20 - 30"}>Từ 20 - 30</option>
-        <option value={"Từ 30 - 50"}>Từ 30 - 50</option>
-        <option value={"Từ 50 - 70"}>Từ 50 - 70</option>
-        <option value={"Từ 70 - 90"}>Từ 70 - 90</option>
-        <option value={"Trên 90"}>Trên 90</option>
+        <option value={"Dưới 20"}>Dưới 20 m2</option>
+        <option value={"Từ 20 - 30"}>Từ 20 - 30 m2</option>
+        <option value={"Từ 30 - 50"}>Từ 30 - 50 m2</option>
+        <option value={"Từ 50 - 70"}>Từ 50 - 70 m2</option>
+        <option value={"Từ 70 - 90"}>Từ 70 - 90 m2</option>
+        <option value={"Trên 90"}>Trên 90 m2</option>
       </select>
       <button
         style={{ alignItems: "center", textAlign: "center" }}

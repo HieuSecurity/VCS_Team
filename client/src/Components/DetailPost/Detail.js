@@ -101,7 +101,7 @@ function Detail() {
 
     // Nếu số tiền nhỏ hơn 1 triệu
     if (amount < 1000000) {
-      return (amount / 1000).toFixed(0) + ' ngàn';
+      return (amount / 1000).toFixed(0) + ' nghìn';
     }
     // Chia số tiền cho 1 tỷ để kiểm tra nếu nó lớn hơn 1 tỷ
     else if (amount >= 1000000000) {
@@ -255,7 +255,14 @@ function Detail() {
                 <span style={{ marginRight: '55px' }}>Mã tin : </span>
                 <p style={{ fontWeight: 'initial' }}>{detailData.newsid}</p>
               </div>
-
+              <div style={{ backgroundColor: 'white', textAlign: 'center', marginLeft: '18px', display: 'flex', alignItems: 'center', fontSize: '18px', justifyContent: 'flex-start', margin: '10px 0' }}>
+                <span style={{ marginRight: '52px' }}>Số tiền : </span>
+                <p style={{ fontWeight: 'initial' }}>{formatMoney(detailData.price)}/tháng</p>
+              </div>
+              <div style={{ backgroundColor: 'white', textAlign: 'center', marginLeft: '18px', display: 'flex', alignItems: 'center', fontSize: '18px', justifyContent: 'flex-start', margin: '10px 0' }}>
+                <span style={{ marginRight: '37px' }}>Diện tích : </span>
+                <p style={{ fontWeight: 'initial' }}>{detailData.acreage} m2</p>
+              </div>
               <div style={{ backgroundColor: 'white', textAlign: 'center', marginLeft: '18px', display: 'flex', alignItems: 'center', fontSize: '18px', justifyContent: 'flex-start', margin: '10px 0' }}>
                 <span style={{ marginRight: '25px' }}>Ngày đăng : </span>
                 <p style={{ fontWeight: 'initial' }}>{formatDate(detailData.timestart)}</p>

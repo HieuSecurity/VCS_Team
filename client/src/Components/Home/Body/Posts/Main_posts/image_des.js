@@ -338,6 +338,13 @@ const ImageDes = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  };
+
   const fetchData = async (sort = "default", district = "") => {
     try {
       let url = "http://localhost:3000/api/get-posts";
@@ -368,6 +375,8 @@ const ImageDes = () => {
         (post) => post.STATE === "Hoạt động"
       );
 
+      shuffleArray(filteredData); // Xáo trộn bài viết để hiển thị các bài khác nhau khi load page
+
       if (sort === "newest") {
         filteredData.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
         filteredData = filteredData.slice(0, 10);
@@ -384,7 +393,7 @@ const ImageDes = () => {
       const response = await axios.get("http://localhost:3000/api/get-posts");
       const filteredData = response.data.results
         .filter(post => post.STATE === "Hoạt động")
-        .sort((a, b) => new Date(b.TIME) - new Date(a.TIME))
+        .sort((a, b) => new Date(b.TIMESTART) - new Date(a.TIMESTART))
         .slice(0, 10);
       setData({ results: filteredData, total: filteredData.length });
     } catch (error) {
