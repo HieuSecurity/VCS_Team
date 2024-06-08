@@ -149,8 +149,14 @@ function PostForm() {
 
   const handleImageChange = (e) => {
     const imageFiles = Array.from(e.target.files); // Get the selected files
-    if (imageFiles.length > 5) {
-      alert("Bạn chỉ được chọn tối đa 5 ảnh");
+    if (imageFiles.length > 20) {
+      alert("Bạn chỉ được chọn tối đa 20 ảnh.");
+      // Clear previous image selections
+      e.target.value = null;
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        images: [],
+      }));
       return;
     }
     setFormData((prevFormData) => ({

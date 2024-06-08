@@ -6,29 +6,43 @@ import Modal from "react-modal"; // Import Modal from react-modal
 
 const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
   const [formData, setFormData] = useState({
-    title: "",
-    describe: "",
-    price: "",
-    acreage: "",
-    address: "",
-    district: "",
-    images: [],
+    title:"" ,
+    describe: "" ,
+    price: "" ,
+    acreage: "" ,
+    address: "" ,
+    district: "" ,
+    images: "" ,
     agreeTerms: false,
   });
 
   const [districts, setDistricts] = useState([]);
+  const [priceList, setPriceList] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch post details to populate the form
-    async function fetchPostDetails() {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/api/posts/${postId}`);
-        setFormData(response.data);
+        const response = await axios.get(`http://localhost:3000/api/get-post-details/${postId}`); // Thay đổi đường dẫn API theo cấu trúc của bạn
+        const postData = response.data;
+        console.log("ở đây nè:", postData.specificaddress);
+        setFormData({
+          title: postData.title ,
+          describe: postData.describe,
+          price: postData.price ,
+          acreage: postData.acreage ,
+          address: postData.address ,
+          district: postData.district ,
+          images: postData.images ,
+          agreeTerms: false,
+        });
       } catch (error) {
-        console.error("Error fetching post details:", error);
+        console.error("Error fetching post data:", error);
       }
-    }
+    };
+
+
 
     // Fetch list of districts
     async function fetchDistricts() {
@@ -39,9 +53,18 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
         console.error("Error fetching districts:", error);
       }
     }
+    async function fetchPriceList() {
+      try {
+        const response = await axios.get("http://localhost:3000/api/get-pricelist"); // API endpoint
+        setPriceList(response.data);
+      } catch (error) {
+        console.error("Error fetching price list:", error);
+      }
+    }
 
-    fetchPostDetails();
+    fetchData();
     fetchDistricts();
+    fetchPriceList();
   }, [postId]);
 
   const handleSubmit = async (event) => {
@@ -54,14 +77,13 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("title", formData.title);
-      formDataToSend.append("postDuration", formData.postDuration);
       formDataToSend.append("describe", formData.describe);
       formDataToSend.append("price", formData.price);
       formDataToSend.append("acreage", formData.acreage);
       formDataToSend.append("address", formData.address);
       formDataToSend.append("district", formData.district);
 
-      // Append each image to formData
+      // Đưa hình ảnh vào FormData
       formData.images.forEach((image) => {
         formDataToSend.append("images", image);
       });
@@ -96,19 +118,32 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
   };
 
   const handleImageChange = (e) => {
-    const imageFiles = Array.from(e.target.files);
-    if (imageFiles.length > 5) {
-      alert("Bạn chỉ được chọn tối đa 5 ảnh");
+    const imageFiles = Array.from(e.target.files); // Get the selected files
+    if (imageFiles.length > 20) {
+      alert("Bạn chỉ được chọn tối đa 20 ảnh");
+      // Clear previous image selections
+      e.target.value = null;
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        images: [],
+      }));
       return;
     }
     setFormData((prevFormData) => ({
       ...prevFormData,
-      images: imageFiles,
+      images: imageFiles, // Set the image files in the form data
     }));
   };
 
   const handleCancel = () => {
     onRequestClose(); // Close the modal on cancel
+  };
+
+  const formatMoney = (amount) => {
+    return amount
+      .toLocaleString("en-US", { style: "currency", currency: "USD" })
+      .replace(/\$/, "")
+      .replace(/\.00$/, "");
   };
 
   return (

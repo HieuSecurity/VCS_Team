@@ -20,8 +20,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt1", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -251,15 +251,6 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
 
       const IDDISTRICT = districtResults[0].IDDISTRICT;
 
-      const deleteImageQuery = "DELETE FROM image WHERE NEWSID = ?";
-      connection.query(deleteImageQuery, [postId], (error, results) => {
-        if (error) {
-          console.error("Error deleting image:", error);
-          return connection.rollback(() => {
-          res.status(500).json({ message: "Internal server error" });
-        });
-      }
-
 
       // Update post details in newslist table
       const updateNewslistQuery =
@@ -307,6 +298,14 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
                   });
                 });
               } else {
+                const deleteImageQuery = "DELETE FROM image WHERE NEWSID = ?";
+                connection.query(deleteImageQuery, [postId], (error, results) => {
+                  if (error) {
+                    console.error("Error deleting image:", error);
+                    return connection.rollback(() => {
+                    res.status(500).json({ message: "Internal server error" });
+                });
+                }
                 // Images uploaded, insert them into the database
                 const insertImageQuery =
                   "INSERT INTO image (newsid, image) VALUES (?, ?)";
@@ -353,6 +352,7 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
                         .json({ message: "Internal server error" });
                     });
                   });
+      });
               }
             }
           );
@@ -360,7 +360,6 @@ app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
       );
       });
     });
-  });
 });
 
 //  cập nhật TIMESTART và TIMEEND theo thời điểm bài đăng đc hiển thị
@@ -765,6 +764,64 @@ app.get('/api/get-post-byNewsId/:newsId', (req, res) => {
     }
   });
 });
+
+// lấy thông tin để hiển thị lên form chỉnh sửa bài đăng
+app.get('/api/get-post-details/:newsId', (req, res) => {
+  const newsId = req.params.newsId;
+  
+  const sqlList = 'SELECT TITLE, ACREAGE, PRICE, ADDRESS FROM NEWSLIST WHERE NEWSID = ?';
+  const sqlDetail = 'SELECT SPECIFICADDRESS, `DESCRIBE` FROM NEWSDETAIL WHERE NEWSID = ?';
+  const sqlImages = 'SELECT IMAGE FROM IMAGE WHERE NEWSID = ?';
+  
+  const values = [newsId];
+  
+  connection.query(sqlList, values, (err, listResults) => {
+    if (err) {
+      console.error('Error getting post details by news ID:', err);
+      res.status(500).json({ message: 'Internal server error' });
+      return;
+    }
+    
+    if (listResults.length === 0) {
+      res.status(404).json({ message: 'Post details not found' });
+      return;
+    }
+    
+    connection.query(sqlDetail, values, (err, detailResults) => {
+      if (err) {
+        console.error('Error getting post details by news ID:', err);
+        res.status(500).json({ message: 'Internal server error' });
+        return;
+      }
+      
+      if (detailResults.length === 0) {
+        res.status(404).json({ message: 'Post details not found' });
+        return;
+      }
+      
+      connection.query(sqlImages, values, (err, imageResults) => {
+        if (err) {
+          console.error('Error getting images by news ID:', err);
+          res.status(500).json({ message: 'Internal server error' });
+          return;
+        }
+        
+        const postDetails = {
+          title: listResults[0].TITLE,
+          describe: detailResults[0].DESCRIBE,
+          price: listResults[0].PRICE,
+          acreage: listResults[0].ACREAGE,
+          district: listResults[0].ADDRESS,
+          address: detailResults[0].SPECIFICADDRESS,          
+          images: imageResults.map(image => image.IMAGE)
+        };
+        console.log("List:", postDetails);
+        res.json(postDetails);
+      });
+    });
+  });
+});
+
 
 // API Lấy các bài viết của người dùng từ USERID
 app.get("/api/get-posts-byUserid/:userid", (req, res) => {
