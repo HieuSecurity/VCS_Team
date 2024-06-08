@@ -152,7 +152,7 @@ const PostTable = () => {
   };
 
   const formatDate = (dateString) => {
-    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "null";
+    return dateString ? format(parseISO(dateString), 'yyyy/MM/dd') : "N/A";
   };
 
   if (loading) {
@@ -181,7 +181,7 @@ const PostTable = () => {
             <tr key={post.NEWSID}>
               <td>{post.NEWSID}</td>
               <td>{post.TITLE}</td>
-              <td>{formatDate(post.TIMESTART)}</td>
+              <td>{formatDate(post.TIMEEND)}</td>
               <td>{post.STATE}</td>
               <td className="chuc-Nang">
                 <Link className="detail-link update-button" to={`/detail/${post.NEWSID}`}>

@@ -9,7 +9,7 @@ const { start } = require("repl");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const { format, parseISO } = require("date-fns-tz"); // Import format và parseISO từ date-fns-tz
-const moment = require('moment-timezone');
+const moment = require('moment');
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
@@ -65,7 +65,7 @@ app.get('/api/get-qrThanhToan', (req, res) => {
 });
 
 
-app.post("/api/create-post", upload.array("images", 5), (req, res) => {
+app.post("/api/create-post", upload.array("images", 20), (req, res) => {
   const {
     userid,
     title,
@@ -217,7 +217,7 @@ app.post("/api/create-post", upload.array("images", 5), (req, res) => {
 
 
 // API để cập nhật thông tin bài đăng
-app.put("/api/update-post/:postId", upload.array("images", 5), (req, res) => {
+app.put("/api/update-post/:postId", upload.array("images", 20), (req, res) => {
   const postId = req.params.postId;
   const { title, timestart, describe, price, acreage, address, district } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
@@ -384,15 +384,15 @@ app.post('/api/update-news-detail', (req, res) => {
     console.log("Thời hạn:", postDuration);
 
     // Tính toán TIMESTART và TIMEEND
-    const timeStart = moment().tz('Asia/Ho_Chi_Minh');
-    console.log("Ngày hiện tại:", timeStart.format('yyyy/MM/dd'));
+    const timeStart = moment();
+    console.log("Ngày hiện tại:", timeStart.format('YYYY-MM-DD HH:mm:ss'));
 
     const timeEnd = timeStart.clone().add(postDuration, 'days');
-    console.log("Ngày hết hạn:", timeEnd.format('yyyy/MM/dd'));
+    console.log("Ngày hết hạn:", timeEnd.format('YYYY-MM-DD HH:mm:ss'));
 
     // Update NEWSDETAIL
     const queryUpdate = `UPDATE NEWSDETAIL SET TIMESTART = ?, TIMEEND = ? WHERE NEWSID = ?`;
-    connection.query(queryUpdate, [timeStart.format('yyyy/MM/dd'), timeEnd.format('yyyy/MM/dd'), newsid], (err, result) => {
+    connection.query(queryUpdate, [timeStart.format('YYYY-MM-DD HH:mm:ss'), timeEnd.format('YYYY-MM-DD HH:mm:ss'), newsid], (err, result) => {
       if (err) {
         console.error('Error updating NEWSDETAIL:', err);
         res.status(500).send('Internal Server Error');
@@ -826,18 +826,53 @@ app.get('/api/get-post-details/:newsId', (req, res) => {
 // API Lấy các bài viết của người dùng từ USERID
 app.get("/api/get-posts-byUserid/:userid", (req, res) => {
   const { userid } = req.params;
-  const sql = `SELECT * FROM NEWSLIST WHERE USERID = ?`;
 
-  connection.query(sql, [userid], (err, result) => {
+  // Câu truy vấn đầu tiên để lấy danh sách bài viết
+  const sql1 = `SELECT * FROM NEWSLIST WHERE USERID = ?`;
+
+  connection.query(sql1, [userid], (err, newsListResult) => {
     if (err) {
       console.error("Error fetching user posts:", err);
       res.status(500).json({ error: "Error fetching user posts" });
       return;
     }
 
-    res.status(200).json(result);
+    // Nếu không có bài viết nào, trả về kết quả rỗng
+    if (newsListResult.length === 0) {
+      res.status(200).json([]);
+      return;
+    }
+
+    // Lấy danh sách NEWSID từ kết quả đầu tiên
+    const newsIds = newsListResult.map(post => post.NEWSID);
+
+    // Câu truy vấn thứ hai để lấy giá trị TIMEEND từ bảng NEWSDETAIL
+    const sql2 = `SELECT NEWSID, TIMEEND FROM NEWSDETAIL WHERE NEWSID IN (?)`;
+
+    connection.query(sql2, [newsIds], (err, newsDetailResult) => {
+      if (err) {
+        console.error("Error fetching news details:", err);
+        res.status(500).json({ error: "Error fetching news details" });
+        return;
+      }
+
+      // Tạo một map từ NEWSID đến TIMEEND
+      const timeendMap = {};
+      newsDetailResult.forEach(detail => {
+        timeendMap[detail.NEWSID] = detail.TIMEEND;
+      });
+
+      // Kết hợp kết quả từ hai câu truy vấn
+      const finalResult = newsListResult.map(post => ({
+        ...post,
+        TIMEEND: timeendMap[post.NEWSID] || null // Nếu không tìm thấy TIMEEND, gán null
+      }));
+
+      res.status(200).json(finalResult);
+    });
   });
 });
+
 
 // API Lấy các bài viết của người dùng từ email
 app.get("/api/get-posts-byEmail/:email", (req, res) => {
