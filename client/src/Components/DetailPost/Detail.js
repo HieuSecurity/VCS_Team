@@ -117,7 +117,7 @@ function Detail() {
   }
 
   const formatDate = (dateString) => {
-    return format(parseISO(dateString), "yyyy-MM-dd");
+    return dateString ? format(parseISO(dateString), "yyyy/MM/dd") : "null";
   };
 
   const fetchData = async () => {

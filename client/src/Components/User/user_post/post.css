@@ -18,6 +18,7 @@
 
 .function-cell {
   color: red; /* Màu chữ là đỏ */
+  width: 300px;
 }
 
 .detail-link {
