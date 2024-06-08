@@ -401,7 +401,7 @@ const ImageDes = () => {
       setSelectedDistrict("all"); // Clear selected district
       setSelectedPrice("all"); // Clear selected price
       setSelectedAcreage("all"); // Clear selected acreage
-      fetchData(); // Fetch data with default parameters
+      window.location.href = "/"; // Fetch data with default parameters
     } else if (type === "newest") {
       setSortBy(type);
       setSelectedDistrict("all"); // Clear selected district
