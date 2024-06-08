@@ -1,5 +1,7 @@
 import React from "react";
 import "./footer.css"; // Import CSS file
+import { Link } from "react-router-dom";
+
 
 function Footer() {
   return (
@@ -10,9 +12,9 @@ function Footer() {
             <h3 className="footer__heading">Tin tức</h3>
             <ul className="footer__list">
               <li className="footer__item">
-                <a href="#" className="footer__item__link">
+              <Link to="/introduce" className="footer__item__link">
                   Giới thiệu
-                </a>
+                </Link>
               </li>
               <li className="footer__item">
                 <a href="/" className="footer__item__link">
@@ -20,17 +22,9 @@ function Footer() {
                 </a>
               </li>
               <li className="footer__item">
-                <a href="#" className="footer__item__link">
+              <Link to="/recruitment" className="footer__item__link">
                   Tuyển dụng
-                </a>
-              </li>
-              <li className="footer__item">
-                <a
-                  href="https://phongtro123.com/lien-he"
-                  className="footer__item__link"
-                >
-                  Liên hệ
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -46,7 +40,7 @@ function Footer() {
                 </a>
               </li>
               <li className="footer__item">
-                <a href="#" className="footer__item__link">
+                <a href="https://phongtro123.com/quy-dinh-su-dung" className="footer__item__link">
                   Điều khoản sử dụng
                 </a>
               </li>
@@ -59,18 +53,27 @@ function Footer() {
                 </a>
               </li>
               <li className="footer__item">
-                <a
-                  href="https://phongtro123.com/bang-gia-dich-vu"
-                  className="footer__item__link"
-                >
-                  Bảng giá dịch vụ
-                </a>
+              <Link to="/priceList" className="footer__item__link">
+                  Bảng giá đăng tin
+                </Link>
               </li>
             </ul>
           </div>
           <div className="grid__column-3">
-            <h3 className="footer__heading">Theo dõi</h3>
+            <h3 className="footer__heading">Liên hệ</h3>
             <ul className="footer__list">
+            <li className="footer__item">
+                <a
+                  href="https://mail.google.com/mail/u/0/#inbox?compose=new"
+                  className="footer__item__link"
+                >
+                  <ion-icon
+                    className="footer__item__icon"
+                    name="logo-email"
+                  ></ion-icon>
+                  nguyenhieuxt23@gmail.com
+                </a>
+              </li>
               <li className="footer__item">
                 <a
                   href="https://www.facebook.com/nguyenhieuxt23"

@@ -13,6 +13,9 @@ import User from "./Components/User/user";
 import DetailPostUser from "./Components/User/user_post/detailPost";
 import DetailPostAdmin from "./Components/Admin/admin_post/detailPost";
 import Footer from "./Components/Home/Footer/footer";
+import Recruitment from "./Components/Home/Footer/recruitment";
+import Introduce from "./Components/Home/Footer/introduce";
+import PriceList from "./Components/Home/Footer/priceList";
 import ChangePassWord from "./Components/Home/Head/ChangePass/main";
 
 function App() {
@@ -84,6 +87,15 @@ function App() {
       </Routes>
       <Routes>
         <Route path="/forgot" element={<MainForgot />} />
+      </Routes>
+      <Routes>
+        <Route path="/recruitment" element={<Recruitment />} />
+      </Routes>
+      <Routes>
+        <Route path="/introduce" element={<Introduce />} />
+      </Routes>
+      <Routes>
+        <Route path="/priceList" element={<PriceList />} />
       </Routes>
       <Footer />
     </div>

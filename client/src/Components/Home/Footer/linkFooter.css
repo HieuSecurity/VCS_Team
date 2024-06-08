@@ -1,0 +1,72 @@
+.body-tuyendung {
+	margin: 50px;
+	width: 90%;
+}
+
+.tuyendung-header {
+	height: 40px;
+	font-weight: bold;
+	line-height: 40px;
+	padding-left: 10px;
+	background: pink;
+	text-align: center;
+	font-size: 28px;
+}
+
+.tuyendung-info {
+	margin: 10px;
+}
+
+.tieude {
+	color: #0C9;
+	text-align: center;
+	font-size: 28px;
+}
+
+.tuyendung-noidung {
+	margin: 10px 0 15px 25px;
+}
+
+ul li span {
+	font-weight: bold;
+	color: red;
+}
+
+.price-list {
+	width: 80%;
+	margin: 0 auto;
+	border: 1px solid #ccc;
+	padding: 20px;
+	background-color: #f0f0f0;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.price-list__heading {
+	text-align: center;
+	color: #333;
+}
+
+.price-list__table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 20px;
+}
+
+.price-list__table th,
+.price-list__table td {
+	border: 1px solid #ccc;
+	padding: 8px;
+	text-align: center;
+}
+
+.price-list__table th {
+	background-color: #f2f2f2;
+}
+
+.price-list__note {
+	margin-top: 10px;
+	text-align: center;
+	font-style: italic;
+	color: #888;
+}
