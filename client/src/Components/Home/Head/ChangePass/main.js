@@ -137,7 +137,7 @@ const Main = () => {
             <div className="form-group">
               <label htmlFor="otp">Mã OTP đã gửi về email</label>
               <input
-                type="text"
+                type="password"
                 id="otp"
                 name="otp"
                 value={formData.otp}

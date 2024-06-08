@@ -20,8 +20,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
-  database: "dbpt1", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
+  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -221,7 +221,6 @@ app.put("/api/update-post/:postId", upload.array("images", 20), (req, res) => {
   const postId = req.params.postId;
   const { title, timestart, describe, price, acreage, address, district } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
-  const state = "Hoạt động";
   console.log("Received form data:", req.body);
   console.log("Received images:", req.files);
 
@@ -254,10 +253,10 @@ app.put("/api/update-post/:postId", upload.array("images", 20), (req, res) => {
 
       // Update post details in newslist table
       const updateNewslistQuery =
-        "UPDATE newslist SET title=?, acreage=?, price=?,address=?, state=? WHERE newsid=?";
+        "UPDATE newslist SET title=?, acreage=?, price=?,address=? WHERE newsid=?";
       connection.query(
         updateNewslistQuery,
-        [title, acreage, price, IDDISTRICT, state, postId],
+        [title, acreage, price, IDDISTRICT, postId],
         (error, newslistResults) => {
           if (error) {
             return connection.rollback(() => {
@@ -1448,16 +1447,17 @@ app.get("/api/get-userid-byEmail/:email", (req, res) => {
 
   const query = "SELECT USERID FROM USERINFO WHERE EMAIL = ?";
   connection.query(query, [email], (error, results) => {
+    if (results.length === 0) {
+      res.status(404).send("User not found");
+      return;
+    }
+
     if (error) {
       console.error("Error fetching USERID:", error);
       res.status(500).send("Internal Server Error");
       return;
     }
 
-    if (results.length === 0) {
-      res.status(404).send("User not found");
-      return;
-    }
 
     const userId = results[0].USERID;
     res.json({ USERID: userId });
@@ -1909,7 +1909,7 @@ app.get('/api/check-report-yet/:userId', (req, res) => {
       return;
     }
     
-    const reported = results[0].count > 0;
+    const reported = results[0].count;
     res.json({ reported });
   });
 });
@@ -1982,7 +1982,8 @@ app.get("/api/get-reportList", (req, res) => {
             REPORTER: reporter ? reporter.NAME : "Unknown",
             POSTOWNER: postOwner ? postOwner.NAME : "Unknown",
             TIME: report.TIME,
-            CONTENT: report.CONTENT
+            CONTENT: report.CONTENT,
+            SEEN: report.SEEN
           };
         });
 

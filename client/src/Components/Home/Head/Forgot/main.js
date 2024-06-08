@@ -61,7 +61,6 @@ const Main = () => {
           const response = await axios.get(
             `http://localhost:3000/api/get-userid-byEmail/${formData.email}`
           );
-
           if (response.data && response.data.USERID) {
             setStep(2); // Chuyển sang bước 2
           } else {
@@ -84,8 +83,12 @@ const Main = () => {
           }
         }
       } catch (error) {
+        if (error.response && error.response.status === 404) {
+          alert("Email không tồn tại trên hệ thống");
+        } else {
+          alert("Có lỗi xảy ra khi thực hiện yêu cầu");
+        }
         console.error("Error:", error);
-        alert("Có lỗi xảy ra khi thực hiện yêu cầu");
       }
     }
   };
@@ -142,7 +145,7 @@ const Main = () => {
             <div className="form-group">
               <label htmlFor="otp">Mã OTP đã gửi về email (123456):</label>
               <input
-                type="text"
+                type="password"
                 id="otp"
                 name="otp"
                 value={formData.otp}

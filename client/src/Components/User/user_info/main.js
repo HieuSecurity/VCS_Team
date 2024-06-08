@@ -172,7 +172,7 @@ function Main() {
               />
             </div>
             <div className="form-group">
-              <label>Ngày Sinh:</label>
+              <label>Ngày Sinh (mm/dd/yyyy):</label>
               <input
                 type="date"
                 name="DOB"
