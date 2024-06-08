@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
 import "../body.css";
+<<<<<<< HEAD
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+=======
+
+
+>>>>>>> ef53d3c06e358350f759db3146fc0e60c8a35dd7
 function Search({ onSearch }) {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [districts, setDistricts] = useState([]);
   const [selectedPrice, setSelectedPrice] = useState("");
-  const [price, setPrice] = useState([]);
   const [selectedDientich, setSelectedDientich] = useState("");
-  const [dientich, setDientich] = useState([]);
 
   useEffect(() => {
     // Fetch data from the API
@@ -34,30 +37,36 @@ function Search({ onSearch }) {
   }, []);
 
   const handleDistrictChange = (event) => {
-    console.log("Selected district:", event.target.value); // Log giá trị quận được chọn
+    console.log("Selected district:", event.target.value); // Log gtri quan duoc chon
     setSelectedDistrict(event.target.value);
   };
+
   const handlePriceChange = (event) => {
-    console.log("Selected district:", event.target.value); // Log giá trị quận được chọn
+    console.log("Selected price:", event.target.value); // Log gia duoc chon
     setSelectedPrice(event.target.value);
   };
+
   const handleDienTichChange = (event) => {
-    console.log("Selected district:", event.target.value); // Log giá trị quận được chọn
+    console.log("Selected area:", event.target.value); // Log gtri dien tich duoc chon
     setSelectedDientich(event.target.value);
   };
 
   const handleSearchButtonClick = () => {
-    if (selectedDistrict && selectedPrice && setSelectedDientich) {
-      onSearch(selectedDistrict);
+    if (selectedDistrict || selectedPrice || selectedDientich) {
+      onSearch({
+        district: selectedDistrict,
+        price: selectedPrice,
+        area: selectedDientich,
+      });
     } else {
-      alert("Vui lòng chọn để tìm kiếm!");
+      alert("Vui lòng chọn ít nhất một tiêu chí để tìm kiếm!");
     }
   };
 
   return (
     <div className="search-container">
       <select
-        className="select-district"
+        className="select"
         value={selectedDistrict}
         onChange={handleDistrictChange}
       >
@@ -71,14 +80,13 @@ function Search({ onSearch }) {
         ))}
       </select>
       <select
-        className="select-district"
+        className="select"
         value={selectedPrice}
         onChange={handlePriceChange}
       >
         <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
           Giá
         </option>
-
         <option value={"Dưới 1 triệu"}>Dưới 1 triệu</option>
         <option value={"Từ 1 - 2 triệu"}>Từ 1 - 2 triệu</option>
         <option value={"Từ 2 - 3 triệu"}>Từ 2 - 3 triệu</option>
@@ -89,20 +97,19 @@ function Search({ onSearch }) {
         <option value={"Trên 15 triệu"}>Trên 15 triệu</option>
       </select>
       <select
-        className="select-district"
+        className="select"
         value={selectedDientich}
         onChange={handleDienTichChange}
       >
         <option disabled value="" style={{ color: "red", fontSize: "25px" }}>
           Diện Tích m2
         </option>
-
-        <option value={"Dưới 20 "}>Dưới 20 </option>
-        <option value={"Từ 20 - 30 "}>Từ 20 - 30 </option>
-        <option value={"Từ 30 - 50 "}>Từ 30 - 50 </option>
-        <option value={"Từ 50 - 70 "}>Từ 50 - 70 </option>
-        <option value={"Từ 70 - 90 "}>Từ 70 - 90 </option>
-        <option value={"Trên 90 "}>Trên 90 </option>
+        <option value={"Dưới 20"}>Dưới 20</option>
+        <option value={"Từ 20 - 30"}>Từ 20 - 30</option>
+        <option value={"Từ 30 - 50"}>Từ 30 - 50</option>
+        <option value={"Từ 50 - 70"}>Từ 50 - 70</option>
+        <option value={"Từ 70 - 90"}>Từ 70 - 90</option>
+        <option value={"Trên 90"}>Trên 90</option>
       </select>
       <button
         style={{ alignItems: "center", textAlign: "center" }}

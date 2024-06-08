@@ -94,7 +94,7 @@ const Main = () => {
   };
 
   return (
-    <div className="Main">
+    <div className="MainReport">
       <Back style={{ marginTop: "50px" }} className="back" />
       <Slogan className="slogan" style={{ marginTop: "-50px" }} />
       <div style={{ marginBottom: "-200px" }} className="report-section">
