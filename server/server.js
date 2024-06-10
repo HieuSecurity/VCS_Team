@@ -20,7 +20,7 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "admin", // Thay password bằng mật khẩu của bạn
+  password: "", // Thay password bằng mật khẩu của bạn
   database: "webdangbai", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
@@ -1938,11 +1938,12 @@ app.put("/api/update-notificationSeen/:notificationID", (req, res) => {
 
 
 // API để kiểm tra người dùng đã thực hiện báo cáo chưa
-app.get('/api/check-report-yet/:userId', (req, res) => {
+app.get('/api/check-report-yet/:userId/:newsId', (req, res) => {
   const userId = req.params.userId;
+  const newsId = req.params.newsId;
   
-  const sql = 'SELECT COUNT(*) AS count FROM report WHERE USERID = ?';
-  const values = [userId];
+  const sql = 'SELECT COUNT(*) AS count FROM report WHERE USERID = ? AND NEWSID = ?';
+  const values = [userId, newsId];
   
   connection.query(sql, values, (err, results) => {
     if (err) {

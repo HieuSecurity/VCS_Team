@@ -49,7 +49,7 @@ const Main = () => {
       const userId = response.data.USERID;
       console.log("UserId của người tạo report: ", userId);
 
-      const checkReportResponse = await axios.get(`http://localhost:3000/api/check-report-yet/${userId}`);
+      const checkReportResponse = await axios.get(`http://localhost:3000/api/check-report-yet/${userId}/${newsId}`);
       console.log("Dữ liệu từ check report yet: ", checkReportResponse.data);
       if (checkReportResponse.data.reported) {
         alert("Bạn đã báo cáo bài viết này.");
