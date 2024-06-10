@@ -212,9 +212,9 @@ const PostTable = () => {
         </tbody>
       </table>
 
-      <h2 style={{ width: "700px", fontWeight: "700", fontSize: "33px" }}>
+      <h1 style={{ width: "700px", fontWeight: "700", fontSize: "30px" }}>
         Thông tin tất cả bài đăng !
-      </h2>
+      </h1>
       <table className="user-table">
         <thead>
           <tr>

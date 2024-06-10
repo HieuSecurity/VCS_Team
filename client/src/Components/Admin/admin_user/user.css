@@ -31,3 +31,18 @@ td {
 .user-table tr:hover {
   background-color: #dddddd;
 }
+
+.table input[type="text"] {
+  width: 60%;
+  padding: 5px;
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.table .fa-search {
+  color: #00796b;
+  cursor: pointer;
+  font-size: 18px;
+}
+
