@@ -20,8 +20,8 @@ app.use("/uploads", express.static("uploads"));
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
-  password: "", // Thay password bằng mật khẩu của bạn
-  database: "DBPT", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  password: "admin", // Thay password bằng mật khẩu của bạn
+  database: "dbpt1", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -1734,6 +1734,47 @@ app.get("/api/payment", async (req, res) => {
   }
 });
 
+app.get('/api/payment-statistics', (req, res) => {
+  // Truy vấn SQL để lấy thông tin cần thiết từ bảng PAYMENT và trích xuất MONTH và YEAR từ cột TIME
+  const query = `
+    SELECT MONTH(TIME) AS payment_month, YEAR(TIME) AS payment_year, COUNT(*) AS totalPosts, SUM(PRICE) AS totalProfit
+    FROM PAYMENT
+    WHERE STATE = 'Thành công'
+    GROUP BY payment_month, payment_year
+  `;
+
+  // Thực hiện truy vấn SQL
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error('Error executing query', error);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+
+    // Tạo đối tượng kết quả để trả về cho client
+    const response = {
+      statistics: results.map(payment => {
+        return {
+          month: payment.payment_month,
+          year: payment.payment_year,
+          totalPosts: payment.totalPosts,
+          totalProfit: payment.totalProfit
+        };
+      })
+    };
+
+    // Log kết quả
+    console.log("Response:", response);
+
+    // Trả về kết quả cho client
+    res.json(response);
+  });
+});
+
+
+
+
+
 // API to fetch payment by paymentId
 app.get("/api/payment/:paymentId", (req, res) => {
   const paymentId = req.params.paymentId;
@@ -1752,6 +1793,7 @@ app.get("/api/payment/:paymentId", (req, res) => {
   });
 });
 const util = require("util");
+const { TbHanger2 } = require("react-icons/tb");
 const query = util.promisify(connection.query).bind(connection);
 
 // API lấy thông tin thanh toán dựa trên NEWSID

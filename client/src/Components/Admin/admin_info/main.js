@@ -68,27 +68,27 @@ function Main() {
         <table className="table">
           <thead>
             <tr>
-              <th>Mã ID</th>
-              <th>Họ và Tên</th>
-              <th>Giới Tính</th>
-              <th>Ngày Sinh</th>
-              <th>Số Điện Thoại</th>
-              <th>Email</th>
-              <th>Địa Chỉ</th>
-              <th className="function-cell">Chức năng</th>
+              <th style={{textAlign:"center"}}>Mã ID</th>
+              <th style={{textAlign:"center"}}>Họ và Tên</th>
+              <th style={{textAlign:"center"}}>Giới Tính</th>
+              <th style={{textAlign:"center"}}>Ngày Sinh</th>
+              <th style={{textAlign:"center"}}>Số Điện Thoại</th>
+              <th style={{textAlign:"center"}}>Email</th>
+              <th style={{textAlign:"center"}}>Địa Chỉ</th>
+              <th className="function-cell" style={{textAlign:"center"}}>Chức năng</th>
             </tr>
           </thead>
           <tbody>
             {userData.map((user) => (
               <tr key={user.ADMINID}>
-                <td>{user.ADMINID}</td>
-                <td>{user.NAME}</td>
-                <td>{user.SEX}</td>
-                <td>{formatDate(user.DOB)}</td>
-                <td>{user.PHONE}</td>
-                <td>{user.EMAIL}</td>
-                <td>{user.ADDRESS}</td>
-                <td>
+                <td style={{textAlign:"center"}}>{user.ADMINID}</td>
+                <td style={{textAlign:"center"}}>{user.NAME}</td>
+                <td style={{textAlign:"center"}}>{user.SEX}</td>
+                <td style={{textAlign:"center"}}>{formatDate(user.DOB)}</td>
+                <td style={{textAlign:"center"}}>{user.PHONE}</td>
+                <td style={{textAlign:"center"}}>{user.EMAIL}</td>
+                <td style={{textAlign:"center"}}>{user.ADDRESS}</td>
+                <td style={{textAlign:"center"}}> 
                   <button
                     className="detail-link update-button"
                     onClick={() => handleEdit(user)}

@@ -1,0 +1,21 @@
+.statistics-container {
+    font-family: 'Times New Roman', Times, serif;
+  }
+  
+  .statistics-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+  }
+  
+  .statistics-table th, .statistics-table td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .statistics-table th {
+    background-color: #f2f2f2;
+  }
+  
+  

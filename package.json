@@ -5,6 +5,7 @@
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.45",
     "react-icons": "^5.2.1",
-    "react-modal": "^3.16.1"
+    "react-modal": "^3.16.1",
+    "react-router-dom": "^6.23.1"
   }
 }

@@ -97,3 +97,17 @@
   margin-right: 10px;
 }
 
+.statistics-button {
+  padding: 5px 5px;
+  background-color: #16c784;
+  color: white;
+  border: none;
+  cursor: pointer;
+  margin-left: 700px;
+  width: 180px;
+  margin-bottom: 20px;
+}
+
+.statistics-button:hover {
+  background-color: #1976D2;
+}

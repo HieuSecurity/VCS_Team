@@ -137,29 +137,29 @@ function Main() {
         <table className="table">
           <thead>
             <tr>
-              <th>Mã ID</th>
-              <th>Tên</th>
-              <th>Giới tính</th>
-              <th>Ngày sinh</th>
-              <th>Số Điện Thoại</th>
-              <th>Email</th>
-              <th>Số bài viết</th>
-              <th>Trạng Thái</th>
-              <th className="function-cell">Chức năng</th>
+              <th style={{textAlign:"center"}}>Mã ID</th>
+              <th style={{textAlign:"center"}}>Tên</th>
+              <th style={{textAlign:"center"}}>Giới tính</th>
+              <th style={{textAlign:"center"}}>Ngày sinh</th>
+              <th style={{textAlign:"center"}}>Số Điện Thoại</th>
+              <th style={{textAlign:"center"}}>Email</th>
+              <th style={{textAlign:"center"}}>Số bài viết</th>
+              <th style={{textAlign:"center"}}>Trạng Thái</th>
+              <th className="function-cell" style={{textAlign:"center"}}>Chức năng</th>
             </tr>
           </thead>
           <tbody>
             {userData.map((user) => (
               <tr key={user.USERID}>
-                <td>{user.USERID}</td>
-                <td>{user.NAME}</td>
-                <td>{user.SEX}</td>
-                <td>{formatDate(user.DOB)}</td>
-                <td>{user.PHONE}</td>
-                <td>{user.EMAIL}</td>
-                <td>{user.NEWSCOUNT}</td>
-                <td>{user.STATUS}</td>
-                <td>
+                <td style={{textAlign:"center"}}>{user.USERID}</td>
+                <td style={{textAlign:"center"}}>{user.NAME}</td>
+                <td style={{textAlign:"center"}}>{user.SEX}</td>
+                <td style={{textAlign:"center"}}>{formatDate(user.DOB)}</td>
+                <td style={{textAlign:"center"}}>{user.PHONE}</td>
+                <td style={{textAlign:"center"}}>{user.EMAIL}</td>
+                <td style={{textAlign:"center"}}>{user.NEWSCOUNT}</td>
+                <td style={{textAlign:"center"}}>{user.STATUS}</td> 
+                <td style={{textAlign:"center"}}>
                   <button
                     className="detail-link update-button"
                     onClick={() => handleStatusChange(user)}

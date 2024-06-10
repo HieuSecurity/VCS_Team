@@ -115,10 +115,10 @@ const PostTable = () => {
         url = `http://localhost:3000/api/update-newsState`;
         data = { newsid: postId, state: "Hoạt động" };
         break;
-      case "edit":
-        url = `http://localhost:3000/api/update-newsState`;
-        data = { newsid: postId, state: "Đã chỉnh sửa" };
-        break;
+      // case "edit":
+      //   url = `http://localhost:3000/api/update-newsState`;
+      //   data = { newsid: postId, state: "Đã chỉnh sửa" };
+      //   break;
       case "delete":
         url = `http://localhost:3000/api/update-newsState`;
         data = { newsid: postId, state: "Đã xóa" };

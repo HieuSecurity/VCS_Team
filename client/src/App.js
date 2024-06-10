@@ -17,6 +17,7 @@ import Recruitment from "./Components/Home/Footer/recruitment";
 import Introduce from "./Components/Home/Footer/introduce";
 import PriceList from "./Components/Home/Footer/priceList";
 import ChangePassWord from "./Components/Home/Head/ChangePass/main";
+import StatisticsTable from "./Components/Admin/admin_payment/StatisticsTable";
 
 function App() {
   return (
@@ -96,6 +97,9 @@ function App() {
       </Routes>
       <Routes>
         <Route path="/priceList" element={<PriceList />} />
+      </Routes>
+      <Routes>
+        <Route path="/statistics" element={<StatisticsTable />} />
       </Routes>
       <Footer />
     </div>

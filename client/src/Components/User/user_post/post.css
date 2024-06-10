@@ -7,13 +7,14 @@
 .user-table {
   width: 100%;
   border-collapse: collapse;
+  text-align: center;
 }
 
 .user-table th, 
 .user-table td {
   border: 1px solid #ddd;
   padding: 8px;
-  text-align: left;
+  text-align: center;
 }
 
 .function-cell {
