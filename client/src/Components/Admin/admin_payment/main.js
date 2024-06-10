@@ -7,13 +7,16 @@ import {
   faTimes,
   faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import "./payment.css"; // Import CSS file for styling
 
 const PostTable = () => {
   const [payments, setPayments] = useState([]);
+  const [originalPayments, setOriginalPayments] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   const adminEmail = user ? user.EMAIL : null; // Lấy EMAIL thay vì ADMINID
   const [reason, setReason] = useState(""); // Lý do từ chối hoặc xóa bài viết
+  const [searchId, setSearchId] = useState('');
 
   useEffect(() => {
     fetchPayments();
@@ -22,7 +25,6 @@ const PostTable = () => {
   const formatDate = (dateString) => {
     return format(parseISO(dateString), "yyyy/MM/dd HH:mm:ss");
   };
-
   const formatMoney = (amount) => {
     return amount
       .toLocaleString("en-US", { style: "currency", currency: "USD" })
@@ -227,6 +229,7 @@ const PostTable = () => {
     try {
       const response = await axios.get("http://localhost:3000/api/payment");
       setPayments(response.data);
+      setOriginalPayments(response.data);
     } catch (error) {
       console.error("Error fetching payments:", error);
     }
@@ -248,10 +251,55 @@ const PostTable = () => {
     return parseISO(b.TIME) - parseISO(a.TIME);
   });
 
+  const handleSearch = () => {
+    // Lấy giá trị tìm kiếm, bỏ khoảng trắng đầu và cuối, và chuyển thành chữ thường
+    const trimmedSearchId = searchId.trim();
+  
+    const filteredData = [];
+  
+    for (let i = 0; i < originalPayments.length; i++) {
+      const payment = originalPayments[i];
+  
+      // Chuyển các trường thông tin của người dùng thành chữ thường để so sánh
+      const payIdStr = payment.PAYID.toString();
+      const newsIdStr = payment.NEWSID.toString();
+      // Kiểm tra nếu searchId hoặc searchContact không rỗng
+      const matchId = trimmedSearchId
+        ? payIdStr === trimmedSearchId ||
+          newsIdStr === trimmedSearchId
+        : true;
+  
+      if (matchId) {
+        filteredData.push(payment);
+      }
+    }
+    setPayments(filteredData);
+  };
+
   return (
     <div className="table-container">
       <h1>Thông tin thanh toán tại Phongtro123</h1>
-      <table className="payment-table">
+      <table className="table">
+          <thead>
+          <tr>
+              <th style={{width: "100%"}}>
+                Mã thanh toán/ Mã bài viết
+                <input 
+                  type="text" 
+                  value={searchId} 
+                  onChange={(e) => setSearchId(e.target.value)} 
+                  placeholder="Tìm kiếm mã ID" 
+                />
+                <FontAwesomeIcon 
+                icon={faSearch} 
+                onClick={handleSearch} 
+                style={{ cursor: "pointer", marginLeft: "20px"}} 
+              />
+              </th>
+            </tr>
+          </thead>
+        </table>
+      <table className="table">
         <thead>
           <tr>
             <th>Mã thanh toán</th>
