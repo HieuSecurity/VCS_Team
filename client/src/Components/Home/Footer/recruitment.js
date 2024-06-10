@@ -1,11 +1,15 @@
 import React from 'react';
 import "./linkFooter.css";
+import Slogan from "../../Slogan/slogan";
+import Back from "../../Back/back";
 
 function TuyenDung() {
     return (
         <div className="body-tuyendung">
+        <Back style={{ marginTop: "50px" }} className="back" />
+        <Slogan className="slogan" style={{ marginTop: "-50px" }} />
             <div className="tuyendung-info">
-                <h1 className="tieude">TUYỂN DỤNG NHÂN VIÊN BÁN HÀNG (Tạm dừng)</h1><br />
+                <h1 className="tieude">TUYỂN DỤNG NHÂN VIÊN TRỰC WEB(Tạm dừng)</h1><br />
 
                 <b>1.MÔ TẢ</b>
                 <ul class="tuyendung-noidung">

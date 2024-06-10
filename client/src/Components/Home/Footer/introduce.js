@@ -1,9 +1,13 @@
 import React from 'react';
 import "./linkFooter.css";
+import Slogan from "../../Slogan/slogan";
+import Back from "../../Back/back";
 
 function GioiThieu() {
     return (
         <div className="body-gioithieu">
+        <Back style={{ marginTop: "50px" }} className="back" />
+        <Slogan className="slogan" style={{ marginTop: "-50px" }} />
             <div className="gioithieu-info">
                 <h1 className="tieude">GIỚI THIỆU</h1><br />
                 <div className="gioithieu-noidung">

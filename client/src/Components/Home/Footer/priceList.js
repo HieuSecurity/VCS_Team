@@ -1,9 +1,13 @@
 import React from 'react';
 import './linkFooter.css'; // Import CSS file
+import Slogan from "../../Slogan/slogan";
+import Back from "../../Back/back";
 
 function PriceList() {
     return (
         <div className="price-list">
+            <Back style={{ marginTop: "50px" }} className="back" />
+            <Slogan className="slogan" style={{ marginTop: "-50px" }} />
             <h2 className="price-list__heading">Bảng giá đăng tin</h2>
             <table className="price-list__table">
                 <thead>
@@ -16,13 +20,23 @@ function PriceList() {
                 <tbody>
                     <tr>
                         <td>Tin thường</td>
+                        <td>15 ngày</td>
+                        <td>330.000 VNĐ (22.000 VNĐ/ngày)</td>
+                    </tr>
+                    <tr>
+                        <td>Tin thường</td>
                         <td>30 ngày</td>
                         <td>600.000 VNĐ (20.000 VNĐ/ngày)</td>
                     </tr>
                     <tr>
                         <td>Tin thường</td>
+                        <td>60 ngày</td>
+                        <td>1.140.000 VNĐ (19.000 VNĐ/ngày)</td>
+                    </tr>
+                    <tr>
+                        <td>Tin thường</td>
                         <td>90 ngày</td>
-                        <td>1.710.000 VNĐ (19.000 VNĐ/ngày)</td>
+                        <td>1.620.000 VNĐ (18.000 VNĐ/ngày)</td>
                     </tr>
                     <tr>
                         <td>Tin thường</td>
