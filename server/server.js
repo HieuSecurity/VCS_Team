@@ -1994,7 +1994,22 @@ app.get("/api/get-reportList", (req, res) => {
   });
 });
 
+// API đánh dấu đã xem thông báo
+app.put("/api/update-reportSeen/:reportID", (req, res) => {
+  const reportID = req.params.reportID;
+  const query = "UPDATE REPORT SET SEEN = 1 WHERE REPORTID = ?";
 
+  connection.query(query, [reportID], (error, results) => {
+    if (error) {
+      console.error("Error updating report seen state:", error);
+      return res.status(500).json({ error: "Lỗi máy chủ nội bộ" });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ error: "Không tìm thấy thông báo" });
+    }
+    res.status(200).json({ message: "Cập nhật trạng thái đã xem thành công" });
+  });
+});
 
 
 app.listen(PORT, () => {
