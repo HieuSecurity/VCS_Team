@@ -3,6 +3,7 @@ import axios from "axios";
 import "./post.css"; // Import file CSS cho kiểu dáng
 import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import {
   faCheck,
   faTimes,
@@ -11,8 +12,11 @@ import {
 
 const PostTable = () => {
   const [posts, setPosts] = useState({ newPosts: [], allPosts: [] });
+  const [originalPosts, setOriginalPosts] = useState({ newPosts: [], allPosts: [] })
   const [reason, setReason] = useState(""); // Lý do từ chối hoặc xóa bài viết
   const { id } = useParams();
+  const [searchId, setSearchId] = useState('');
+  const [searchContact, setSearchContact] = useState('');
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -29,6 +33,7 @@ const PostTable = () => {
         filteredPosts.sort((a, b) => a.NEWSID - b.NEWSID);
 
         setPosts({ newPosts, allPosts: filteredPosts });
+        setOriginalPosts({ newPosts, allPosts: filteredPosts });
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -147,6 +152,53 @@ const PostTable = () => {
       });
   };
 
+  const handleSearch = () => {
+    // Lấy giá trị tìm kiếm, bỏ khoảng trắng đầu và cuối, và chuyển thành chữ thường
+    const trimmedSearchId = searchId.trim().toLowerCase();
+    const trimmedSearchContact = searchContact.trim().toLowerCase();
+  
+    const filteredNewPosts = [];
+    const filteredAllPosts = [];
+  
+    // Duyệt qua newPosts và lọc các bài viết thỏa mãn điều kiện tìm kiếm
+    for (let i = 0; i < originalPosts.newPosts.length; i++) {
+      const post = originalPosts.newPosts[i];
+      const postIdStr = post.NEWSID.toString().toLowerCase();
+      const postUser = post.NAME.toLowerCase();
+      const postAddress = post.district.toLowerCase();
+  
+      const matchId = trimmedSearchId ? postIdStr === trimmedSearchId: true;
+      const matchContact = trimmedSearchContact ?
+        postUser.includes(trimmedSearchContact) || postAddress.includes(trimmedSearchContact) :
+        true;
+  
+      if (matchId && matchContact) {
+        filteredNewPosts.push(post);
+      }
+    }
+  
+    // Duyệt qua allPosts và lọc các bài viết thỏa mãn điều kiện tìm kiếm
+    for (let i = 0; i < originalPosts.allPosts.length; i++) {
+      const post = originalPosts.allPosts[i];
+      const postIdStr = post.NEWSID.toString().toLowerCase();
+      const postUser = post.NAME.toLowerCase();
+      const postAddress = post.district.toLowerCase();
+  
+      const matchId = trimmedSearchId ? postIdStr === trimmedSearchId : true;
+      const matchContact = trimmedSearchContact ?
+        postUser.includes(trimmedSearchContact) || postAddress.includes(trimmedSearchContact) :
+        true;
+  
+      if (matchId && matchContact) {
+        filteredAllPosts.push(post);
+      }
+    }
+  
+    setPosts({ newPosts: filteredNewPosts, allPosts: filteredAllPosts });
+  };
+  
+  
+
   return (
     <div className="table-container">
       <h1 style={{ width: "700px", fontWeight: "700", fontSize: "30px" }}>
@@ -215,6 +267,35 @@ const PostTable = () => {
       <h1 style={{ width: "700px", fontWeight: "700", fontSize: "30px" }}>
         Thông tin tất cả bài đăng !
       </h1>
+      <table className="table">
+          <thead>
+          <tr>
+              <th  style={{width: "35%"}}>
+                Mã ID
+                <input 
+                  type="text" 
+                  value={searchId} 
+                  onChange={(e) => setSearchId(e.target.value)} 
+                  placeholder="Tìm kiếm mã ID" 
+                />
+              </th>
+              <th style={{width: "65%"}}>
+                Địa chỉ/Tên người đăng
+                <input 
+                  type="text" 
+                  value={searchContact} 
+                  onChange={(e) => setSearchContact(e.target.value)} 
+                  placeholder="Tìm kiếm" 
+                />
+                <FontAwesomeIcon 
+                  icon={faSearch} 
+                  onClick={handleSearch} 
+                  style={{ cursor: "pointer", marginLeft: "20px"}} 
+                />
+              </th>
+            </tr>
+          </thead>
+        </table>
       <table className="user-table">
         <thead>
           <tr>
