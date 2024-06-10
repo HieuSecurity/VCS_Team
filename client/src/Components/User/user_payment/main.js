@@ -26,14 +26,15 @@ const PostTable = () => {
               try {
                 const adminInfoResponse = await axios.get(`http://localhost:3000/api/get-adminInfo-byId/${adminId}`);
                 const adminName = adminInfoResponse.data.NAME;
-                paymentResponse.data[0].adminName = adminName;
+                // paymentResponse.data[0].adminName = adminName;
+                paymentResponse.data.forEach(payment => payment.adminName = adminName);
               } catch (error) {
                 console.error("Error fetching admin info:", error);
                 paymentResponse.data.adminName = "Unknown";
               }
             } else {
               console.log(`No payment info found for post ${post.NEWSID}`);
-              paymentResponse.data.adminName = "Unknown";
+              paymentResponse.data.forEach(payment => payment.adminName = "Unknown");
             }
             return paymentResponse.data;
           });
@@ -44,6 +45,7 @@ const PostTable = () => {
           // Sắp xếp các thanh toán theo thời gian từ gần nhất đến xa nhất
           flatPayments.sort((a, b) => new Date(b.TIME) - new Date(a.TIME));
 
+          console.log("Flat payments with admin name:", flatPayments);
           setPayments(flatPayments);
 
           // Tính toán tổng số tiền và số lần thanh toán
@@ -108,7 +110,7 @@ const PostTable = () => {
               <td>{formatMoney(payment.PRICE)}</td>
               <td>{formatDate(payment.TIME)}</td>
               <td>{payment.STATE}</td>
-              <td>{payment.adminName}</td>
+              <td>{payment.adminName || payment.ADMINID}</td>
             </tr>
           ))}
         </tbody>
