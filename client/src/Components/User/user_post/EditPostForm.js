@@ -198,7 +198,7 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
                 name="acreage"
                 value={formData.acreage}
                 onChange={handleChange}
-                placeholder="mét"
+                placeholder="Mét"
               />
             </div>
           </div>
@@ -254,9 +254,10 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
             </label>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <button type="submit">lưu</button>
-            <button type="button" onClick={handleCancel}>Hủy</button>
+            <button type="submit" style={{ marginRight: "20px" }}>Lưu</button>
+            <button type="button" onClick={handleCancel} style={{ marginLeft: "20px" }}>Hủy</button>
           </div>
+
         </form>
       </div>
     </Modal>

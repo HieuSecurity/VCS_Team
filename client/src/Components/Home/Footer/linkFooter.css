@@ -1,45 +1,51 @@
-.body-tuyendung {
-	margin: 50px;
-	width: 90%;
+.gioithieu-noidung p{
+	font-weight: lighter;
 }
-
-.tuyendung-header {
-	height: 40px;
-	font-weight: bold;
-	line-height: 40px;
-	padding-left: 10px;
-	background: pink;
-	text-align: center;
-	font-size: 28px;
-}
-
-.tuyendung-info {
-	margin: 10px;
+.body-tuyendung, .body-gioithieu {
+    padding: 20px; /* Khoảng cách lề cho phần body của form */
+    background-color: #f9f9f9; /* Màu nền cho phần body của form */
 }
 
 .tieude {
-	color: #0C9;
-	text-align: center;
-	font-size: 28px;
+	font-size: 24px;
+    color: #333; /* Màu chữ cho tiêu đề mỗi phần của form */
+	white-space: nowrap; /* Ngăn chữ trong tiêu đề bị xuống dòng */
 }
 
 .tuyendung-noidung {
-	margin: 10px 0 15px 25px;
+	font-weight: lighter;
+    
+	margin-bottom: 10px; /* Khoảng cách phía dưới của mỗi phần nội dung trong form */
 }
 
-ul li span {
-	font-weight: bold;
-	color: red;
+.tuyendung-info, .gioithieu-info{
+    background-color: #fff; /* Màu nền cho phần thông tin trong form */
+    padding: 20px; /* Khoảng cách lề cho phần thông tin trong form */
+    border-radius: 5px; /* Đường viền cong cho phần thông tin trong form */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Hiệu ứng bóng đổ cho phần thông tin trong form */
 }
+
+/* Định dạng cho mỗi hàng trong phần nội dung của form */
+.tuyendung-noidung li, .gioithieu-noidung {
+    list-style-type: disc; /* Kiểu đánh dấu cho mỗi mục trong form */
+    margin-left: 20px; /* Khoảng cách lề bên trái cho mỗi mục trong form */
+}
+
+/* Định dạng cho email trong phần liên hệ của form */
+.tuyendung-noidung li b {
+    color: #007bff; /* Màu chữ cho email */
+}
+
 
 .price-list {
-	width: 80%;
+	width: 90%;
 	margin: 0 auto;
 	border: 1px solid #ccc;
 	padding: 20px;
-	background-color: #f0f0f0;
+	background-color: #fff	;
 	border-radius: 5px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	
 }
 
 .price-list__heading {
@@ -61,12 +67,12 @@ ul li span {
 }
 
 .price-list__table th {
-	background-color: #f2f2f2;
+	background-color: #f0f0f0;
 }
 
 .price-list__note {
 	margin-top: 10px;
 	text-align: center;
 	font-style: italic;
-	color: #888;
+	color: #333;
 }

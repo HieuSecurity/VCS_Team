@@ -243,7 +243,7 @@ function PostForm() {
                 name="acreage"
                 value={formData.acreage}
                 onChange={handleChange}
-                placeholder="mét"
+                placeholder="Mét"
                 required
               />
             </div>

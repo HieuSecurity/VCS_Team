@@ -168,7 +168,7 @@ img {
   padding: 16px;
   margin-top: -22px;
   color: #000000;
-  background-color: rgba(242, 211, 12, 0.816);
+  background-color: #f0f0f0;
   font-weight: bold;
   font-size: 18px;
   transition: 0.6s ease;
@@ -189,7 +189,7 @@ img {
 
 .prev:hover,
 .next:hover {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: #16c784;
   color: yellow;
 }
 

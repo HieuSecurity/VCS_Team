@@ -4,9 +4,8 @@ import "./linkFooter.css";
 function TuyenDung() {
     return (
         <div className="body-tuyendung">
-            <div className="tuyendung-header">Tuyển dụng</div>
             <div className="tuyendung-info">
-                <h1 className="tieude">NHÂN VIÊN BÁN HÀNG (Tạm dừng)</h1><br />
+                <h1 className="tieude">TUYỂN DỤNG NHÂN VIÊN BÁN HÀNG (Tạm dừng)</h1><br />
 
                 <b>1.MÔ TẢ</b>
                 <ul class="tuyendung-noidung">
