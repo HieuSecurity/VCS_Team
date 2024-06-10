@@ -8,7 +8,7 @@ function CreatePost() {
       window.location.href = "/createPost";
     } else {
       // Chưa đăng nhập, hiển thị thông báo
-      alert("Bạn cần phải đăng nhập trước khi đăng tin !!!");
+      alert("Vui lòng đăng nhập để thực hiện chức năng đăng tin !!!");
     }
   };
 

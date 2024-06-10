@@ -1734,6 +1734,8 @@ app.get("/api/payment", async (req, res) => {
   }
 });
 
+
+// api để lập bảng thống kê doanh thu
 app.get('/api/payment-statistics', (req, res) => {
   // Truy vấn SQL để lấy thông tin cần thiết từ bảng PAYMENT và trích xuất MONTH và YEAR từ cột TIME
   const query = `
@@ -1770,8 +1772,6 @@ app.get('/api/payment-statistics', (req, res) => {
     res.json(response);
   });
 });
-
-
 
 
 

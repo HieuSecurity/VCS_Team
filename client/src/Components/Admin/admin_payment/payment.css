@@ -99,15 +99,15 @@
 
 .statistics-button {
   padding: 5px 5px;
-  background-color: #16c784;
+  background-color: #1ebb31;
   color: white;
   border: none;
   cursor: pointer;
   margin-left: 700px;
-  width: 180px;
+  width: 300px;
   margin-bottom: 20px;
 }
 
 .statistics-button:hover {
-  background-color: #1976D2;
+  background-color: #0a0a0a;
 }

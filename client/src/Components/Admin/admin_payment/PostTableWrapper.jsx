@@ -1,10 +1,10 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
-import PostTable from "./PostTable";
+// import React from "react";
+// import { useHistory } from "react-router-dom";
+// import PostTable from "./PostTable";
 
-const PostTableWrapper = () => {
-  const history = useHistory();
-  return <PostTable history={history} />;
-};
+// const PostTableWrapper = () => {
+//   const history = useHistory();
+//   return <PostTable history={history} />;
+// };
 
-export default PostTableWrapper;
+// export default PostTableWrapper;

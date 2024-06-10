@@ -9,7 +9,7 @@ import {
   faChartSimple,
 } from "@fortawesome/free-solid-svg-icons";
 import "./payment.css"; // Import CSS file for styling
-import StatisticsTable from "./StatisticsTable";
+//import StatisticsTable from "./StatisticsTable";
 
 const PostTable = ({ history }) => {
   const [payments, setPayments] = useState([]);
@@ -243,7 +243,6 @@ const PostTable = ({ history }) => {
     } catch (error) {
       console.error("Error fetching statistics:", error);
     }
-    history.push('/statistics');
   };
 
   // Sort payments
@@ -267,7 +266,7 @@ const PostTable = ({ history }) => {
       <div className="header">
         <h1>Thông tin thanh toán tại Phongtro123</h1>
         <button className="statistics-button" onClick={fetchStatistics}>
-          Thống kê
+          Thống kê doanh thu
           <FontAwesomeIcon style={{ marginLeft: '15px', fontSize: '25px' }} icon={faChartSimple} />            
         </button>
       </div>
@@ -306,7 +305,7 @@ const PostTable = ({ history }) => {
           ))}
         </tbody>
       </table>
-      <StatisticsTable/>
+      
     </div>
   );
 };
