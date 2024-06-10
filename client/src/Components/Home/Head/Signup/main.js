@@ -39,6 +39,7 @@ const RegistrationForm = () => {
     if (!validator.isLength(formData.username, { min: 3 })) {
       newErrors.username = "Tên người dùng phải có ít nhất 3 ký tự";
     }
+    formData.username = formData.username.trim();
     if (!validator.isEmail(formData.email)) {
       newErrors.email = "Email không hợp lệ";
     }
@@ -66,7 +67,6 @@ const RegistrationForm = () => {
             phone: "",
             password: "",
           });
-          console.log(response.status);
           alert("Đã tạo tài khoản thành công !");
           navigate("/login"); // Chuyển hướng đến trang đăng nhập
         }

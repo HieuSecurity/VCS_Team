@@ -256,7 +256,7 @@ function PostForm() {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Phường, xã"
+                placeholder="Tên đường, Phường/Xã"
                 required
               />
             </div>

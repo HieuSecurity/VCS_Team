@@ -187,9 +187,9 @@ function Main() {
                 value={editingUser.SEX}
                 onChange={handleChange}
               >
+              <option value="Khác">Khác</option>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
               </select>
             </div>
             <div className="form-group">
