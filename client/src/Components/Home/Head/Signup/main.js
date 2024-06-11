@@ -36,8 +36,9 @@ const RegistrationForm = () => {
     e.preventDefault();
     const newErrors = {};
     // Kiểm tra các điều kiện ràng buộc
-    if (!validator.isLength(formData.username, { min: 3 })) {
-      newErrors.username = "Tên người dùng phải có ít nhất 3 ký tự";
+    const usernameRegex = /^[A-Za-z]{3,}$/; // Regex chỉ cho phép các ký tự chữ cái và ít nhất 3 ký tự
+    if (!usernameRegex.test(formData.username)) {
+      newErrors.username = "Tên người dùng phải có ít nhất 3 ký tự và không chứa số hoặc ký tự đặc biệt";
     }
     formData.username = formData.username.trim();
     if (!validator.isEmail(formData.email)) {
@@ -46,6 +47,7 @@ const RegistrationForm = () => {
     if (!validator.isMobilePhone(formData.phone, "vi-VN")) {
       newErrors.phone = "Số điện thoại không hợp lệ";
     }
+    formData.password = formData.password.trim();
     if (!validatePassword(formData.password)) {
       newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
     }
@@ -54,7 +56,6 @@ const RegistrationForm = () => {
       setErrors(newErrors);
     } else {
       setErrors({});
-
       try {
         const response = await axios.post(
           "http://localhost:3000/api/signup",
@@ -81,6 +82,7 @@ const RegistrationForm = () => {
       }
     }
   };
+
 
   return (
     <div className="Main">

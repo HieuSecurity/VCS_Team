@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { format, parseISO, isBefore, subYears, addYears } from "date-fns";
+import { format, parseISO, isBefore, subYears } from "date-fns";
 import "./info.css";
 
 function Main() {
@@ -57,6 +57,12 @@ function Main() {
       DOB: editingUser.DOB.replace(/\//g, "-"),
     };
 
+    // Validate tên người dùng
+    if (!validateUserName(editedUser.NAME)) {
+      alert("Tên người dùng phải có ít nhất 3 ký tự và không chứa số hoặc ký tự đặc biệt.");
+      return;
+    }
+
     // Validate số điện thoại trước khi lưu
     if (!validatePhoneNumber(editedUser.PHONE)) {
       alert(
@@ -93,6 +99,13 @@ function Main() {
     const { name, value } = e.target;
     // Cập nhật state chỉ khi hợp lệ
     setEditingUser({ ...editingUser, [name]: value });
+  };
+
+  const validateUserName = (userName) => {
+    // Sử dụng biểu thức chính quy để kiểm tra tên người dùng
+    // Tên người dùng phải có ít nhất 3 ký tự và không chứa số hoặc ký tự đặc biệt
+    const userNamePattern = /^[A-Za-z]{3,}$/;
+    return userNamePattern.test(userName);
   };
 
   const validatePhoneNumber = (phoneNumber) => {
@@ -187,7 +200,7 @@ function Main() {
                 value={editingUser.SEX}
                 onChange={handleChange}
               >
-              <option value="Khác">Khác</option>
+                <option value="Khác">Khác</option>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
               </select>
