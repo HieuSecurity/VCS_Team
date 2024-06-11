@@ -36,7 +36,7 @@ const RegistrationForm = () => {
     e.preventDefault();
     const newErrors = {};
     // Kiểm tra các điều kiện ràng buộc
-    const usernameRegex = /^[A-Za-z]{3,}$/; // Regex chỉ cho phép các ký tự chữ cái và ít nhất 3 ký tự
+    const usernameRegex = /^[a-zA-ZÀ-ỹ\s]{3,}$/; // Regex chỉ cho phép các ký tự chữ cái và ít nhất 3 ký tự
     if (!usernameRegex.test(formData.username)) {
       newErrors.username = "Tên người dùng phải có ít nhất 3 ký tự và không chứa số hoặc ký tự đặc biệt";
     }

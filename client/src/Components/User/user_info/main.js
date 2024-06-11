@@ -104,7 +104,7 @@ function Main() {
   const validateUserName = (userName) => {
     // Sử dụng biểu thức chính quy để kiểm tra tên người dùng
     // Tên người dùng phải có ít nhất 3 ký tự và không chứa số hoặc ký tự đặc biệt
-    const userNamePattern = /^[A-Za-z]{3,}$/;
+    const userNamePattern = /^[a-zA-ZÀ-ỹ\s]{3,}$/;
     return userNamePattern.test(userName);
   };
 
