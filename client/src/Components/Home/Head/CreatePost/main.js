@@ -47,12 +47,12 @@ function PostForm() {
     async function fetchUserIdByEmail(email) {
       try {
         const response = await axios.get(`http://localhost:3000/api/get-userid-byEmail/${email}`);
-        console.log("here:", response); 
+//        console.log("here:", response); 
         setFormData((prevFormData) => ({
           ...prevFormData,
           userId: response.data.USERID,
         }));
-        console.log("here2:", response.data.userId);
+//        console.log("here2:", response.data.userId);
       } catch (error) {
         console.error("Error fetching userId:", error);
       }
@@ -117,7 +117,7 @@ function PostForm() {
       );
 
       const postId = response.data.postId;
-      console.log("Post created with ID:", postId);
+//      console.log("Post created with ID:", postId);
 
       // Clear form fields after successful submission
       setFormData({
@@ -149,6 +149,28 @@ function PostForm() {
       ...prevFormData,
       [name]: newValue,
     }));
+  };
+
+  const handlePriceChange = (e) => {
+    const { value } = e.target;
+    // Only allow positive numbers
+    if (value >= 0) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        price: value,
+      }));
+    }
+  };
+
+  const handleAcreageChange = (e) => {
+    const { value } = e.target;
+    // Only allow positive numbers
+    if (value >= 0) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        acreage: value,
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -231,7 +253,7 @@ function PostForm() {
                 type="number"
                 name="price"
                 value={formData.price}
-                onChange={handleChange}
+                onChange={handlePriceChange}
                 placeholder="VND"
                 required
               />
@@ -242,7 +264,7 @@ function PostForm() {
                 type="number"
                 name="acreage"
                 value={formData.acreage}
-                onChange={handleChange}
+                onChange={handleAcreageChange}
                 placeholder="Mét"
                 required
               />
