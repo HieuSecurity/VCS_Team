@@ -143,7 +143,7 @@ const Main = () => {
           )}
           {step === 2 && (
             <div className="form-group">
-              <label htmlFor="otp">Mã OTP đã gửi về email (123456):</label>
+              <label htmlFor="otp">Mã OTP đã gửi về email:</label>
               <input
                 type="password"
                 id="otp"

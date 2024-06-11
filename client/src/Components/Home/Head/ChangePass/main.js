@@ -36,17 +36,19 @@ const Main = () => {
 
     if (step === 1) {
       const user = JSON.parse(localStorage.getItem("user"));
-      console.log(user);
+//      console.log(user);
 
       if (formData.newPassword !== formData.confirmNewPassword) {
         newErrors.confirmNewPassword = "Mật khẩu mới không khớp";
       }
       else if (formData.currentPassword !== user.PASSWORD) {
-        console.log(formData.currentPassword)
-        console.log(user.PASSWORD)
+//        console.log(formData.currentPassword)
+//        console.log(user.PASSWORD)
         newErrors.currentPassword = "Mật khẩu hiện tại không đúng";
-      }
-      else if (!validatePassword(formData.newPassword)) {
+      } else if (formData.currentPassword === formData.newPassword) {
+        newErrors.newPassword = "Mật khẩu mới không được trùng với mật khẩu cũ";
+        newErrors.confirmNewPassword = "Mật khẩu mới không được trùng với mật khẩu cũ";
+      } else if (!validatePassword(formData.newPassword)) {
         newErrors.newPassword =
           "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt";
       }
