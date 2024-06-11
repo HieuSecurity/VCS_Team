@@ -67,7 +67,7 @@ const User = () => {
         const notifications = response.data;
         const sortedNotifications = notifications.sort((a, b) => parseISO(b.TIME) - parseISO(a.TIME)).slice(0, 15);
         const unseenCount = sortedNotifications.filter(notification => notification.SEEN === 0).length;
-        console.log(unseenCount > 14)
+//        console.log(unseenCount > 14)
         if (unseenCount === 0) {
           setUnseenNotificationsCount("");
         } else if (unseenCount > 14) {

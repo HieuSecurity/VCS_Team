@@ -46,14 +46,14 @@ const ImageDes = () => {
           selectedAcreage && selectedAcreage !== "all" ? selectedAcreage : undefined,
       };
       
-      console.log(params.district);
-      console.log(params.price);
-      console.log(params.acreage);
+//      console.log(params.district);
+//      console.log(params.price);
+//      console.log(params.acreage);
       // Construct URL based on selected filters
       if (params.district || params.price || params.acreage) {
         url = `http://localhost:3000/api/search-posts?district=${params.district}&price=${params.price}&acreage=${params.acreage}`;
       }
-      console.log(url)
+//      console.log(url)
       const response = await axios.get(url);
       let posts = response.data.results;
       // Update post state if TIMEEND > current time

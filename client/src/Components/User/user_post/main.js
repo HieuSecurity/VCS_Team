@@ -80,8 +80,8 @@ const PostTable = () => {
   };
 
   const handleReset = (postId) => {
-    const durationOptions = ["30", "90", "180", "365"];
-    const userInput = prompt("Thời gian gia hạn(30, 90, 180, 365):");
+    const durationOptions = ["15","30", "60", "90", "180", "365"];
+    const userInput = prompt("Thời gian gia hạn(15, 30, 60, 90, 180, 365 ngày):");
   
     if (userInput === null) {
       // User clicked Cancel, do nothing
@@ -89,7 +89,7 @@ const PostTable = () => {
     }
   
     if (!durationOptions.includes(userInput)) {
-      alert("Vui lòng nhập một trong các khoảng thời gian sau: 30, 60, 180, 365");
+      alert("Vui lòng nhập một trong các khoảng thời gian sau: 15, 30, 60, 90, 180, 365");
       handleReset(postId); // Ask the user to input again
       return;
     }

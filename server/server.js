@@ -21,7 +21,7 @@ const connection = mysql.createConnection({
   host: "localhost",
   user: "root", // Thay username bằng tên người dùng của bạn
   password: "", // Thay password bằng mật khẩu của bạn
-  database: "webdangbai", // Thay database_name bằng tên cơ sở dữ liệu của bạn
+  database: "WEBDANGBAI", // Thay database_name bằng tên cơ sở dữ liệu của bạn
 });
 
 const storage = multer.diskStorage({
@@ -81,8 +81,8 @@ app.post("/api/create-post", upload.array("images", 20), (req, res) => {
   const images = req.files; // Get the list of uploaded images from req.files
   const state = "Chờ duyệt";
 
-  console.log("Received form data:", req.body);
-  console.log("Received images:", req.files);
+//  console.log("Received form data:", req.body);
+//  console.log("Received images:", req.files);
 
   connection.beginTransaction((err) => {
     if (err) {
@@ -221,8 +221,8 @@ app.put("/api/update-post/:postId", upload.array("images", 20), (req, res) => {
   const postId = req.params.postId;
   const { title, timestart, describe, price, acreage, address, district } = req.body;
   const images = req.files; // Get the list of uploaded images from req.files
-  console.log("Received form data:", req.body);
-  console.log("Received images:", req.files);
+//  console.log("Received form data:", req.body);
+//  console.log("Received images:", req.files);
 
 
   connection.beginTransaction((err) => {
@@ -380,14 +380,14 @@ app.post('/api/update-news-detail', (req, res) => {
     }
 
     const postDuration = results[0].POSTDURATION;
-    console.log("Thời hạn:", postDuration);
+//    console.log("Thời hạn:", postDuration);
 
     // Tính toán TIMESTART và TIMEEND
     const timeStart = moment();
-    console.log("Ngày hiện tại:", timeStart.format('YYYY-MM-DD HH:mm:ss'));
+//    console.log("Ngày hiện tại:", timeStart.format('YYYY-MM-DD HH:mm:ss'));
 
     const timeEnd = timeStart.clone().add(postDuration, 'days');
-    console.log("Ngày hết hạn:", timeEnd.format('YYYY-MM-DD HH:mm:ss'));
+//    console.log("Ngày hết hạn:", timeEnd.format('YYYY-MM-DD HH:mm:ss'));
 
     // Update NEWSDETAIL
     const queryUpdate = `UPDATE NEWSDETAIL SET TIMESTART = ?, TIMEEND = ? WHERE NEWSID = ?`;
@@ -814,7 +814,7 @@ app.get('/api/get-post-details/:newsId', (req, res) => {
           address: detailResults[0].SPECIFICADDRESS,          
           images: imageResults.map(image => image.IMAGE)
         };
-        console.log("List:", postDetails);
+//        console.log("List:", postDetails);
         res.json(postDetails);
       });
     });
@@ -1587,7 +1587,6 @@ app.post("/api/create-payment", (req, res) => {
       }
 
       const ADMINID = adminResults[0].ADMINID;
-
       // Lấy giá từ bảng giá
       const priceQuery = "SELECT PRICE FROM PRICELIST WHERE POSTDURATION = ?";
       connection.query(priceQuery, [POSTDURATION], (error, priceResults) => {
@@ -1766,7 +1765,7 @@ app.get('/api/payment-statistics', (req, res) => {
     };
 
     // Log kết quả
-    console.log("Response:", response);
+//    console.log("Response:", response);
 
     // Trả về kết quả cho client
     res.json(response);

@@ -26,7 +26,7 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
       try {
         const response = await axios.get(`http://localhost:3000/api/get-post-details/${postId}`); // Thay đổi đường dẫn API theo cấu trúc của bạn
         const postData = response.data;
-        console.log("ở đây nè:", postData.specificaddress);
+//        console.log("ở đây nè:", postData.specificaddress);
         setFormData({
           title: postData.title ,
           describe: postData.describe,
@@ -96,7 +96,7 @@ const EditPostForm = ({ postId, isOpen, onRequestClose }) => {
           },
         }
       );
-      console.log(response.data);
+//      console.log(response.data);
       alert("Đã chỉnh sửa bài đăng thành công");
       window.location.reload();
       onRequestClose(); // đóng cửa sổ chỉnh s

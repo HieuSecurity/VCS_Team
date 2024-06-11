@@ -58,9 +58,9 @@ function Detail() {
       return;
     }
 
-    console.log('Vấn đề báo cáo:', selectedIssue);
+//    console.log('Vấn đề báo cáo:', selectedIssue);
     if (selectedIssue === 'Vấn đề khác') {
-      console.log('Nội dung vấn đề tùy chỉnh:', customIssue);
+//      console.log('Nội dung vấn đề tùy chỉnh:', customIssue);
     }
 
     // Lưu detailData.newsid vào localStorage
@@ -77,7 +77,7 @@ function Detail() {
       return;
     } else {
       if (selectedIssue === 'Vấn đề khác') {
-        console.log('Nội dung vấn đề tùy chỉnh:', customIssue);
+//        console.log('Nội dung vấn đề tùy chỉnh:', customIssue);
       }
     
       // Lưu detailData.newsid vào localStorage
@@ -154,7 +154,7 @@ function Detail() {
         },
       });
 
-      console.log(response.data); // Log the response data
+//      console.log(response.data); // Log the response data
       alert('Images uploaded successfully');
     } catch (error) {
       console.error('Error uploading images: ', error);

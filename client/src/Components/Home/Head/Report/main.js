@@ -33,8 +33,8 @@ const Main = () => {
       return;
     }
 
-    console.log("Lý do đã chọn: ", selectedIssue);
-    console.log("Lý do đã nhập: ", customIssue);
+//    console.log("Lý do đã chọn: ", selectedIssue);
+//    console.log("Lý do đã nhập: ", customIssue);
 
     try {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -47,10 +47,10 @@ const Main = () => {
 
       const response = await axios.get(`http://localhost:3000/api/get-userid-byEmail/${user.EMAIL}`);
       const userId = response.data.USERID;
-      console.log("UserId của người tạo report: ", userId);
+//      console.log("UserId của người tạo report: ", userId);
 
       const checkReportResponse = await axios.get(`http://localhost:3000/api/check-report-yet/${userId}/${newsId}`);
-      console.log("Dữ liệu từ check report yet: ", checkReportResponse.data);
+//      console.log("Dữ liệu từ check report yet: ", checkReportResponse.data);
       if (checkReportResponse.data.reported) {
         alert("Bạn đã báo cáo bài viết này.");
         return;
@@ -61,7 +61,7 @@ const Main = () => {
         NEWSID: newsId,
         ISSUE: selectedIssue === "Vấn đề khác" ? customIssue : selectedIssue,
       };
-      console.log("Dữ liệu tạo báo cáo: ", reportData)
+//      console.log("Dữ liệu tạo báo cáo: ", reportData)
 
       await axios.post("http://localhost:3000/api/create-report", reportData);
       alert("Báo cáo đã được gửi thành công.");
@@ -69,12 +69,12 @@ const Main = () => {
       // Tạo thông báo cho người dùng với nội dung phù hợp
       const notificationData = {
         newsid: newsId,
-        content: `Bài viết có mã số ${newsId} của bạn đã bị cáo báo!`,
+        content: `Bài viết có mã số ${newsId} của bạn đã bị ai đó cáo báo!`,
         reason: selectedIssue === "Vấn đề khác" ? customIssue : selectedIssue,
         category: "Bài viết",
       };
-      console.log("UserID của người bị báo cáo: ", postUserId);
-      console.log("nội dung tạo thông báo: ", notificationData);
+//      console.log("UserID của người bị báo cáo: ", postUserId);
+//      console.log("nội dung tạo thông báo: ", notificationData);
 
       await axios.post("http://localhost:3000/api/create-notification", notificationData);
 
